@@ -41,3 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 .env*.local
+
+# added by agent-md installer
+.agent/
+
+# claude code — per-user overrides and local credentials (never commit)
+.claude/settings.local.json
+.claude/.credentials.json

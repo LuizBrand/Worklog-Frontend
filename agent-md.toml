@@ -1,0 +1,32 @@
+# agent-md.toml — verification commands for the agent-md hooks.
+#
+# These commands are invoked by .claude/hooks/* and .githooks/pre-commit.
+# Anything left unset falls back to the heuristic detector in
+# .claude/hooks/_lib.sh.
+
+[verify]
+# Project-wide type-check. Runs at Stop and at pre-commit.
+typecheck = "pnpm exec tsc --noEmit"
+
+# Project-wide lint. Runs at Stop and at pre-commit.
+lint = "pnpm exec eslint ."
+
+# Per-file lint used by post-edit-verify (fast, runs after every Write/Edit).
+# {file} is substituted with the edited file path.
+lint_file = "pnpm exec eslint {file}"
+
+# Test suite — intentionally unset. package.json has no `test` script yet,
+# so stop-verify.sh and .githooks/pre-commit skip tests automatically
+# (has_npm_test_script returns false). Add a `test` script in package.json
+# and uncomment below once a test runner is wired up.
+# test = "pnpm test --silent"
+
+[visual]
+# Blocking. UI file changes (.tsx/.jsx/.css/.scss/.html/etc.) require
+# fresh structured evidence under artifacts_dir before Stop is allowed:
+# a markdown note with the 5 required fields (Changed files, Route or URL,
+# Viewport, Artifact, Observed result) plus an image referenced by name.
+# Capture via Playwright MCP (preferred) or .agent-md/bin/playwright-capture.sh.
+required          = true
+artifacts_dir     = ".agent/visual"
+freshness_seconds = 3600
