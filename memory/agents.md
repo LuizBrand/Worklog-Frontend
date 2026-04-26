@@ -42,6 +42,10 @@ Auth token is read from `localStorage` and attached as `Bearer`.
 - Spec (JSON): `http://localhost:8080/v3/api-docs`
 - Use as the source of truth for endpoints, DTOs, and error shapes when
   wiring API clients, types, or react-query hooks.
+- Springdoc emits `securitySchemes.bearerAuth.name` (invalid in OpenAPI
+  3.1 for `type: http`). `scripts/sanitize-openapi.mjs` strips it; it
+  runs automatically as part of `pnpm api:fetch`. If you ever fetch the
+  spec by other means, re-run the script before `pnpm api:gen`.
 
 ## Forbidden Patterns
 
