@@ -8,7 +8,10 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-<!-- Slice 0 closed; ready to start Slice 1 (Auth). -->
+- [ ] Slice 1 — Auth (login + session). Sub-commits: A) `src/state/auth.ts`
+  zustand store + `src/lib/api.ts` rewrite with single-flight 401
+  refresh; B) `(auth)/layout` + `(auth)/login`, `(app)/layout` (guard) +
+  `(app)/dashboard` stub, root `/` redirects.
 
 ## Completed (this session continued)
 
@@ -66,6 +69,12 @@ changed but this file wasn't updated.
   ticket read/write path landing in slices 4–6 and validated by
   typecheck + manual smoke. Add unit tests when a runner is wired
   (`vitest` planned).
+- `src/state/auth.ts`, `src/lib/api.ts` (Slice 1) — auth store and
+  axios interceptor with single-flight refresh. Behavior is end-to-end
+  (login → store → next request → token expires → refresh → retry) and
+  needs a backend running; manual smoke covers it for now. Concurrent-
+   401 lock and rotation handling are the highest-risk parts; revisit
+  with unit tests when the runner lands.
 
 ## Backlog (next up)
 
