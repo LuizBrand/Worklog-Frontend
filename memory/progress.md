@@ -8,9 +8,7 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-- [ ] Slice 0 — Pre-flight (foundation). Remaining: SSR-guard `src/lib/api.ts`,
-  add `src/lib/ticket-status.ts`, `git config core.hooksPath .githooks`,
-  `pnpm add @tanstack/react-table`, then commit foundation.
+<!-- Slice 0 closed; ready to start Slice 1 (Auth). -->
 
 ## Completed (this session continued)
 
@@ -25,6 +23,14 @@ changed but this file wasn't updated.
   1280×800 full-page, dark) + `.md` note with Changed files / Route /
   Viewport / Artifact / Observed result. Showcase still needs
   independent visual review before Slice 0 commit (no self-grading).
+- [x] 2026-04-27 — Slice 0 foundation commit `9494c2e` (41 files, design
+  system primitives, worklog components, /design showcase, MCP, deps).
+- [x] 2026-04-27 — Slice 0 finishers:
+  - `742c4fd` SSR-guard `src/lib/api.ts` (`typeof window !== 'undefined'`).
+  - `bfbf8cd` `src/lib/ticket-status.ts` mapper + `UI_STATUS_WRITABLE`.
+  - `b3ea3d6` `@tanstack/react-table@8.21.3` installed.
+  - `git config core.hooksPath .githooks` set locally (no commit —
+    local repo config). `.githooks/pre-commit` now active.
 
 ## Completed (this session)
 
