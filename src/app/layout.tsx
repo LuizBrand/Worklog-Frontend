@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-sans",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
-  title: "Worklog",
-  description: "Worklog Frontend",
+  title: "WorkLog",
+  description: "Diário compartilhado do time de suporte",
 };
 
 export default function RootLayout({
@@ -27,11 +27,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}>
+    <html
+      lang="pt-BR"
+      suppressHydrationWarning
+      className={cn(
+        "h-full antialiased font-sans",
+        inter.variable,
+        jetbrainsMono.variable,
+      )}
+    >
       <body className="min-h-full flex flex-col">
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

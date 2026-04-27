@@ -8,10 +8,31 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-<!-- nothing in flight -->
+- [ ] Slice 0 — Pre-flight (foundation). Remaining: SSR-guard `src/lib/api.ts`,
+  add `src/lib/ticket-status.ts`, `git config core.hooksPath .githooks`,
+  `pnpm add @tanstack/react-table`, then commit foundation.
+
+## Completed (this session continued)
+
+- [x] 2026-04-27 — Renamed `src/app/_design/` → `src/app/design/`
+  (Next.js `_folder` is private and opts out of routing — `/design` now
+  serves at 200). Updated `memory/plan.md` Slice 0 directive.
+- [x] 2026-04-27 — Installed `playwright@1.59.1` as devDep + chromium
+  headless shell to make `.agent-md/bin/playwright-capture.sh`
+  executable.
+- [x] 2026-04-27 — Captured visual evidence for Slice 0 design showcase.
+  Artifacts: `.agent/visual/slice-0-design-showcase.png` (121 KB,
+  1280×800 full-page, dark) + `.md` note with Changed files / Route /
+  Viewport / Artifact / Observed result. Showcase still needs
+  independent visual review before Slice 0 commit (no self-grading).
 
 ## Completed (this session)
 
+- [x] 2026-04-26 — Wired shadcn MCP server via
+  `pnpm dlx shadcn@latest mcp init --client claude`. Adds `.mcp.json`,
+  bumps deps in `package.json` / `pnpm-lock.yaml`. Tooling-only; no
+  source or UI changes. Restart Claude Code to pick up the server.
+  Also gitignored `mockups/` (reference HTML, not project source).
 - [x] 2026-04-26 — Scaffolded agent-md framework (memory/, .claude/
   hooks, .githooks/pre-commit, agent-md.toml) — committed as `fb6f774`.
 - [x] 2026-04-26 — Slice 1: Orval codegen wired end-to-end. Snapshot at

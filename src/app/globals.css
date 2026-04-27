@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -39,6 +39,35 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* WorkLog surface scale */
+  --color-wl-bg: var(--wl-bg);
+  --color-wl-surface: var(--wl-surface);
+  --color-wl-surface-2: var(--wl-surface-2);
+  --color-wl-border: var(--wl-border);
+  --color-wl-border-2: var(--wl-border-2);
+  --color-wl-text: var(--wl-text);
+  --color-wl-text-muted: var(--wl-text-muted);
+  --color-wl-text-dim: var(--wl-text-dim);
+
+  /* WorkLog status */
+  --color-status-open: var(--status-open);
+  --color-status-open-bg: var(--status-open-bg);
+  --color-status-progress: var(--status-progress);
+  --color-status-progress-bg: var(--status-progress-bg);
+  --color-status-awaiting: var(--status-awaiting);
+  --color-status-awaiting-bg: var(--status-awaiting-bg);
+  --color-status-resolved: var(--status-resolved);
+  --color-status-resolved-bg: var(--status-resolved-bg);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
+
+  /* WorkLog priority */
+  --color-priority-critical: var(--priority-critical);
+  --color-priority-high: var(--priority-high);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-low: var(--priority-low);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,58 +78,35 @@
 }
 
 /* ============================================
-   TEMA: Mira + Neutral (base) + Sky (accent)
-   Radius: Medium (0.5rem)
+   TEMA: WorkLog — Mira + Sky · Dark default
    ============================================ */
 
 :root {
-  /* Base */
+  /* shadcn base — light */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-
-  /* Card */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
-
-  /* Popover */
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-
-  /* Primary — Sky */
   --primary: oklch(0.623 0.214 255.8);
   --primary-foreground: oklch(1 0 0);
-
-  /* Secondary — Neutral */
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-
-  /* Muted */
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-
-  /* Accent — Sky suave */
   --accent: oklch(0.951 0.026 255.8);
   --accent-foreground: oklch(0.379 0.146 255.8);
-
-  /* Destructive */
   --destructive: oklch(0.577 0.245 27.325);
-
-  /* Bordas e inputs */
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.623 0.214 255.8);
-
-  /* Charts — Sky scale */
   --chart-1: oklch(0.623 0.214 255.8);
   --chart-2: oklch(0.717 0.175 255.8);
   --chart-3: oklch(0.811 0.111 255.8);
   --chart-4: oklch(0.439 0.16 255.8);
   --chart-5: oklch(0.322 0.118 255.8);
-
-  /* Radius — Medium */
   --radius: 0.5rem;
-
-  /* Sidebar */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.623 0.214 255.8);
@@ -109,53 +115,61 @@
   --sidebar-accent-foreground: oklch(0.379 0.146 255.8);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.623 0.214 255.8);
+
+  /* WorkLog surface scale — light */
+  --wl-bg: #f5f3ef;
+  --wl-surface: #ffffff;
+  --wl-surface-2: #eeeae4;
+  --wl-border: #ddd9d2;
+  --wl-border-2: #ccc8c0;
+  --wl-text: #1a1714;
+  --wl-text-muted: #7a7269;
+  --wl-text-dim: #b0aba3;
+
+  /* WorkLog status — light backgrounds */
+  --status-open: #f97316;
+  --status-open-bg: #fff3e6;
+  --status-progress: #0ea5e9;
+  --status-progress-bg: #e6f4fc;
+  --status-awaiting: #a78bfa;
+  --status-awaiting-bg: #f0ebff;
+  --status-resolved: #34d399;
+  --status-resolved-bg: #e6faf3;
+  --status-cancelled: #5a5550;
+  --status-cancelled-bg: #f0efee;
+
+  /* WorkLog priority */
+  --priority-critical: #c0443a;
+  --priority-high: #c97a1a;
+  --priority-medium: #7a7269;
+  --priority-low: #4a4640;
 }
 
 .dark {
-  /* Base */
+  /* shadcn base — dark */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
-
-  /* Card */
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
-
-  /* Popover */
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-
-  /* Primary — Sky (mais brilhante no dark) */
   --primary: oklch(0.717 0.175 255.8);
   --primary-foreground: oklch(0.1 0.02 255.8);
-
-  /* Secondary */
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-
-  /* Muted */
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
-
-  /* Accent — Sky escuro */
   --accent: oklch(0.25 0.04 255.8);
   --accent-foreground: oklch(0.717 0.175 255.8);
-
-  /* Destructive */
   --destructive: oklch(0.704 0.191 22.216);
-
-  /* Bordas e inputs */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.717 0.175 255.8);
-
-  /* Charts — Sky scale dark */
   --chart-1: oklch(0.717 0.175 255.8);
   --chart-2: oklch(0.623 0.214 255.8);
   --chart-3: oklch(0.811 0.111 255.8);
   --chart-4: oklch(0.52 0.19 255.8);
   --chart-5: oklch(0.439 0.16 255.8);
-
-  /* Sidebar dark */
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.717 0.175 255.8);
@@ -164,6 +178,23 @@
   --sidebar-accent-foreground: oklch(0.717 0.175 255.8);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.717 0.175 255.8);
+
+  /* WorkLog surface scale — dark */
+  --wl-bg: #13110f;
+  --wl-surface: #1c1a17;
+  --wl-surface-2: #242018;
+  --wl-border: #2e2b25;
+  --wl-border-2: #3a3630;
+  --wl-text: #f0ebe3;
+  --wl-text-muted: #7a7269;
+  --wl-text-dim: #4a4640;
+
+  /* WorkLog status — dark backgrounds */
+  --status-open-bg: #2a1608;
+  --status-progress-bg: #072a3d;
+  --status-awaiting-bg: #1e1533;
+  --status-resolved-bg: #052019;
+  --status-cancelled-bg: #1e1c18;
 }
 
 @layer base {
@@ -172,7 +203,9 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: var(--wl-bg);
+    color: var(--wl-text);
+    @apply font-sans;
   }
 
   html {
