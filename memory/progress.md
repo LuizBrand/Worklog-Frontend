@@ -54,6 +54,12 @@ changed but this file wasn't updated.
   `test` script). Behavior will be exercised indirectly by every
   generated endpoint hook and validated by typecheck + manual API
   smoke when slices land.
+- `src/lib/ticket-status.ts` — pure mapper between API (4 states) and
+  UI (5 states) taxonomies, locked in `memory/plan.md` decisions §1.
+  Project has no test runner; behavior will be exercised by every
+  ticket read/write path landing in slices 4–6 and validated by
+  typecheck + manual smoke. Add unit tests when a runner is wired
+  (`vitest` planned).
 
 ## Backlog (next up)
 
