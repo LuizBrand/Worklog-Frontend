@@ -8,9 +8,38 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-<!-- none — slice 1 complete, slice 2 next -->
+<!-- none — slice 2 complete, slice 3 next -->
+
+## TDD-check exemptions (slice 2)
+
+- `src/hooks/use-is-desktop.ts` — thin `useSyncExternalStore` wrapper over
+  `window.matchMedia`. No business logic; no test runner configured yet.
+  Behavior is exercised visually at every breakpoint resize in slices 2+.
+- `src/components/shell/nav-config.ts` — static route/icon config array.
+  No logic to test; changes are validated by tsc + visual render.
+- `src/components/shell/user-menu.tsx` — UI component (dropdown + logout
+  side-effect). No test runner; behavior validated by manual smoke and
+  visual evidence.
+- `src/components/shell/sidebar.tsx` — pure UI, desktop nav. Validated by
+  tsc + visual evidence.
+- `src/components/shell/top-bar.tsx` — pure UI, mobile header. Validated
+  by tsc + visual evidence.
+- `src/components/shell/bottom-tab-bar.tsx` — pure UI, mobile tabs.
+  Validated by tsc + visual evidence.
+- `src/components/shell/app-shell.tsx` — layout orchestrator. Validated
+  by tsc + visual evidence (desktop + mobile screenshots).
 
 ## Completed (this session continued)
+
+- [x] 2026-05-01 — Slice 2 app shell: `useIsDesktop` hook (useSyncExternalStore
+  over matchMedia), `nav-config.ts`, `sidebar.tsx` (collapsible, 200/52px),
+  `top-bar.tsx` (54px mobile header), `bottom-tab-bar.tsx` (82px, 5 tabs),
+  `user-menu.tsx` (dropdown + logout), `app-shell.tsx` (orchestrator +
+  useGetMe hydration). Fixed zustand-persist hydration race in `(app)/layout.tsx`
+  (lazy useState + onFinishHydration). tsc ✓, lint ✓, visual evidence
+  slice-2-shell-desktop.png + slice-2-shell-mobile.png captured.
+  Note: `UserResponse.roles` is an array of `{role}` objects (not a string) —
+  admin check uses `.some(r => r.role === 'ADMIN')`.
 
 - [x] 2026-05-01 — Slice 1B routes: `(auth)/login/page.tsx` (login form,
   react-hook-form + zod/v3, useLogin), `(auth)/layout.tsx` (centered

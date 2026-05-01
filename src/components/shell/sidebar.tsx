@@ -1,0 +1,156 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useTheme } from 'next-themes'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Moon02Icon,
+  Sun01Icon,
+  SidebarLeftIcon,
+  SidebarLeft01Icon,
+} from '@hugeicons/core-free-icons'
+
+import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/state/auth'
+import { Logo } from '@/components/worklog/logo'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { NAV_ITEMS } from './nav-config'
+import { UserMenu } from './user-menu'
+
+export function Sidebar() {
+  const [collapsed, setCollapsed] = useState(false)
+  const pathname = usePathname()
+  const { resolvedTheme, setTheme } = useTheme()
+  const user = useAuthStore((s) => s.user)
+
+  const isAdmin = user?.roles?.some((r) => r.role === 'ADMIN') ?? false
+
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => !item.adminOnly || isAdmin,
+  ).filter((item) => !item.desktopOnly || true)
+
+  return (
+    <nav
+      className={cn(
+        'flex h-full flex-shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200',
+        collapsed ? 'w-[52px]' : 'w-[200px]',
+      )}
+    >
+      {/* Logo + collapse */}
+      <div
+        className={cn(
+          'flex flex-shrink-0 items-center border-b border-border py-3.5',
+          collapsed ? 'justify-center px-0' : 'justify-between px-3',
+        )}
+      >
+        {!collapsed && <Logo size={28} withWordmark />}
+        {collapsed && <Logo size={28} />}
+        {!collapsed && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setCollapsed(true)}
+            aria-label="Recolher menu"
+          >
+            <HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={1.5} />
+          </Button>
+        )}
+      </div>
+
+      {/* Nav items */}
+      <div className={cn('flex-1 overflow-y-auto py-2', collapsed ? 'px-1.5' : 'px-2')}>
+        {collapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mb-1 w-full"
+            onClick={() => setCollapsed(false)}
+            aria-label="Expandir menu"
+          >
+            <HugeiconsIcon icon={SidebarLeft01Icon} strokeWidth={1.5} />
+          </Button>
+        )}
+        {visibleItems.map((item) => {
+          const active = pathname.startsWith(item.href)
+          const btn = (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={cn(
+                'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+                collapsed && 'justify-center px-0',
+                active
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              <HugeiconsIcon
+                icon={item.icon}
+                strokeWidth={active ? 2 : 1.5}
+                className="size-4 flex-shrink-0"
+              />
+              {!collapsed && <span>{item.label}</span>}
+            </Link>
+          )
+
+          if (!collapsed) return btn
+          return (
+            <Tooltip key={item.id}>
+              <TooltipTrigger asChild>{btn}</TooltipTrigger>
+              <TooltipContent side="right">{item.label}</TooltipContent>
+            </Tooltip>
+          )
+        })}
+      </div>
+
+      {/* Theme + user */}
+      <div
+        className={cn(
+          'flex flex-shrink-0 flex-col gap-1 border-t border-border py-2',
+          collapsed ? 'px-1.5' : 'px-2',
+        )}
+      >
+        <Button
+          variant="ghost"
+          size={collapsed ? 'icon' : 'sm'}
+          className={cn('w-full', !collapsed && 'justify-start gap-2')}
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          aria-label="Alternar tema"
+        >
+          <HugeiconsIcon
+            icon={resolvedTheme === 'dark' ? Sun01Icon : Moon02Icon}
+            strokeWidth={1.5}
+            className="size-4"
+          />
+          {!collapsed && (
+            <span className="text-xs">
+              {resolvedTheme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+            </span>
+          )}
+        </Button>
+
+        <div
+          className={cn(
+            'flex items-center',
+            collapsed ? 'justify-center' : 'gap-2 px-1 py-1',
+          )}
+        >
+          <UserMenu />
+          {!collapsed && user && (
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold leading-none">
+                {user.name?.split(' ')[0]}
+              </p>
+              <p className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                {user.roles?.[0]?.role ?? ''}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+  )
+}
