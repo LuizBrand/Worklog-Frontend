@@ -13,12 +13,15 @@ changed but this file wasn't updated.
 ## Completed (this session continued)
 
 - [x] 2026-05-01 — Slice 1B routes: `(auth)/login/page.tsx` (login form,
-  react-hook-form + zod/v3, useLogin), `(app)/layout.tsx` (client-side
-  auth guard → redirect to /login), `(app)/dashboard/page.tsx` (stub),
-  root `page.tsx` → redirect('/dashboard'). tsc ✓, lint ✓, visual
-  evidence captured (slice-1-login.png, slice-1-dashboard-stub.png).
+  react-hook-form + zod/v3, useLogin), `(auth)/layout.tsx` (centered
+  auth shell), `(app)/layout.tsx` (client-side auth guard → redirect to
+  /login), `(app)/dashboard/page.tsx` (stub), root `page.tsx` →
+  redirect('/dashboard'). tsc ✓, lint ✓, visual evidence captured
+  (slice-1-login.png, slice-1-dashboard-stub.png).
   Note: uses `zod/v3` in form schemas — @hookform/resolvers v5.2.2 rejects
   zod v4.3.x due to a minor-version literal type guard.
+- [x] 2026-05-01 — Fixed missing `(auth)/layout.tsx` from prior commit
+  (was untracked); added playwright enabledPlugins to `.claude/settings.json`.
 
 
 - [x] 2026-04-27 — Renamed `src/app/_design/` → `src/app/design/`
