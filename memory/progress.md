@@ -10,6 +10,11 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-02 — Dashboard polish (round 3):
+  - StatsBar: mobile → 2×2 grid of individual chips; desktop → w-fit inline bar (not full-width)
+  - Sidebar: bg-card (cool-neutral) → --wl-surface, borders → --wl-border, hover → --wl-surface-2 to match warm dark-mode tones
+  - tsc ✓, lint ✓, visual evidence: slice-4c-dashboard-{desktop,mobile}.png
+
 - [x] 2026-05-02 — Dashboard visual redesign (round 2):
   - StatsBar → compact single-line chip strip (count + label + icon, pipe-separated)
   - StatusDonut → larger donut (160px), "TOTAL" center label, 2-column legend grid, no %

@@ -35,14 +35,18 @@ export function Sidebar() {
   return (
     <nav
       className={cn(
-        'flex h-full flex-shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200',
+        'flex h-full flex-shrink-0 flex-col border-r transition-[width] duration-200',
         collapsed ? 'w-[52px]' : 'w-[200px]',
       )}
+      style={{
+        background: 'var(--wl-surface)',
+        borderColor: 'var(--wl-border)',
+      }}
     >
       {/* Logo + collapse */}
       <div
         className={cn(
-          'flex flex-shrink-0 items-center border-b border-border py-3.5',
+          'flex flex-shrink-0 items-center border-b border-[var(--wl-border)] py-3.5',
           collapsed ? 'justify-center px-0' : 'justify-between px-3',
         )}
       >
@@ -84,7 +88,7 @@ export function Sidebar() {
                 collapsed && 'justify-center px-0',
                 active
                   ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  : 'text-muted-foreground hover:bg-[var(--wl-surface-2)] hover:text-foreground',
               )}
             >
               <HugeiconsIcon
@@ -109,7 +113,7 @@ export function Sidebar() {
       {/* Theme + user */}
       <div
         className={cn(
-          'flex flex-shrink-0 flex-col gap-1 border-t border-border py-2',
+          'flex flex-shrink-0 flex-col gap-1 border-t border-[var(--wl-border)] py-2',
           collapsed ? 'px-1.5' : 'px-2',
         )}
       >
