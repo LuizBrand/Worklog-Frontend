@@ -12,12 +12,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Lazy initializer: synchronously true when zustand has already read localStorage.
   // The effect below subscribes for the async case (first mount before hydration).
   const [hydrated, setHydrated] = useState(() =>
-    useAuthStore.persist.hasHydrated(),
+    useAuthStore.persist?.hasHydrated() ?? false,
   )
 
   useEffect(() => {
     if (hydrated) return
-    return useAuthStore.persist.onFinishHydration(() => setHydrated(true))
+    return useAuthStore.persist?.onFinishHydration(() => setHydrated(true))
   }, [hydrated])
 
   useEffect(() => {

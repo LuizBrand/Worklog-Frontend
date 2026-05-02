@@ -8,7 +8,16 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-<!-- none — slice 2 complete, slice 3 next -->
+<!-- none — bugs fixed, slice 3 next -->
+
+## Completed (2026-05-01 session 2)
+
+- [x] 2026-05-01 — Fixed Bug 1: `useAuthStore.persist?.hasHydrated()` and
+  `useAuthStore.persist?.onFinishHydration()` now use optional chaining in
+  `src/app/(app)/layout.tsx` to prevent SSR crash when `persist` middleware
+  is undefined during server pre-render. tsc ✓, lint ✓.
+- [x] 2026-05-01 — Confirmed Bug 2 (next-themes script tag / React 19) already
+  addressed: `suppressHydrationWarning` present on `<html>` in `src/app/layout.tsx`.
 
 ## TDD-check exemptions (slice 2)
 
