@@ -22,6 +22,11 @@ Examples:
   imports, re-exports, test mocks.
 -->
 
+- **2026-05-02** — Dashboard components written with `var(--wl-surface-1)` which doesn't exist
+  in `globals.css`. Available surface variables: `--wl-surface` (card bg), `--wl-surface-2`
+  (darker variant), `--wl-bg` (page bg). → **Rule**: Check `globals.css` for available CSS
+  custom properties before using `var(--wl-*)` in new components.
+
 - **2026-05-01** — `GET /tickets` Orval-generated hook has return type
   `TicketSummary` instead of `PageTicketSummary` because the backend
   OpenAPI spec has the 200 and 401 response schemas swapped. → **Rule**:
