@@ -1,5 +1,11 @@
 import Link from 'next/link'
 
+const SHORTCUTS: { key: string; label: string; href?: string }[] = [
+  { key: 'C', label: 'Criar ticket', href: '/tickets' },
+  { key: '/', label: 'Buscar tickets', href: '/tickets' },
+  { key: 'Esc', label: 'Fechar painel' },
+]
+
 export function QuickFilters() {
   return (
     <div
@@ -10,49 +16,37 @@ export function QuickFilters() {
         className="text-[11px] font-semibold uppercase tracking-wide"
         style={{ color: 'var(--wl-text-muted)' }}
       >
-        Filtros rápidos
+        Atalhos
       </span>
 
       <div className="flex flex-col gap-2">
-        <Link
-          href="/tickets?priority=CRITICAL"
-          className="rounded-lg px-3 py-2 text-[13px] font-medium transition-opacity hover:opacity-80"
-          style={{
-            color: 'var(--priority-critical)',
-            background:
-              'color-mix(in oklch, var(--priority-critical) 12%, transparent)',
-            border:
-              '1px solid color-mix(in oklch, var(--priority-critical) 25%, transparent)',
-          }}
-        >
-          Crítico
-        </Link>
-        <Link
-          href="/tickets?priority=LOW"
-          className="rounded-lg px-3 py-2 text-[13px] font-medium transition-opacity hover:opacity-80"
-          style={{
-            color: 'var(--priority-low)',
-            background:
-              'color-mix(in oklch, var(--priority-low) 12%, transparent)',
-            border:
-              '1px solid color-mix(in oklch, var(--priority-low) 25%, transparent)',
-          }}
-        >
-          Baixo
-        </Link>
-        <Link
-          href="/tickets"
-          className="rounded-lg px-3 py-2 text-[13px] font-medium transition-opacity hover:opacity-80"
-          style={{
-            color: 'var(--primary)',
-            background:
-              'color-mix(in oklch, var(--primary) 10%, transparent)',
-            border:
-              '1px solid color-mix(in oklch, var(--primary) 25%, transparent)',
-          }}
-        >
-          + Novo ticket
-        </Link>
+        {SHORTCUTS.map(({ key, label, href }) => {
+          const inner = (
+            <div className="flex items-center gap-3">
+              <kbd
+                className="min-w-[28px] rounded px-1.5 py-0.5 text-center text-[11px] font-semibold"
+                style={{
+                  background: 'var(--wl-surface-2)',
+                  color: 'var(--wl-text)',
+                  border: '1px solid var(--wl-border)',
+                }}
+              >
+                {key}
+              </kbd>
+              <span className="text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
+                {label}
+              </span>
+            </div>
+          )
+
+          return href ? (
+            <Link key={key} href={href} className="transition-opacity hover:opacity-80">
+              {inner}
+            </Link>
+          ) : (
+            <div key={key}>{inner}</div>
+          )
+        })}
       </div>
     </div>
   )

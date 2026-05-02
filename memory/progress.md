@@ -10,6 +10,14 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-02 — Dashboard visual redesign (round 2):
+  - StatsBar → compact single-line chip strip (count + label + icon, pipe-separated)
+  - StatusDonut → larger donut (160px), "TOTAL" center label, 2-column legend grid, no %
+  - QuickFilters → Atalhos (keyboard shortcuts panel: C, /, Esc with kbd keys)
+  - TicketList → left accent border rows, system name in primary color, count badge in header, arrow on hover
+  - Dashboard page → full-width (removed max-w-6xl), lg:grid-cols-[1fr_300px], passes totalCount
+  - tsc ✓, lint ✓, visual evidence: slice-4b-dashboard-{desktop,mobile}.png
+
 - [x] 2026-05-02 — Login split-screen + Dashboard two-column refactor:
   - `src/app/(auth)/layout.tsx` → split-screen (left form, right marketing panel w/ dot texture)
   - `src/app/(auth)/login/page.tsx` → tab switcher (login|register), logo top-left, register form

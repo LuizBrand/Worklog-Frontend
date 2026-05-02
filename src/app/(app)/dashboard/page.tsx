@@ -66,13 +66,20 @@ export default function DashboardPage() {
   })
 
   const recentTickets = toPage(recentQ.data)?.content
+  const pendingTotal =
+    (toPage(pendingQ.data)?.totalElements ?? 0) +
+    (toPage(awaitingCustomerQ.data)?.totalElements ?? 0)
 
   return (
-    <main className="mx-auto flex max-w-6xl flex-col gap-4 p-4 md:p-6">
+    <main className="flex flex-col gap-4 p-4 md:p-6">
       <StatsBar statusCounts={statusCounts} loading={countsLoading} />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px]">
-        <TicketList tickets={recentTickets} loading={recentQ.isLoading} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
+        <TicketList
+          tickets={recentTickets}
+          loading={recentQ.isLoading}
+          totalCount={countsLoading ? undefined : pendingTotal}
+        />
 
         <div className="flex flex-col gap-4">
           <StatusDonut data={statusCounts} loading={countsLoading} />

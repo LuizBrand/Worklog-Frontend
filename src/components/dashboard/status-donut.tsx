@@ -32,65 +32,67 @@ export function StatusDonut({ data, loading }: StatusDonutProps) {
         className="text-[11px] font-semibold uppercase tracking-wide"
         style={{ color: 'var(--wl-text-muted)' }}
       >
-        Distribuição por status
+        Distribuição de status
       </span>
 
-      <div className="flex items-center gap-6">
+      <div className="flex justify-center">
         <DonutChart
           data={loading ? [] : slices}
-          size={120}
-          strokeWidth={12}
+          size={160}
+          strokeWidth={18}
           centerLabel={
-            <span
-              className="text-[20px] font-bold tabular-nums"
-              style={{ color: 'var(--wl-text)' }}
-            >
-              {loading ? '—' : total}
-            </span>
+            <div className="flex flex-col items-center gap-0.5">
+              <span
+                className="text-[28px] font-bold tabular-nums leading-none"
+                style={{ color: 'var(--wl-text)' }}
+              >
+                {loading ? '—' : total}
+              </span>
+              <span
+                className="text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: 'var(--wl-text-muted)' }}
+              >
+                total
+              </span>
+            </div>
           }
         />
+      </div>
 
-        <div className="flex flex-1 flex-col gap-2">
-          {data.map((d) => {
-            const meta = STATUS_META[d.status]
-            const pct = total > 0 ? Math.round((d.count / total) * 100) : 0
-            return (
-              <div
-                key={d.status}
-                className="flex items-center justify-between text-[12px]"
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    aria-hidden
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: meta.color,
-                      display: 'inline-block',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ color: 'var(--wl-text)' }}>{meta.label}</span>
-                </div>
-                <div className="flex items-center gap-2 tabular-nums">
-                  <span style={{ color: 'var(--wl-text)' }}>
-                    {loading ? '—' : d.count}
-                  </span>
-                  <span
-                    style={{
-                      color: 'var(--wl-text-muted)',
-                      minWidth: 32,
-                      textAlign: 'right',
-                    }}
-                  >
-                    {loading ? '' : `${pct}%`}
-                  </span>
-                </div>
+      {/* 2-column legend */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+        {data.map((d) => {
+          const meta = STATUS_META[d.status]
+          return (
+            <div key={d.status} className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span
+                  aria-hidden
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: meta.color,
+                    display: 'inline-block',
+                    flexShrink: 0,
+                  }}
+                />
+                <span
+                  className="truncate text-[12px]"
+                  style={{ color: 'var(--wl-text)' }}
+                >
+                  {meta.label}
+                </span>
               </div>
-            )
-          })}
-        </div>
+              <span
+                className="shrink-0 text-[12px] font-semibold tabular-nums"
+                style={{ color: 'var(--wl-text)' }}
+              >
+                {loading ? '—' : d.count}
+              </span>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
