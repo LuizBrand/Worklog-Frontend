@@ -8,7 +8,15 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-<!-- none — bugs fixed, slice 3 next -->
+<!-- none — slice 3 complete, slice 4 (tickets list) next -->
+
+- [x] 2026-05-01 — Slice 3 Dashboard: `kpi-card.tsx`, `status-donut.tsx`,
+  `recent-activity.tsx`, `priority-distribution.tsx` (placeholder — no
+  priority field in `TicketSummary`), dashboard `page.tsx` with 4 parallel
+  status-count queries + recent-activity query. Discovered backend OpenAPI
+  spec has 200/401 schemas swapped on `GET /tickets`; cast workaround in
+  page + gotcha documented. tsc ✓, lint ✓, visual evidence
+  slice-3-dashboard-{desktop,mobile}.png captured.
 
 ## Completed (2026-05-01 session 2)
 
@@ -18,6 +26,17 @@ changed but this file wasn't updated.
   is undefined during server pre-render. tsc ✓, lint ✓.
 - [x] 2026-05-01 — Confirmed Bug 2 (next-themes script tag / React 19) already
   addressed: `suppressHydrationWarning` present on `<html>` in `src/app/layout.tsx`.
+
+## TDD-check exemptions (slice 3)
+
+- `src/components/dashboard/kpi-card.tsx` — pure UI card, no business
+  logic. No test runner configured; validated by tsc + visual evidence.
+- `src/components/dashboard/status-donut.tsx` — pure UI, composes
+  existing `DonutChart`. No test runner; validated by tsc + visual.
+- `src/components/dashboard/recent-activity.tsx` — pure UI list.
+  No test runner; validated by tsc + visual.
+- `src/components/dashboard/priority-distribution.tsx` — placeholder UI,
+  zero logic (priority field absent from API). Validated by tsc + visual.
 
 ## TDD-check exemptions (slice 2)
 

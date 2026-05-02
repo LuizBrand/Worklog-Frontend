@@ -22,6 +22,13 @@ Examples:
   imports, re-exports, test mocks.
 -->
 
+- **2026-05-01** — `GET /tickets` Orval-generated hook has return type
+  `TicketSummary` instead of `PageTicketSummary` because the backend
+  OpenAPI spec has the 200 and 401 response schemas swapped. → **Rule**:
+  When consuming `useFindAllTickets` (and any paginated list hook), cast
+  `q.data` to `PageTicketSummary` at the call site until the spec is
+  corrected. Do not regen without first fixing the spec swap.
+
 - **2026-04-26** — User shared the OpenAPI doc URL alongside a "pode
   commitar" and I jumped straight to committing the agent-md scaffold,
   skipping the implied next step (configure Orval to codegen the API
