@@ -5,10 +5,12 @@ import { TicketFiltersParamsStatus } from '@/api/generated/schemas'
 import { apiToUiStatus } from '@/lib/ticket-status'
 import type { ApiTicketStatus } from '@/lib/ticket-status'
 import type { PageTicketSummary } from '@/api/generated/schemas'
-import { KpiCard } from '@/components/dashboard/kpi-card'
+import { StatsBar } from '@/components/dashboard/stats-bar'
+import { TicketList } from '@/components/dashboard/ticket-list'
 import { StatusDonut } from '@/components/dashboard/status-donut'
-import { RecentActivity } from '@/components/dashboard/recent-activity'
 import { PriorityDistribution } from '@/components/dashboard/priority-distribution'
+import { QuickFilters } from '@/components/dashboard/quick-filters'
+import { RecentActivity } from '@/components/dashboard/recent-activity'
 
 const API_STATUSES = [
   TicketFiltersParamsStatus.PENDING,
@@ -36,7 +38,7 @@ export default function DashboardPage() {
   })
   const recentQ = useFindAllTickets({
     filters: {},
-    pageable: { page: 0, size: 5, sort: ['updatedAt,desc'] },
+    pageable: { page: 0, size: 8, sort: ['updatedAt,desc'] },
   })
 
   const countsLoading =
@@ -63,35 +65,23 @@ export default function DashboardPage() {
     }
   })
 
+  const recentTickets = toPage(recentQ.data)?.content
+
   return (
-    <main className="mx-auto flex max-w-5xl flex-col gap-4 p-4 md:p-6">
-      <h1
-        className="text-xl font-semibold"
-        style={{ color: 'var(--wl-text)' }}
-      >
-        Dashboard
-      </h1>
+    <main className="mx-auto flex max-w-6xl flex-col gap-4 p-4 md:p-6">
+      <StatsBar statusCounts={statusCounts} loading={countsLoading} />
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {statusCounts.map(({ status, count }) => (
-          <KpiCard
-            key={status}
-            status={status}
-            count={count}
-            loading={countsLoading}
-          />
-        ))}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px]">
+        <TicketList tickets={recentTickets} loading={recentQ.isLoading} />
+
+        <div className="flex flex-col gap-4">
+          <StatusDonut data={statusCounts} loading={countsLoading} />
+          <PriorityDistribution />
+          <QuickFilters />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <StatusDonut data={statusCounts} loading={countsLoading} />
-        <PriorityDistribution />
-      </div>
-
-      <RecentActivity
-        tickets={toPage(recentQ.data)?.content}
-        loading={recentQ.isLoading}
-      />
+      <RecentActivity tickets={recentTickets} loading={recentQ.isLoading} />
     </main>
   )
 }

@@ -15,7 +15,7 @@ export function RecentActivity({ tickets, loading }: RecentActivityProps) {
   return (
     <div
       className="flex flex-col gap-3 rounded-xl p-4"
-      style={{ background: 'var(--wl-surface-1)' }}
+      style={{ background: 'var(--wl-surface)' }}
     >
       <span
         className="text-[11px] font-semibold uppercase tracking-wide"
@@ -24,28 +24,27 @@ export function RecentActivity({ tickets, loading }: RecentActivityProps) {
         Atividade recente
       </span>
 
-      {loading && (
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
+      <div className="flex gap-3 overflow-x-auto pb-1">
+        {loading &&
+          Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-[46px] animate-pulse rounded-lg"
+              className="h-[120px] w-[260px] shrink-0 animate-pulse rounded-lg"
               style={{ background: 'var(--wl-surface-2)' }}
             />
           ))}
-        </div>
-      )}
 
-      {!loading && (!tickets || tickets.length === 0) && (
-        <EmptyState
-          title="Nenhum ticket"
-          description="Ainda não há tickets registrados."
-        />
-      )}
+        {!loading && (!tickets || tickets.length === 0) && (
+          <EmptyState
+            title="Nenhum ticket"
+            description="Ainda não há tickets registrados."
+          />
+        )}
 
-      {!loading && tickets && tickets.length > 0 && (
-        <div className="flex flex-col">
-          {tickets.map((t) => {
+        {!loading &&
+          tickets &&
+          tickets.length > 0 &&
+          tickets.map((t) => {
             const uiStatus = t.status
               ? apiToUiStatus(t.status as ApiTicketStatus)
               : 'OPEN'
@@ -54,50 +53,48 @@ export function RecentActivity({ tickets, loading }: RecentActivityProps) {
               <Link
                 key={t.publicId}
                 href={`/tickets/${t.publicId}`}
-                className="-mx-2 flex items-start gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-[var(--wl-surface-2)]"
+                className="flex w-[260px] shrink-0 flex-col gap-2 rounded-lg p-3 transition-opacity hover:opacity-80"
+                style={{ background: 'var(--wl-surface-2)' }}
               >
-                <WlAvatar name={clientName} size={32} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className="truncate text-[13px] font-medium"
-                      style={{ color: 'var(--wl-text)' }}
-                    >
-                      {t.title ?? '(sem título)'}
-                    </span>
-                    <StatusChip status={uiStatus} size="sm" />
-                  </div>
-                  <div className="mt-0.5 flex items-center gap-2">
-                    <span
-                      className="text-[11px]"
-                      style={{ color: 'var(--wl-text-muted)' }}
-                    >
-                      {clientName}
-                    </span>
-                    {t.system?.name && (
-                      <>
-                        <span style={{ color: 'var(--wl-text-muted)' }}>·</span>
-                        <span
-                          className="text-[11px]"
-                          style={{ color: 'var(--wl-text-muted)' }}
-                        >
-                          {t.system.name}
-                        </span>
-                      </>
-                    )}
-                    <span
-                      className="ml-auto text-[11px]"
-                      style={{ color: 'var(--wl-text-muted)' }}
-                    >
-                      {fmtRelative(t.updatedAt)}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-between gap-2">
+                  <StatusChip status={uiStatus} size="sm" />
+                  <span
+                    className="text-[11px]"
+                    style={{ color: 'var(--wl-text-muted)' }}
+                  >
+                    {fmtRelative(t.updatedAt)}
+                  </span>
+                </div>
+                <span
+                  className="line-clamp-2 text-[13px] font-medium leading-snug"
+                  style={{ color: 'var(--wl-text)' }}
+                >
+                  {t.title ?? '(sem título)'}
+                </span>
+                <div className="mt-auto flex items-center gap-2">
+                  <WlAvatar name={clientName} size={20} />
+                  <span
+                    className="truncate text-[11px]"
+                    style={{ color: 'var(--wl-text-muted)' }}
+                  >
+                    {clientName}
+                  </span>
+                  {t.system?.name && (
+                    <>
+                      <span style={{ color: 'var(--wl-text-muted)' }}>·</span>
+                      <span
+                        className="truncate text-[11px]"
+                        style={{ color: 'var(--wl-text-muted)' }}
+                      >
+                        {t.system.name}
+                      </span>
+                    </>
+                  )}
                 </div>
               </Link>
             )
           })}
-        </div>
-      )}
+      </div>
     </div>
   )
 }

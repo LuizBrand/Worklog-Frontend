@@ -5,13 +5,13 @@ export function PriorityDistribution() {
   return (
     <div
       className="flex flex-col gap-4 rounded-xl p-4"
-      style={{ background: 'var(--wl-surface-1)' }}
+      style={{ background: 'var(--wl-surface)' }}
     >
       <span
         className="text-[11px] font-semibold uppercase tracking-wide"
         style={{ color: 'var(--wl-text-muted)' }}
       >
-        Distribuição por prioridade
+        Por prioridade (abertos)
       </span>
 
       <div className="flex flex-col gap-3">
