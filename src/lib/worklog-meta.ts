@@ -1,3 +1,6 @@
+import type { LucideIcon } from 'lucide-react'
+import { AlertCircle, Play, Clock, CheckCircle2, XCircle } from 'lucide-react'
+
 export type TicketStatus =
   | 'OPEN'
   | 'IN_PROGRESS'
@@ -19,38 +22,38 @@ export const STATUS_META: Record<
   TicketStatus,
   {
     label: string
-    icon: string
+    icon: LucideIcon
     color: string
     background: string
   }
 > = {
   OPEN: {
     label: 'Aberto',
-    icon: '○',
+    icon: AlertCircle,
     color: 'var(--status-open)',
     background: 'var(--status-open-bg)',
   },
   IN_PROGRESS: {
     label: 'Em andamento',
-    icon: '◑',
+    icon: Play,
     color: 'var(--status-progress)',
     background: 'var(--status-progress-bg)',
   },
   AWAITING_DEV: {
     label: 'Aguard. dev',
-    icon: '◷',
+    icon: Clock,
     color: 'var(--status-awaiting)',
     background: 'var(--status-awaiting-bg)',
   },
   RESOLVED: {
     label: 'Resolvido',
-    icon: '●',
+    icon: CheckCircle2,
     color: 'var(--status-resolved)',
     background: 'var(--status-resolved-bg)',
   },
   CANCELLED: {
     label: 'Cancelado',
-    icon: '✕',
+    icon: XCircle,
     color: 'var(--status-cancelled)',
     background: 'var(--status-cancelled-bg)',
   },

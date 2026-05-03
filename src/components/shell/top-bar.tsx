@@ -1,8 +1,7 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { Moon02Icon, Sun01Icon } from '@hugeicons/core-free-icons'
+import { Sun, Moon } from 'lucide-react'
 
 import { Logo } from '@/components/worklog/logo'
 import { Button } from '@/components/ui/button'
@@ -32,11 +31,9 @@ export function TopBar({ title }: TopBarProps) {
           onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
           aria-label="Alternar tema"
         >
-          <HugeiconsIcon
-            icon={resolvedTheme === 'dark' ? Sun01Icon : Moon02Icon}
-            strokeWidth={1.5}
-            className="size-4"
-          />
+          {resolvedTheme === 'dark'
+            ? <Sun strokeWidth={1.5} className="size-4" />
+            : <Moon strokeWidth={1.5} className="size-4" />}
         </Button>
         <UserMenu />
       </div>

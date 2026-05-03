@@ -10,6 +10,33 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-02 — Dashboard polish (round 5 — right-column compaction + legend refinement):
+  - StatusDonut: `gap-4` → `gap-3`, donut `160px` → `152px` / `strokeWidth 18` → `16`
+  - Legend markers: circular `borderRadius:'50%'` → square `borderRadius:2` (7×7px)
+  - Legend grid: `gap-x-4 gap-y-2` → `gap-x-3 gap-y-1.5` (tighter 2-col grid)
+  - PriorityDistribution: outer `gap-4` → `gap-2.5`, inner bars `gap-3` → `gap-2`
+  - QuickFilters: outer `gap-3` → `gap-2.5`, shortcuts list `gap-2` → `gap-1.5`
+  - Dashboard page right column: `gap-4` → `gap-2` (ATALHOS bottom now aligns with TicketList bottom)
+  - tsc ✓, visual evidence: slice-4e-dashboard-round5.png
+
+- [x] 2026-05-02 — Dashboard polish (round 5):
+  - Accent bar: `w-[2px] rounded-full my-2.5 ml-[3px]` — thin inset pill with spacing (was 3px flush bar)
+  - Count badge: orange pill `--status-open` with tinted bg (was muted text)
+  - TicketList: `lg:max-h-[660px]` + inner list `scroll-thin overflow-y-auto` — caps height to ~right-column height
+  - Scrollbar: `.scroll-thin` utility in globals.css (`scrollbar-width: thin`, 4px webkit, `--wl-border-2` color)
+  - Applied `.scroll-thin` to both TicketList inner list and RecentActivity horizontal scroll
+  - tsc ✓, visual evidence blocked by auth (see slice-4d)
+
+- [x] 2026-05-02 — Dashboard polish (round 4):
+  - StatsBar icons: each icon wrapped in 18×18 bordered box (1px solid <color>55, border-radius 4)
+  - ⚠ icon color: `var(--status-open)` orange (was `--wl-text-muted`)
+  - "+ Novo ticket" button: solid `var(--primary)` fill + white text (was ghost tint)
+  - Client name color: `var(--primary)` font-medium (was muted)
+  - System name color: `var(--wl-text-muted)` (was primary) — colors swapped vs before
+  - Ticket row separator: `borderTop: 1px solid var(--wl-border)` between rows (idx > 0)
+  - Status+date right-side alignment: status chip `w-[90px] justify-end`, date `w-[60px] text-right`
+  - tsc ✓, lint ✓, visual evidence: slice-4d-dashboard-desktop.png (login page — dashboard blocked by auth)
+
 - [x] 2026-05-02 — Dashboard polish (round 3):
   - StatsBar: mobile → 2×2 grid of individual chips; desktop → w-fit inline bar (not full-width)
   - Sidebar: bg-card (cool-neutral) → --wl-surface, borders → --wl-border, hover → --wl-surface-2 to match warm dark-mode tones

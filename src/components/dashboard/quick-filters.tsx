@@ -9,8 +9,8 @@ const SHORTCUTS: { key: string; label: string; href?: string }[] = [
 export function QuickFilters() {
   return (
     <div
-      className="flex flex-col gap-3 rounded-xl p-4"
-      style={{ background: 'var(--wl-surface)' }}
+      className="flex flex-col gap-2.5 rounded-xl p-4"
+      style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
     >
       <span
         className="text-[11px] font-semibold uppercase tracking-wide"
@@ -19,7 +19,7 @@ export function QuickFilters() {
         Atalhos
       </span>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         {SHORTCUTS.map(({ key, label, href }) => {
           const inner = (
             <div className="flex items-center gap-3">

@@ -12,7 +12,7 @@ export function Logo({ size = 28, withWordmark = false, className }: LogoProps) 
     <span className={cn('inline-flex items-center gap-2', className)}>
       <span
         aria-hidden
-        className="inline-flex items-center justify-center font-bold text-white"
+        className="inline-flex flex-shrink-0 items-center justify-center font-bold text-white"
         style={{
           width: size,
           height: size,
@@ -21,6 +21,7 @@ export function Logo({ size = 28, withWordmark = false, className }: LogoProps) 
           fontSize: Math.round(size * 0.5),
           letterSpacing: '-0.04em',
           fontFamily: 'var(--font-sans)',
+          lineHeight: 1,
         }}
       >
         W
@@ -28,7 +29,11 @@ export function Logo({ size = 28, withWordmark = false, className }: LogoProps) 
       {withWordmark && (
         <span
           className="font-bold tracking-[-0.04em]"
-          style={{ fontSize: Math.round(size * 0.6), color: 'var(--wl-text)' }}
+          style={{
+            fontSize: Math.round(size * 0.6),
+            lineHeight: `${size}px`,
+            color: 'var(--wl-text)',
+          }}
         >
           WorkLog
         </span>

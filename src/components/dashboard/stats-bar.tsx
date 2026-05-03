@@ -19,16 +19,29 @@ function ChipContent({
   return (
     <>
       <span
-        className="text-[15px] font-bold tabular-nums"
-        style={{ color: meta.color }}
+        className="text-[13px] font-bold tabular-nums"
+        style={{ color: meta.color, lineHeight: '16px' }}
       >
         {loading ? '—' : count}
       </span>
-      <span className="text-[13px]" style={{ color: 'var(--wl-text)' }}>
+      <span
+        className="text-[12px]"
+        style={{ color: 'var(--wl-text)', lineHeight: '16px' }}
+      >
         {meta.label}
       </span>
-      <span className="text-[13px]" style={{ color: meta.color }}>
-        {meta.icon}
+      <span
+        className="flex items-center justify-center"
+        style={{
+          border: `1px solid ${meta.color}55`,
+          borderRadius: 3,
+          width: 16,
+          height: 16,
+          color: meta.color,
+          flexShrink: 0,
+        }}
+      >
+        <meta.icon strokeWidth={2} style={{ width: 10, height: 10 }} />
       </span>
     </>
   )
@@ -43,7 +56,7 @@ export function StatsBar({ statusCounts, loading }: StatsBarProps) {
           <div
             key={status}
             className="flex items-center gap-1.5 rounded-xl px-4 py-3"
-            style={{ background: 'var(--wl-surface)' }}
+            style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
           >
             <ChipContent status={status} count={count} loading={loading} />
           </div>
@@ -52,8 +65,8 @@ export function StatsBar({ statusCounts, loading }: StatsBarProps) {
 
       {/* Desktop: single inline bar, width fits content */}
       <div
-        className="hidden sm:flex sm:w-fit sm:items-center sm:rounded-xl sm:px-5 sm:py-3"
-        style={{ background: 'var(--wl-surface)' }}
+        className="hidden sm:flex sm:w-fit sm:items-center sm:rounded-xl sm:px-4 sm:py-1.5"
+        style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
       >
         {statusCounts.map(({ status, count }, i) => (
           <Fragment key={status}>

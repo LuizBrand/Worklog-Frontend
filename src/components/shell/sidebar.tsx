@@ -4,13 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
-import { HugeiconsIcon } from '@hugeicons/react'
-import {
-  Moon02Icon,
-  Sun01Icon,
-  SidebarLeftIcon,
-  SidebarLeft01Icon,
-} from '@hugeicons/core-free-icons'
+import { Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/state/auth'
@@ -46,7 +40,7 @@ export function Sidebar() {
       {/* Logo + collapse */}
       <div
         className={cn(
-          'flex flex-shrink-0 items-center border-b border-[var(--wl-border)] py-3.5',
+          'flex h-[52px] flex-shrink-0 items-center border-b border-[var(--wl-border)]',
           collapsed ? 'justify-center px-0' : 'justify-between px-3',
         )}
       >
@@ -59,7 +53,7 @@ export function Sidebar() {
             onClick={() => setCollapsed(true)}
             aria-label="Recolher menu"
           >
-            <HugeiconsIcon icon={SidebarLeftIcon} strokeWidth={1.5} />
+            <PanelLeftClose strokeWidth={1.5} className="size-4" />
           </Button>
         )}
       </div>
@@ -74,27 +68,27 @@ export function Sidebar() {
             onClick={() => setCollapsed(false)}
             aria-label="Expandir menu"
           >
-            <HugeiconsIcon icon={SidebarLeft01Icon} strokeWidth={1.5} />
+            <PanelLeftOpen strokeWidth={1.5} className="size-4" />
           </Button>
         )}
         {visibleItems.map((item) => {
           const active = pathname.startsWith(item.href)
+          const Icon = item.icon
           const btn = (
             <Link
               key={item.id}
               href={item.href}
               className={cn(
-                'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+                'flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-[13px] font-medium transition-colors',
                 collapsed && 'justify-center px-0',
                 active
                   ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:bg-[var(--wl-surface-2)] hover:text-foreground',
               )}
             >
-              <HugeiconsIcon
-                icon={item.icon}
+              <Icon
                 strokeWidth={active ? 2 : 1.5}
-                className="size-4 flex-shrink-0"
+                className="size-[18px] flex-shrink-0"
               />
               {!collapsed && <span>{item.label}</span>}
             </Link>
@@ -120,17 +114,15 @@ export function Sidebar() {
         <Button
           variant="ghost"
           size={collapsed ? 'icon' : 'sm'}
-          className={cn('w-full', !collapsed && 'justify-start gap-2')}
+          className={cn('w-full', !collapsed && 'justify-start gap-3')}
           onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
           aria-label="Alternar tema"
         >
-          <HugeiconsIcon
-            icon={resolvedTheme === 'dark' ? Sun01Icon : Moon02Icon}
-            strokeWidth={1.5}
-            className="size-4"
-          />
+          {resolvedTheme === 'dark'
+            ? <Sun strokeWidth={1.5} className="size-[18px]" />
+            : <Moon strokeWidth={1.5} className="size-[18px]" />}
           {!collapsed && (
-            <span className="text-xs">
+            <span className="text-[13px]">
               {resolvedTheme === 'dark' ? 'Modo claro' : 'Modo escuro'}
             </span>
           )}

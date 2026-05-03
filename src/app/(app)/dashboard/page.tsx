@@ -22,15 +22,15 @@ const API_STATUSES = [
 export default function DashboardPage() {
   const pendingQ = useFindAllTickets({
     filters: { status: TicketFiltersParamsStatus.PENDING },
-    pageable: { page: 0, size: 1 },
+    pageable: { page: 0, size: 20, sort: ['updatedAt,desc'] },
   })
   const awaitingCustomerQ = useFindAllTickets({
     filters: { status: TicketFiltersParamsStatus.AWAITING_CUSTOMER },
-    pageable: { page: 0, size: 1 },
+    pageable: { page: 0, size: 20, sort: ['updatedAt,desc'] },
   })
   const awaitingDevQ = useFindAllTickets({
     filters: { status: TicketFiltersParamsStatus.AWAITING_DEVELOPMENT },
-    pageable: { page: 0, size: 1 },
+    pageable: { page: 0, size: 20, sort: ['updatedAt,desc'] },
   })
   const completedQ = useFindAllTickets({
     filters: { status: TicketFiltersParamsStatus.COMPLETED },
@@ -66,6 +66,29 @@ export default function DashboardPage() {
   })
 
   const recentTickets = toPage(recentQ.data)?.content
+
+  // Combine active-status lists; deduplicate by publicId, filter resolved, sort by updatedAt desc.
+  const seen = new Set<string>()
+  const activeTickets = [
+    ...(toPage(pendingQ.data)?.content ?? []),
+    ...(toPage(awaitingCustomerQ.data)?.content ?? []),
+    ...(toPage(awaitingDevQ.data)?.content ?? []),
+  ]
+    .filter(t => {
+      if (!t.publicId || seen.has(t.publicId)) return false
+      seen.add(t.publicId)
+      const s = t.status ? apiToUiStatus(t.status as ApiTicketStatus) : 'OPEN'
+      return s !== 'RESOLVED'
+    })
+    .sort((a, b) => {
+      const ta = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+      const tb = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+      return tb - ta
+    })
+
+  const activeListLoading =
+    pendingQ.isLoading || awaitingCustomerQ.isLoading || awaitingDevQ.isLoading
+
   const pendingTotal =
     (toPage(pendingQ.data)?.totalElements ?? 0) +
     (toPage(awaitingCustomerQ.data)?.totalElements ?? 0)
@@ -74,14 +97,14 @@ export default function DashboardPage() {
     <main className="flex flex-col gap-4 p-4 md:p-6">
       <StatsBar statusCounts={statusCounts} loading={countsLoading} />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_300px]">
         <TicketList
-          tickets={recentTickets}
-          loading={recentQ.isLoading}
+          tickets={activeTickets}
+          loading={activeListLoading}
           totalCount={countsLoading ? undefined : pendingTotal}
         />
 
-        <div className="flex flex-col gap-4">
+        <div className="flex h-full flex-col justify-between">
           <StatusDonut data={statusCounts} loading={countsLoading} />
           <PriorityDistribution />
           <QuickFilters />

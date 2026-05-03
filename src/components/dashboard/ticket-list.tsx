@@ -15,12 +15,12 @@ export interface TicketListProps {
 export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
   return (
     <div
-      className="flex flex-col gap-2 rounded-xl p-4"
-      style={{ background: 'var(--wl-surface)' }}
+      className="flex flex-col rounded-xl p-4 lg:h-[660px]"
+      style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
     >
-      <div className="flex items-center justify-between pb-1">
+      <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">
-          <span className="text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
+          <span className="text-[13px]" style={{ color: 'var(--status-open)' }}>
             ⚠
           </span>
           <span
@@ -31,8 +31,11 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
           </span>
           {totalCount !== undefined && !loading && (
             <span
-              className="text-[13px] font-semibold tabular-nums"
-              style={{ color: 'var(--wl-text-muted)' }}
+              className="rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums"
+              style={{
+                background: 'color-mix(in oklch, var(--status-open) 18%, transparent)',
+                color: 'var(--status-open)',
+              }}
             >
               {totalCount}
             </span>
@@ -40,17 +43,19 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
         </div>
         <Link
           href="/tickets"
-          className="rounded-md px-3 py-1 text-[12px] font-semibold transition-opacity hover:opacity-80"
+          className="rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-85"
           style={{
-            color: 'var(--primary)',
-            background: 'color-mix(in oklch, var(--primary) 15%, transparent)',
+            color: '#fff',
+            background: 'var(--primary)',
           }}
         >
           + Novo ticket
         </Link>
       </div>
 
-      <div className="flex flex-col">
+      <div style={{ height: 1, background: 'var(--wl-border)', flexShrink: 0 }} />
+
+      <div className="scroll-thin mt-3 flex flex-col overflow-y-auto">
         {loading &&
           Array.from({ length: 6 }).map((_, i) => (
             <div
@@ -70,37 +75,45 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
         {!loading &&
           tickets &&
           tickets.length > 0 &&
-          tickets.map((t) => {
+          tickets.map((t, idx) => {
             const uiStatus = t.status
               ? apiToUiStatus(t.status as ApiTicketStatus)
               : 'OPEN'
             const meta = STATUS_META[uiStatus]
             const clientName = t.client?.name ?? '—'
             return (
+              <div key={t.publicId}>
+              {idx > 0 && (
+                <div style={{ height: 1, background: 'var(--wl-border)' }} />
+              )}
               <Link
-                key={t.publicId}
                 href={`/tickets/${t.publicId}`}
-                className="group flex items-stretch overflow-hidden rounded-lg transition-colors hover:bg-[var(--wl-surface-2)]"
+                className="group flex items-stretch rounded-lg transition-colors hover:bg-[var(--wl-surface-2)]"
               >
-                {/* Left status accent */}
+                {/* Left status accent — inset pill */}
                 <div
-                  className="w-[3px] shrink-0"
+                  className="ml-[3px] w-[2px] shrink-0 rounded-full my-2.5"
                   style={{ background: meta.color }}
                 />
 
                 <div className="flex flex-1 items-center gap-3 px-3 py-3">
-                  {/* Title + client/system */}
+                  {/* Title row (with status chip) + client/system */}
                   <div className="min-w-0 flex-1">
-                    <p
-                      className="truncate text-[13px] font-semibold"
-                      style={{ color: 'var(--wl-text)' }}
-                    >
-                      {t.title ?? '(sem título)'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p
+                        className="flex-1 truncate text-[13px] font-semibold"
+                        style={{ color: 'var(--wl-text)' }}
+                      >
+                        {t.title ?? '(sem título)'}
+                      </p>
+                      <div className="shrink-0">
+                        <StatusChip status={uiStatus} size="sm" />
+                      </div>
+                    </div>
                     <div className="mt-0.5 flex items-center gap-1">
                       <span
-                        className="truncate text-[11px]"
-                        style={{ color: 'var(--wl-text-muted)' }}
+                        className="truncate text-[11px] font-medium"
+                        style={{ color: 'var(--primary)' }}
                       >
                         {clientName}
                       </span>
@@ -114,7 +127,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
                           </span>
                           <span
                             className="truncate text-[11px]"
-                            style={{ color: 'var(--primary)' }}
+                            style={{ color: 'var(--wl-text-muted)' }}
                           >
                             {t.system.name}
                           </span>
@@ -123,11 +136,10 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
                     </div>
                   </div>
 
-                  {/* Right: status + date + arrow */}
+                  {/* Right: date + arrow */}
                   <div className="flex shrink-0 items-center gap-2">
-                    <StatusChip status={uiStatus} size="sm" />
                     <span
-                      className="text-[11px] tabular-nums"
+                      className="w-[60px] text-right text-[11px] tabular-nums"
                       style={{ color: 'var(--wl-text-muted)' }}
                     >
                       {fmtRelative(t.updatedAt)}
@@ -141,6 +153,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
                   </div>
                 </div>
               </Link>
+              </div>
             )
           })}
       </div>

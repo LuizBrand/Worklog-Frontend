@@ -25,8 +25,8 @@ export function StatusDonut({ data, loading }: StatusDonutProps) {
 
   return (
     <div
-      className="flex flex-col gap-4 rounded-xl p-4"
-      style={{ background: 'var(--wl-surface)' }}
+      className="flex flex-col gap-3 rounded-xl p-4"
+      style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
     >
       <span
         className="text-[11px] font-semibold uppercase tracking-wide"
@@ -38,8 +38,8 @@ export function StatusDonut({ data, loading }: StatusDonutProps) {
       <div className="flex justify-center">
         <DonutChart
           data={loading ? [] : slices}
-          size={160}
-          strokeWidth={18}
+          size={152}
+          strokeWidth={16}
           centerLabel={
             <div className="flex flex-col items-center gap-0.5">
               <span
@@ -59,8 +59,8 @@ export function StatusDonut({ data, loading }: StatusDonutProps) {
         />
       </div>
 
-      {/* 2-column legend */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+      {/* 2-column legend — square markers with rounded corners */}
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
         {data.map((d) => {
           const meta = STATUS_META[d.status]
           return (
@@ -69,9 +69,9 @@ export function StatusDonut({ data, loading }: StatusDonutProps) {
                 <span
                   aria-hidden
                   style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
+                    width: 7,
+                    height: 7,
+                    borderRadius: 2,
                     background: meta.color,
                     display: 'inline-block',
                     flexShrink: 0,

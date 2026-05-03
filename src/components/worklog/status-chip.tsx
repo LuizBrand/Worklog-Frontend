@@ -27,9 +27,11 @@ export function StatusChip({ status, size = 'md', className }: StatusChipProps) 
         lineHeight: 1,
       }}
     >
-      <span aria-hidden style={{ fontSize: size === 'sm' ? 10 : 11 }}>
-        {meta.icon}
-      </span>
+      <meta.icon
+        aria-hidden
+        strokeWidth={2}
+        style={{ width: size === 'sm' ? 10 : 11, height: size === 'sm' ? 10 : 11, flexShrink: 0 }}
+      />
       {meta.label}
     </span>
   )

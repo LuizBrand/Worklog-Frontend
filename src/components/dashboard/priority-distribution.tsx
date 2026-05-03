@@ -4,8 +4,8 @@ import { PRIORITY_ORDER } from '@/lib/worklog-meta'
 export function PriorityDistribution() {
   return (
     <div
-      className="flex flex-col gap-4 rounded-xl p-4"
-      style={{ background: 'var(--wl-surface)' }}
+      className="flex flex-col gap-2.5 rounded-xl p-4"
+      style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
     >
       <span
         className="text-[11px] font-semibold uppercase tracking-wide"
@@ -14,7 +14,7 @@ export function PriorityDistribution() {
         Por prioridade (abertos)
       </span>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {PRIORITY_ORDER.map((p) => (
           <PriorityBar key={p} priority={p} value={0} total={0} />
         ))}

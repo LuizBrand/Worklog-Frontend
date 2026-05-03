@@ -212,3 +212,34 @@
     @apply font-sans;
   }
 }
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--wl-border-2) transparent;
+}
+
+.scroll-thin::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--wl-border-2);
+  border-radius: 2px;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--wl-text-dim);
+}
+
+.scroll-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-hide::-webkit-scrollbar {
+  display: none;
+}

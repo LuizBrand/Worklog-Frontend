@@ -1,8 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { HugeiconsIcon } from '@hugeicons/react'
-import { Logout01Icon, User02Icon } from '@hugeicons/core-free-icons'
+import { User, LogOut } from 'lucide-react'
 
 import { useLogout } from '@/api/generated/autenticação/autenticação'
 import { useAuthStore } from '@/state/auth'
@@ -59,7 +58,7 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => router.push('/perfil')}>
-          <HugeiconsIcon icon={User02Icon} strokeWidth={1.5} className="size-3.5" />
+          <User strokeWidth={1.5} className="size-3.5" />
           Minha conta
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -67,7 +66,7 @@ export function UserMenu() {
           onClick={handleLogout}
           className="text-destructive focus:text-destructive"
         >
-          <HugeiconsIcon icon={Logout01Icon} strokeWidth={1.5} className="size-3.5" />
+          <LogOut strokeWidth={1.5} className="size-3.5" />
           Sair
         </DropdownMenuItem>
       </DropdownMenuContent>
