@@ -32,6 +32,11 @@ export const useAuthStore = create<AuthState>()(
         acessToken: state.acessToken,
         refreshToken: state.refreshToken,
       }),
+      // skipHydration prevents auto-hydration during module evaluation.
+      // The layout manually calls rehydrate() after registering the listener,
+      // avoiding the race where localStorage (synchronous) completes before
+      // onFinishHydration is subscribed.
+      skipHydration: true,
     },
   ),
 )

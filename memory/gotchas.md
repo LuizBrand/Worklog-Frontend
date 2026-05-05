@@ -42,3 +42,12 @@ Examples:
   it into the project, not just reference material. Confirm the
   expected next step before falling back to whatever was already
   pending.
+
+## Orval nested params vs Spring Boot flat params
+
+Orval gera `FindAllTicketsParams = {filters: {...}, pageable: {...}}`.
+Axios serializa isso como `filters[title]=x&pageable[page]=0`.
+Spring Boot espera params flat: `title=x&page=0`.
+
+**Fix**: `paramsSerializer` customizado em `src/lib/api.ts` que achata objetos aninhados
+recursivamente e repete arrays como params múltiplos.

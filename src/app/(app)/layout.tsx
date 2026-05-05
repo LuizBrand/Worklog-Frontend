@@ -9,16 +9,15 @@ import { AppShell } from '@/components/shell/app-shell'
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const acessToken = useAuthStore((s) => s.acessToken)
-  // Lazy initializer: synchronously true when zustand has already read localStorage.
-  // The effect below subscribes for the async case (first mount before hydration).
-  const [hydrated, setHydrated] = useState(() =>
-    useAuthStore.persist?.hasHydrated() ?? false,
-  )
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    if (hydrated) return
-    return useAuthStore.persist?.onFinishHydration(() => setHydrated(true))
-  }, [hydrated])
+    // Register the listener BEFORE calling rehydrate() so it is in place
+    // when hydration completes synchronously (localStorage is sync).
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true))
+    useAuthStore.persist.rehydrate()
+    return unsub
+  }, [])
 
   useEffect(() => {
     if (hydrated && !acessToken) {

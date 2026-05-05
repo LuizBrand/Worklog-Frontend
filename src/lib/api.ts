@@ -5,9 +5,31 @@ import { useAuthStore } from '@/state/auth'
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
 
+// Orval generates nested params like {filters: {title}, pageable: {page}}.
+// Spring Boot expects flat query params: title=x&page=0.
+// This serializer unwraps one level of wrapper objects and repeats arrays.
+function serializeParams(params: Record<string, unknown>): string {
+  const parts: string[] = []
+  function collect(obj: Record<string, unknown>) {
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === undefined || value === null) continue
+      if (Array.isArray(value)) {
+        for (const v of value) parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(v))}`)
+      } else if (typeof value === 'object') {
+        collect(value as Record<string, unknown>)
+      } else {
+        parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+      }
+    }
+  }
+  collect(params)
+  return parts.join('&')
+}
+
 export const api = axios.create({
   baseURL,
   headers: { 'Content-Type': 'application/json' },
+  paramsSerializer: { serialize: (p) => serializeParams(p as Record<string, unknown>) },
 })
 
 api.interceptors.request.use((config) => {

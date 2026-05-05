@@ -55,7 +55,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
 
       <div style={{ height: 1, background: 'var(--wl-border)', flexShrink: 0 }} />
 
-      <div className="scroll-thin mt-3 flex flex-col overflow-y-auto">
+      <div className="scroll-hide mt-3 flex flex-col overflow-y-auto">
         {loading &&
           Array.from({ length: 6 }).map((_, i) => (
             <div

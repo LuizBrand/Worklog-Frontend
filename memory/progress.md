@@ -10,6 +10,20 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-04 — Slice 5 — Ticket detail panel:
+  - `src/components/tickets/ticket-activity.tsx` — timeline de logs; renderiza STATUS (chips de/para), DESCRIPTION (diff verde/vermelho), SOLUTION/nota (texto), outros campos genéricos
+  - `src/components/tickets/ticket-detail.tsx` — painel fixo direito (480px); header ID+StatusChip+título+X; meta grid 2-col; botões "Mudar status" (CANCELLED desabilitado); DESCRIÇÃO; TicketActivity; footer textarea+Salvar nota; backdrop fecha ao clicar; Esc fecha via keydown
+  - `src/components/tickets/ticket-table.tsx` — adicionado `onRowClick` prop; `<Link>` removido das células; `<tr>` recebe `onClick`
+  - `src/app/(app)/tickets/page.tsx` — lê param `?id=`; `openDetail`/`closeDetail` manipulam URL; passa `onRowClick` para TicketTable; renderiza `<TicketDetail>` quando `selectedId` presente; Esc handler para fechar
+  - tsc ✓, visual evidence: slice-5-ticket-detail.{png,md}
+
+- [x] 2026-05-03 — Slice 4 — Tickets list:
+  - `src/app/(app)/tickets/page.tsx` — client component; header com search (shortcut "/"), selects de status e cliente, botão "+ Novo C"; URL params (`q`, `status`, `clientId`, `page`); `useFindAllTickets` + `useFindAllClients`; cast para `PageTicketSummary` (gotcha schema swap); paginação com ChevronLeft/Right
+  - `src/components/tickets/ticket-table.tsx` — tabela 8 colunas; skeleton 8 linhas; empty state; link por linha; Prioridade exibe "—" (campo ausente no backend)
+  - tsc ✓, visual evidence: slice-4-tickets-desktop.{png,md}
+
+- [x] 2026-05-03 — TicketList scrollbar: `scroll-thin` → `scroll-hide` in `src/components/dashboard/ticket-list.tsx`. Barra de rolagem vertical removida; scroll por roda/toque mantido. tsc ✓.
+
 - [x] 2026-05-02 — Dashboard polish (round 5 — right-column compaction + legend refinement):
   - StatusDonut: `gap-4` → `gap-3`, donut `160px` → `152px` / `strokeWidth 18` → `16`
   - Legend markers: circular `borderRadius:'50%'` → square `borderRadius:2` (7×7px)
@@ -80,6 +94,17 @@ changed but this file wasn't updated.
   is undefined during server pre-render. tsc ✓, lint ✓.
 - [x] 2026-05-01 — Confirmed Bug 2 (next-themes script tag / React 19) already
   addressed: `suppressHydrationWarning` present on `<html>` in `src/app/layout.tsx`.
+
+## TDD-check exemptions (slice 5 — ticket detail panel)
+
+- `src/components/tickets/ticket-activity.tsx` — pure UI component; renderiza `TicketLogResponse[]` sem lógica de negócio. Sem test runner configurado; validado por tsc + evidência visual.
+- `src/components/tickets/ticket-detail.tsx` — client component que orquestra queries e mutation. Sem test runner; validado por tsc + smoke visual (login → clique em linha → painel aparece → campos corretos).
+- `src/components/tickets/ticket-table.tsx` — refactor: `<Link>` → `onClick` + prop `onRowClick`. Comportamento verificado visualmente.
+
+## TDD-check exemptions (slice 4 — tickets list)
+
+- `src/components/tickets/ticket-table.tsx` — componente UI puro; renderiza `TicketSummary[]` sem lógica de negócio. Sem test runner configurado; validado por tsc + evidência visual.
+- `src/app/(app)/tickets/page.tsx` — page client component; orquestra queries e filtros via URL params. Sem test runner; validado por tsc + smoke visual.
 
 ## TDD-check exemptions (login split-screen + dashboard refactor)
 
