@@ -16,6 +16,7 @@ changed but this file wasn't updated.
   - `src/components/tickets/ticket-table.tsx` — adicionado `onRowClick` prop; `<Link>` removido das células; `<tr>` recebe `onClick`
   - `src/app/(app)/tickets/page.tsx` — lê param `?id=`; `openDetail`/`closeDetail` manipulam URL; passa `onRowClick` para TicketTable; renderiza `<TicketDetail>` quando `selectedId` presente; Esc handler para fechar
   - tsc ✓, visual evidence: slice-5-ticket-detail.{png,md}
+  - unused import `UI_STATUS_WRITABLE` removido de `ticket-detail.tsx` (lint fix)
 
 - [x] 2026-05-03 — Slice 4 — Tickets list:
   - `src/app/(app)/tickets/page.tsx` — client component; header com search (shortcut "/"), selects de status e cliente, botão "+ Novo C"; URL params (`q`, `status`, `clientId`, `page`); `useFindAllTickets` + `useFindAllClients`; cast para `PageTicketSummary` (gotcha schema swap); paginação com ChevronLeft/Right
