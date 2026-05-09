@@ -78,6 +78,29 @@ function LogContent({ log }: { log: TicketLogResponse }) {
     )
   }
 
+  if (fieldChanged === 'solution' && newValue) {
+    return (
+      <div
+        className="mt-2 rounded-lg px-3 py-2.5"
+        style={{
+          background: 'rgba(14,165,233,0.06)',
+          border: '1px solid rgba(14,165,233,0.2)',
+          borderLeft: '3px solid #0ea5e9',
+        }}
+      >
+        <div className="mb-1.5 flex items-center gap-1.5">
+          <MessageSquare size={11} strokeWidth={2} style={{ color: '#0ea5e9' }} />
+          <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#0ea5e9' }}>
+            Nota
+          </span>
+        </div>
+        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--wl-text)' }}>
+          {newValue}
+        </p>
+      </div>
+    )
+  }
+
   if (newValue) {
     return (
       <p
