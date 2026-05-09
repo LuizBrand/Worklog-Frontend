@@ -10,7 +10,11 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
-- [x] 2026-05-09 — fix — Filtrar clientes inativos no create dialog:
+- [x] 2026-05-09 — fix — Filtrar clientes inativos (client-side) no create dialog:
+  - `src/components/tickets/ticket-form.tsx` — removido ClientFiltersParamsStatus.ATIVO (causava 403); filtro client-side via `c.enabled !== false`
+  - tsc ✓
+
+- [x] 2026-05-09 — fix (revertido) — Filtrar clientes inativos no create dialog:
   - `src/components/tickets/ticket-form.tsx` — `useFindAllClients` usa `ClientFiltersParamsStatus.ATIVO` no create dialog
   - `backend-gaps.md` — gap #4: `SystemResponse` sem campo de status ativo/inativo
   - tsc ✓
