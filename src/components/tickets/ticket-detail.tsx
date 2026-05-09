@@ -60,6 +60,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getGetTicketByPublicIdQueryKey(publicId) })
         qc.invalidateQueries({ queryKey: getGetTicketLogsQueryKey(publicId) })
+        invalidateTickets(qc)
       },
     },
   })

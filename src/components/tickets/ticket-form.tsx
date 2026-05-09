@@ -11,9 +11,14 @@ import { toast } from 'sonner'
 import { useCreateTicket, useUpdateTicket } from '@/api/generated/tickets/tickets'
 import { useFindAllClients } from '@/api/generated/clientes/clientes'
 import { useFindAllSystems } from '@/api/generated/sistemas/sistemas'
+import { useFindAllUsers } from '@/api/generated/usuários/usuários'
 import { TicketRequestStatus } from '@/api/generated/schemas'
 import { invalidateTickets, invalidateTicket } from '@/api/invalidate'
+import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
+import { STATUS_META } from '@/lib/worklog-meta'
+import { useAuthStore } from '@/state/auth'
 import type { TicketResponse } from '@/api/generated/schemas'
+import type { UiWritableStatus } from '@/lib/ticket-status'
 
 // ── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -22,6 +27,8 @@ const createSchema = z.object({
   description: z.string().optional(),
   clientId: z.string().min(1, 'Selecione um cliente'),
   systemId: z.string().min(1, 'Selecione um sistema'),
+  status: z.string().min(1, 'Selecione um status'),
+  userId: z.string().optional(),
 })
 
 const editSchema = z.object({
@@ -127,11 +134,19 @@ export interface TicketCreateDialogProps {
 
 export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
   const qc = useQueryClient()
+  const currentUser = useAuthStore((s) => s.user)
+  const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
+
   const clientsQ = useFindAllClients({ filtersParams: {} })
   const systemsQ = useFindAllSystems()
+  const usersQ = useFindAllUsers({ query: { enabled: isAdmin } })
 
   const { register, handleSubmit, formState: { errors } } = useForm<CreateValues>({
     resolver: zodResolver(createSchema),
+    defaultValues: {
+      status: TicketRequestStatus.PENDING,
+      userId: currentUser?.publicId ?? '',
+    },
   })
 
   const createMut = useCreateTicket({
@@ -154,7 +169,8 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
         description: values.description || undefined,
         clientId: values.clientId,
         systemId: values.systemId,
-        status: TicketRequestStatus.PENDING,
+        status: values.status as TicketRequestStatus,
+        userId: values.userId || currentUser?.publicId || undefined,
       },
     })
   }
@@ -207,6 +223,28 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
               </select>
             </FormField>
           </div>
+
+          <FormField label="Status" error={errors.status?.message}>
+            <select {...register('status')} className={inputCls} style={inputStyle}>
+              {UI_STATUS_WRITABLE.map((ui) => (
+                <option key={ui} value={uiToApiStatus(ui as UiWritableStatus)}>
+                  {STATUS_META[ui as UiWritableStatus].label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+
+          {isAdmin && (
+            <FormField label="Autor" error={errors.userId?.message}>
+              <select {...register('userId')} className={inputCls} style={inputStyle}>
+                {(usersQ.data ?? []).map((u) => (
+                  <option key={u.publicId} value={u.publicId ?? ''}>
+                    {u.name ?? u.email}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          )}
 
           <div className="flex justify-end gap-2 pt-1">
             <button
