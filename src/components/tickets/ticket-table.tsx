@@ -128,7 +128,7 @@ export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: 
                     </span>
                   </td>
 
-                  {/* AUTOR */}
+                  {/* RESPONSÁVEL */}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <WlAvatar name={authorName} size={22} />

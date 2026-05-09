@@ -236,7 +236,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
           </FormField>
 
           {isAdmin && (
-            <FormField label="Autor" error={errors.userId?.message}>
+            <FormField label="Responsável" error={errors.userId?.message}>
               <select {...register('userId')} className={selectCls} style={inputStyle}>
                 {(usersQ.data ?? []).map((u) => (
                   <option key={u.publicId} value={u.publicId ?? ''}>

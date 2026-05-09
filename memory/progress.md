@@ -10,6 +10,12 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — btw — Renomear todos os labels "Autor/AUTOR" → "Responsável/RESPONSÁVEL":
+  - `src/components/tickets/ticket-table.tsx` — comentário AUTOR → RESPONSÁVEL
+  - `src/components/tickets/ticket-form.tsx` — label "Autor" → "Responsável"
+  - `src/components/tickets/ticket-detail.tsx` — MetaItem label "AUTOR" → "RESPONSÁVEL"
+  - tsc ✓
+
 - [x] 2026-05-09 — Slice 6q — Animação slide-out do painel de detalhe:
   - `src/app/globals.css` — keyframes slide-out-to-right + fade-out-backdrop; classes animate-slide-out-to-right / animate-fade-out-backdrop
   - `src/components/tickets/ticket-detail.tsx` — isClosing state; handleClose() com setTimeout 230ms; painel/backdrop alternam classes entrada↔saída

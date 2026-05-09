@@ -184,7 +184,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                     {ticket?.system?.name ?? '—'}
                   </span>
                 </MetaItem>
-                <MetaItem label="AUTOR">
+                <MetaItem label="RESPONSÁVEL">
                   {ticket?.user ? (
                     <div className="flex items-center gap-1.5">
                       <WlAvatar name={ticket.user.name ?? ''} size={18} />
