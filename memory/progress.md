@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6o — Hover dos botões de status como pill de fundo:
+  - `src/components/tickets/ticket-detail.tsx` — hover:opacity-70 → hover:bg-white/10 + rounded + px/py padding (pill sutil)
+  - tsc ✓, lint ✓, visual evidence: slice-6o-status-hover-pill.{png,md}
+
 - [x] 2026-05-09 — Slice 6n — cursor-pointer em todos os elementos interativos:
   - `ticket-form.tsx`, `ticket-detail.tsx`, `ticket-table.tsx`, `tickets/page.tsx`, `recent-activity.tsx` — cursor-pointer adicionado a todos os botões e selects
   - tsc ✓, lint ✓

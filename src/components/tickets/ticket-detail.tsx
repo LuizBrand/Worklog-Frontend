@@ -216,7 +216,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                         key={status}
                         disabled={updateMut.isPending}
                         onClick={() => handleStatusChange(status)}
-                        className="cursor-pointer text-[12px] font-medium transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-35"
+                        className="cursor-pointer rounded px-1.5 py-0.5 text-[12px] font-medium transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
                         style={{ color: meta.color }}
                       >
                         {meta.label}
