@@ -95,14 +95,14 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40"
+        className="animate-fade-in-backdrop fixed inset-0 z-40"
         onClick={onClose}
         style={{ background: 'rgba(0,0,0,0.35)' }}
       />
 
       {/* Panel */}
       <div
-        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[560px]"
+        className="animate-slide-in-right fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[560px]"
         style={{
           background: 'var(--wl-surface)',
           borderLeft: '1px solid var(--wl-border)',

@@ -10,6 +10,11 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6p — Animação slide-in do painel de detalhe:
+  - `src/app/globals.css` — keyframes slide-in-from-right + fade-in-backdrop; classes .animate-slide-in-right / .animate-fade-in-backdrop
+  - `src/components/tickets/ticket-detail.tsx` — painel e backdrop recebem as classes de animação
+  - tsc ✓, visual evidence: slice-6p-panel-slide-in.md
+
 - [x] 2026-05-09 — Slice 6o — Hover dos botões de status como pill de fundo:
   - `src/components/tickets/ticket-detail.tsx` — hover:opacity-70 → hover:bg-white/10 + rounded + px/py padding (pill sutil)
   - tsc ✓, lint ✓, visual evidence: slice-6o-status-hover-pill.{png,md}
