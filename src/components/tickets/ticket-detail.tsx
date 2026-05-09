@@ -166,19 +166,19 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
               <Loader2 size={20} className="animate-spin" style={{ color: 'var(--wl-text-muted)' }} />
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="divide-y" style={{ '--tw-divide-color': 'var(--wl-border)' } as React.CSSProperties}>
               {/* ── Meta grid ── */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 pb-4">
                 <MetaItem label="STATUS">
                   {currentUiStatus && <StatusChip status={currentUiStatus} size="sm" />}
                 </MetaItem>
                 <MetaItem label="CLIENTE">
-                  <span className="text-[13px]" style={{ color: 'var(--wl-text)' }}>
+                  <span className="text-[13px] font-medium" style={{ color: 'var(--wl-text)' }}>
                     {ticket?.client?.name ?? '—'}
                   </span>
                 </MetaItem>
                 <MetaItem label="SISTEMA">
-                  <span className="text-[13px]" style={{ color: 'var(--primary)' }}>
+                  <span className="text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
                     {ticket?.system?.name ?? '—'}
                   </span>
                 </MetaItem>
@@ -207,14 +207,11 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
               </div>
 
               {/* ── Status change ── */}
-              <div>
-                <p
-                  className="mb-2 text-[11px] font-semibold uppercase tracking-wide"
-                  style={{ color: 'var(--wl-text-muted)' }}
-                >
-                  Mudar status:
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
+              <div className="py-4">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>
+                    Mudar status:
+                  </span>
                   {STATUS_BUTTONS.map(({ status, label }) => {
                     const isCancelled = status === 'CANCELLED'
                     const isActive = currentUiStatus === status
@@ -227,20 +224,13 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                         onClick={() =>
                           !isCancelled && handleStatusChange(status as UiWritableStatus)
                         }
-                        className="rounded px-2.5 py-1 text-[12px] font-medium transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
-                        style={
-                          isActive
-                            ? {
-                                background: meta.background,
-                                color: meta.color,
-                                border: `1px solid ${meta.color}55`,
-                              }
-                            : {
-                                background: 'var(--wl-surface-2)',
-                                color: 'var(--wl-text-muted)',
-                                border: '1px solid var(--wl-border)',
-                              }
-                        }
+                        className="text-[13px] transition-opacity disabled:cursor-not-allowed disabled:opacity-35 hover:opacity-70"
+                        style={{
+                          color: isCancelled ? 'var(--wl-text-muted)' : meta.color,
+                          fontWeight: isActive ? 700 : 500,
+                          textDecoration: isActive ? 'underline' : 'none',
+                          textUnderlineOffset: '3px',
+                        }}
                       >
                         {label}
                       </button>
@@ -248,7 +238,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                   })}
                   {updateMut.isPending && (
                     <Loader2
-                      size={14}
+                      size={13}
                       className="animate-spin"
                       style={{ color: 'var(--wl-text-muted)' }}
                     />
@@ -258,7 +248,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
 
               {/* ── Description ── */}
               {ticket?.description && (
-                <div>
+                <div className="py-4">
                   <SectionTitle>DESCRIÇÃO</SectionTitle>
                   <p
                     className="text-[13px] leading-relaxed"
@@ -270,7 +260,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
               )}
 
               {/* ── Activity ── */}
-              <div>
+              <div className="pt-4">
                 <SectionTitle>HISTÓRICO DE ALTERAÇÕES</SectionTitle>
                 {logsQ.isLoading ? (
                   <div className="flex justify-center py-4">

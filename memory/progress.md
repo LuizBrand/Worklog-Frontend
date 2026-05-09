@@ -10,6 +10,11 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6j — Detail panel: separadores + status texto colorido + ícones de atividade:
+  - `src/components/tickets/ticket-detail.tsx` — `divide-y` entre seções; status change como texto colorido (status color, bold+underline quando ativo, sem chip de fundo)
+  - `src/components/tickets/ticket-activity.tsx` — ícones tipados por campo (RefreshCw/status, AlignLeft/descrição, MessageSquare/nota, Type/título, User/usuário); badge circular colorido; nota com left-border block
+  - tsc ✓, lint ✓, visual evidence: slice-6j-detail-separators-activity.{png,md}
+
 - [x] 2026-05-09 — Slice 6i — SISTEMA sem azul; CLIENTE discretamente destacado:
   - `src/components/tickets/ticket-table.tsx` — SISTEMA: `var(--primary)` → `var(--wl-text-muted)`; CLIENTE: `font-medium` para leve destaque
   - tsc ✓, lint ✓, visual evidence: slice-6i-sistema-muted-cliente-bold.{png,md}
