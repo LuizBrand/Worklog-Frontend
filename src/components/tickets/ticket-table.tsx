@@ -116,14 +116,14 @@ export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: 
 
                   {/* CLIENTE */}
                   <td className="px-4 py-3">
-                    <span className="text-[13px]" style={{ color: 'var(--wl-text)' }}>
+                    <span className="text-[13px] font-medium" style={{ color: 'var(--wl-text)' }}>
                       {clientName}
                     </span>
                   </td>
 
                   {/* SISTEMA */}
                   <td className="px-4 py-3">
-                    <span className="text-[13px]" style={{ color: 'var(--primary)' }}>
+                    <span className="text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
                       {t.system?.name ?? '—'}
                     </span>
                   </td>

@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6i — SISTEMA sem azul; CLIENTE discretamente destacado:
+  - `src/components/tickets/ticket-table.tsx` — SISTEMA: `var(--primary)` → `var(--wl-text-muted)`; CLIENTE: `font-medium` para leve destaque
+  - tsc ✓, lint ✓, visual evidence: slice-6i-sistema-muted-cliente-bold.{png,md}
+
 - [x] 2026-05-09 — btw — Renomear coluna AUTOR → RESPONSÁVEL:
   - `src/components/tickets/ticket-table.tsx` — `COLS` array: `'AUTOR'` → `'RESPONSÁVEL'`
   - tsc ✓, lint ✓, visual evidence: slice-6h-responsavel-col.{png,md}
