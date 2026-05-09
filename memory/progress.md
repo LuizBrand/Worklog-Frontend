@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6f — Botão excluir vermelho:
+  - `src/components/tickets/ticket-detail.tsx` — ícone lixo e botão confirm trocados de `--status-open` (laranja) para `#e53e3e` (vermelho)
+  - tsc ✓, lint ✓, visual evidence: slice-6f-delete-red.{png,md}
+
 - [x] 2026-05-09 — Slice 6e — Ícone de status sem texto no header do painel:
   - `src/components/worklog/status-chip.tsx` — prop `iconOnly` (bool): renderiza quadrado 22×22 com ícone colorido + tooltip; refactor de UI puro (TDD-check exemption)
   - `src/components/tickets/ticket-detail.tsx` — usa `<StatusChip iconOnly />`; ícone atualiza automaticamente ao mudar status

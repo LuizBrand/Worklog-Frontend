@@ -142,7 +142,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
             <button
               onClick={() => setShowDeleteConfirm(true)}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
-              style={{ color: 'var(--status-open)' }}
+              style={{ color: '#e53e3e' }}
               aria-label="Excluir ticket"
               title="Excluir"
             >
@@ -348,7 +348,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                 onClick={() => deleteMut.mutate({ publicId })}
                 disabled={deleteMut.isPending}
                 className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold disabled:opacity-50"
-                style={{ background: 'var(--status-open)', color: '#fff' }}
+                style={{ background: '#e53e3e', color: '#fff' }}
               >
                 {deleteMut.isPending && <Loader2 size={13} className="animate-spin" />}
                 Excluir
