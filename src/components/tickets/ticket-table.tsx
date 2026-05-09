@@ -9,12 +9,7 @@ import type { ApiTicketStatus } from '@/lib/ticket-status'
 
 function fmtId(publicId: string | undefined): string {
   if (!publicId) return '—'
-  const dash = publicId.indexOf('-')
-  if (dash === -1) return publicId
-  const prefix = publicId.slice(0, dash)
-  const suffix = publicId.slice(dash + 1)
-  if (suffix.length <= 7) return publicId
-  return `${prefix}-···${suffix.slice(-5)}`
+  return publicId.slice(0, 6)
 }
 
 export interface TicketTableProps {
@@ -157,7 +152,7 @@ export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: 
                   >
                     <button
                       onClick={() => setOpenMenuId(isMenuOpen ? null : (t.publicId ?? null))}
-                      className="flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-opacity group-hover:opacity-100"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
                       style={{ color: 'var(--wl-text-muted)' }}
                       title="Ações"
                       aria-label="Ações do ticket"

@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6h — ID curto + botão ··· sempre visível:
+  - `src/components/tickets/ticket-table.tsx` — `fmtId` → `slice(0,6)`; botão ··· sempre visível (sem opacity-0/group-hover) + cursor-pointer
+  - tsc ✓, lint ✓, visual evidence: slice-6h-id-dots.{png,md}
+
 - [x] 2026-05-09 — Slice 6g — Menu de ações por linha (···):
   - `src/components/tickets/ticket-table.tsx` — coluna de ações com dropdown (Ver detalhes / Editar / Excluir); props `onEdit` e `onDelete`; TDD-check exemption: refactor de componente UI puro
   - `src/components/tickets/ticket-form.tsx` — `TicketEditFetcher` + `TicketDeleteDialog` standalone; TDD-check exemption: UI components sem test runner configurado
