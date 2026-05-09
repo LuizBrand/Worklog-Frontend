@@ -9,6 +9,7 @@ import { useFindAllClients } from '@/api/generated/clientes/clientes'
 import { TicketFiltersParamsStatus } from '@/api/generated/schemas'
 import { TicketTable } from '@/components/tickets/ticket-table'
 import { TicketDetail } from '@/components/tickets/ticket-detail'
+import { TicketCreateDialog } from '@/components/tickets/ticket-form'
 import type { PageTicketSummary } from '@/api/generated/schemas'
 import { STATUS_META } from '@/lib/worklog-meta'
 import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
@@ -34,6 +35,7 @@ export default function TicketsPage() {
   const selectedId = params.get('id') ?? ''
 
   const [searchInput, setSearchInput] = useState(q)
+  const [showCreate, setShowCreate] = useState(false)
   const routerRef = useRef(router)
 
   useEffect(() => { routerRef.current = router }, [router])
@@ -50,14 +52,13 @@ export default function TicketsPage() {
     return () => clearTimeout(timer)
   }, [searchInput])
 
-  // "/" focuses search
+  // "/" focuses search; "c" opens create dialog
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName
-      if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
-        e.preventDefault()
-        searchRef.current?.focus()
-      }
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (e.key === '/') { e.preventDefault(); searchRef.current?.focus() }
+      if (e.key === 'c' || e.key === 'C') { e.preventDefault(); setShowCreate(true) }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -165,10 +166,9 @@ export default function TicketsPage() {
 
         {/* + Novo */}
         <button
+          onClick={() => setShowCreate(true)}
           className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
           style={{ background: 'var(--primary)', color: '#fff' }}
-          disabled
-          title="Em breve"
         >
           + Novo
           <kbd
@@ -223,6 +223,9 @@ export default function TicketsPage() {
 
       {/* ── Detail panel ── */}
       {selectedId && <TicketDetail publicId={selectedId} onClose={closeDetail} />}
+
+      {/* ── Create dialog ── */}
+      {showCreate && <TicketCreateDialog onClose={() => setShowCreate(false)} />}
     </div>
   )
 }

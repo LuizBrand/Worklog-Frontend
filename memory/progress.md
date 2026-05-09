@@ -10,6 +10,13 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6 — Ticket create / edit / delete:
+  - `src/api/invalidate.ts` (new) — `invalidateTickets`, `invalidateTicket`, `invalidateTicketLogs` helpers using partial query-key matching
+  - `src/components/tickets/ticket-form.tsx` (new) — `TicketCreateDialog` (title, description, clientId, systemId selects; status=PENDING on submit) + `TicketEditDialog` (pre-fills title/description/solution); both use react-hook-form + zod/v3; Escape closes; toasts on success/error
+  - `src/components/tickets/ticket-detail.tsx` — added Pencil (edit) + Trash (delete) icon buttons in panel header; inline delete confirm overlay (z-60/70 above backdrop); `useDeleteTicket` mutation with invalidation; imports `TicketEditDialog`
+  - `src/app/(app)/tickets/page.tsx` — `showCreate` state; "+ Novo" button enabled + onClick; "C"/"c" keyboard shortcut opens create dialog; `<TicketCreateDialog>` rendered when showCreate
+  - tsc ✓, lint ✓, visual evidence: slice-6-ticket-create-edit.{png×5,md}
+
 - [x] 2026-05-04 — Slice 5 — Ticket detail panel:
   - `src/components/tickets/ticket-activity.tsx` — timeline de logs; renderiza STATUS (chips de/para), DESCRIPTION (diff verde/vermelho), SOLUTION/nota (texto), outros campos genéricos
   - `src/components/tickets/ticket-detail.tsx` — painel fixo direito (480px); header ID+StatusChip+título+X; meta grid 2-col; botões "Mudar status" (CANCELLED desabilitado); DESCRIÇÃO; TicketActivity; footer textarea+Salvar nota; backdrop fecha ao clicar; Esc fecha via keydown
@@ -95,6 +102,11 @@ changed but this file wasn't updated.
   is undefined during server pre-render. tsc ✓, lint ✓.
 - [x] 2026-05-01 — Confirmed Bug 2 (next-themes script tag / React 19) already
   addressed: `suppressHydrationWarning` present on `<html>` in `src/app/layout.tsx`.
+
+## TDD-check exemptions (slice 6 — ticket create / edit / delete)
+
+- `src/api/invalidate.ts` — pure wrappers around `qc.invalidateQueries`; no business logic. No test runner configured; behaviour is exercised indirectly by every mutation that calls these helpers.
+- `src/components/tickets/ticket-form.tsx` — UI form components; validated by tsc + visual evidence (create dialog, edit dialog pre-fill, toasts).
 
 ## TDD-check exemptions (slice 5 — ticket detail panel)
 

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, Pencil, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   useGetTicketByPublicId,
@@ -10,6 +11,7 @@ import {
   useGetTicketLogs,
   getGetTicketLogsQueryKey,
   useUpdateTicket,
+  useDeleteTicket,
 } from '@/api/generated/tickets/tickets'
 import { StatusChip, WlAvatar } from '@/components/worklog'
 import { apiToUiStatus, uiToApiStatus } from '@/lib/ticket-status'
@@ -17,6 +19,8 @@ import { STATUS_META, fmtDate } from '@/lib/worklog-meta'
 import type { PageTicketLogResponse } from '@/api/generated/schemas'
 import { TicketUpdateRequestStatus } from '@/api/generated/schemas'
 import type { ApiTicketStatus, UiWritableStatus } from '@/lib/ticket-status'
+import { invalidateTickets } from '@/api/invalidate'
+import { TicketEditDialog } from './ticket-form'
 import { TicketActivity } from './ticket-activity'
 
 // All status buttons shown in panel; CANCELLED is disabled (backend gap)
@@ -40,6 +44,8 @@ export interface TicketDetailProps {
 export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
   const qc = useQueryClient()
   const [note, setNote] = useState('')
+  const [showEdit, setShowEdit] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const ticketQ = useGetTicketByPublicId(publicId)
   // Cast: API declares return as TicketLogResponse but returns PageTicketLogResponse (schema swap gotcha)
@@ -54,6 +60,19 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
       onSuccess: () => {
         qc.invalidateQueries({ queryKey: getGetTicketByPublicIdQueryKey(publicId) })
         qc.invalidateQueries({ queryKey: getGetTicketLogsQueryKey(publicId) })
+      },
+    },
+  })
+
+  const deleteMut = useDeleteTicket({
+    mutation: {
+      onSuccess: () => {
+        invalidateTickets(qc)
+        toast.success('Ticket excluído')
+        onClose()
+      },
+      onError: () => {
+        toast.error('Erro ao excluir ticket')
       },
     },
   })
@@ -120,6 +139,28 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
           >
             {ticketQ.isLoading ? '…' : (ticket?.title ?? '(sem título)')}
           </h2>
+          {ticket && (
+            <button
+              onClick={() => setShowEdit(true)}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+              style={{ color: 'var(--wl-text-muted)' }}
+              aria-label="Editar ticket"
+              title="Editar"
+            >
+              <Pencil size={13} />
+            </button>
+          )}
+          {ticket && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+              style={{ color: 'var(--status-open)' }}
+              aria-label="Excluir ticket"
+              title="Excluir"
+            >
+              <Trash2 size={13} />
+            </button>
+          )}
           <button
             onClick={onClose}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
@@ -288,6 +329,51 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* ── Delete confirm ── */}
+      {showDeleteConfirm && (
+        <>
+          <div
+            className="fixed inset-0 z-[60]"
+            onClick={() => setShowDeleteConfirm(false)}
+            style={{ background: 'rgba(0,0,0,0.5)' }}
+          />
+          <div
+            className="fixed left-1/2 top-1/2 z-[70] w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl p-6 shadow-2xl"
+            style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
+          >
+            <h3 className="text-[15px] font-semibold" style={{ color: 'var(--wl-text)' }}>
+              Excluir ticket?
+            </h3>
+            <p className="mt-1 text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
+              Esta ação não pode ser desfeita.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="rounded-lg px-4 py-1.5 text-[13px] font-medium"
+                style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => deleteMut.mutate({ publicId })}
+                disabled={deleteMut.isPending}
+                className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold disabled:opacity-50"
+                style={{ background: 'var(--status-open)', color: '#fff' }}
+              >
+                {deleteMut.isPending && <Loader2 size={13} className="animate-spin" />}
+                Excluir
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Edit dialog ── */}
+      {showEdit && ticket && (
+        <TicketEditDialog ticket={ticket} onClose={() => setShowEdit(false)} />
+      )}
     </>
   )
 }
