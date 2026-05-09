@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — btw — Renomear coluna AUTOR → RESPONSÁVEL:
+  - `src/components/tickets/ticket-table.tsx` — `COLS` array: `'AUTOR'` → `'RESPONSÁVEL'`
+  - tsc ✓, lint ✓, visual evidence: slice-6h-responsavel-col.{png,md}
+
 - [x] 2026-05-09 — Slice 6h — ID curto + botão ··· sempre visível:
   - `src/components/tickets/ticket-table.tsx` — `fmtId` → `slice(0,6)`; botão ··· sempre visível (sem opacity-0/group-hover) + cursor-pointer
   - tsc ✓, lint ✓, visual evidence: slice-6h-id-dots.{png,md}

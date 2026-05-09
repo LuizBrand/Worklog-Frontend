@@ -20,7 +20,7 @@ export interface TicketTableProps {
   onDelete?: (publicId: string) => void
 }
 
-const COLS = ['ID', 'TÍTULO', 'STATUS', 'PRIORIDADE', 'CLIENTE', 'SISTEMA', 'AUTOR', 'ATUALIZADO'] as const
+const COLS = ['ID', 'TÍTULO', 'STATUS', 'PRIORIDADE', 'CLIENTE', 'SISTEMA', 'RESPONSÁVEL', 'ATUALIZADO'] as const
 
 export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: TicketTableProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
