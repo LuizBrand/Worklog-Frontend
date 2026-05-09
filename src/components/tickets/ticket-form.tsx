@@ -12,7 +12,7 @@ import { useCreateTicket, useUpdateTicket, useGetTicketByPublicId, useDeleteTick
 import { useFindAllClients } from '@/api/generated/clientes/clientes'
 import { useFindAllSystems } from '@/api/generated/sistemas/sistemas'
 import { useFindAllUsers } from '@/api/generated/usuários/usuários'
-import { TicketRequestStatus } from '@/api/generated/schemas'
+import { TicketRequestStatus, ClientFiltersParamsStatus } from '@/api/generated/schemas'
 import { invalidateTickets, invalidateTicket, invalidateTicketLogs } from '@/api/invalidate'
 import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
 import { STATUS_META } from '@/lib/worklog-meta'
@@ -138,7 +138,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
   const currentUser = useAuthStore((s) => s.user)
   const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
 
-  const clientsQ = useFindAllClients({ filtersParams: {} })
+  const clientsQ = useFindAllClients({ filtersParams: { status: ClientFiltersParamsStatus.ATIVO } })
   const systemsQ = useFindAllSystems()
   const usersQ = useFindAllUsers({ query: { enabled: isAdmin } })
 
