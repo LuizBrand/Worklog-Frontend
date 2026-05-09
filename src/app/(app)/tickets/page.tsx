@@ -169,7 +169,7 @@ export default function TicketsPage() {
         {/* + Novo */}
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
+          className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
           style={{ background: 'var(--primary)', color: '#fff' }}
         >
           + Novo
@@ -205,7 +205,7 @@ export default function TicketsPage() {
             <button
               disabled={page === 0}
               onClick={() => setParam('page', String(page - 1))}
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-opacity disabled:opacity-30 hover:bg-[var(--wl-surface-2)]"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-opacity disabled:opacity-30 hover:bg-[var(--wl-surface-2)]"
               style={{ color: 'var(--wl-text-muted)' }}
               aria-label="Página anterior"
             >
@@ -219,7 +219,7 @@ export default function TicketsPage() {
             <button
               disabled={page >= totalPages - 1}
               onClick={() => setParam('page', String(page + 1))}
-              className="flex h-7 w-7 items-center justify-center rounded-md transition-opacity disabled:opacity-30 hover:bg-[var(--wl-surface-2)]"
+              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-opacity disabled:opacity-30 hover:bg-[var(--wl-surface-2)]"
               style={{ color: 'var(--wl-text-muted)' }}
               aria-label="Próxima página"
             >
@@ -258,7 +258,7 @@ function FilterSelect({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-[34px] appearance-none rounded-lg py-0 pl-3 pr-8 text-[13px] outline-none transition-colors"
+        className="h-[34px] cursor-pointer appearance-none rounded-lg py-0 pl-3 pr-8 text-[13px] outline-none transition-colors"
         style={{
           background: 'var(--wl-surface-2)',
           border: '1px solid var(--wl-border)',

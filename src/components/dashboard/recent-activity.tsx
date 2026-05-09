@@ -54,7 +54,7 @@ export function RecentActivity({ tickets, loading }: RecentActivityProps) {
   const hasItems = !loading && tickets && tickets.length > 0
 
   const arrowBase =
-    'absolute top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full transition-all'
+    'absolute top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full transition-all'
   const arrowStyle = {
     background: 'var(--wl-surface)',
     color: 'var(--wl-text-muted)',

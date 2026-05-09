@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6n — cursor-pointer em todos os elementos interativos:
+  - `ticket-form.tsx`, `ticket-detail.tsx`, `ticket-table.tsx`, `tickets/page.tsx`, `recent-activity.tsx` — cursor-pointer adicionado a todos os botões e selects
+  - tsc ✓, lint ✓
+
 - [x] 2026-05-09 — Slice 6m — Painel mais largo + fonte de status equalizada:
   - `src/components/tickets/ticket-detail.tsx` — largura 480→560px; botões de status text-[13px]→text-[12px]
   - tsc ✓, visual evidence: slice-6m-panel-wider-status-font.{png,md}

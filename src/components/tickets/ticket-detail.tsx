@@ -125,7 +125,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
           {ticket && (
             <button
               onClick={() => setShowEdit(true)}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+              className="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
               style={{ color: 'var(--wl-text-muted)' }}
               aria-label="Editar ticket"
               title="Editar"
@@ -136,7 +136,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
           {ticket && (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+              className="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
               style={{ color: '#e53e3e' }}
               aria-label="Excluir ticket"
               title="Excluir"
@@ -146,7 +146,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
           )}
           <button
             onClick={onClose}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+            className="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
             style={{ color: 'var(--wl-text-muted)' }}
             aria-label="Fechar"
           >
@@ -216,7 +216,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                         key={status}
                         disabled={updateMut.isPending}
                         onClick={() => handleStatusChange(status)}
-                        className="text-[12px] font-medium transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-35"
+                        className="cursor-pointer text-[12px] font-medium transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-35"
                         style={{ color: meta.color }}
                       >
                         {meta.label}
@@ -291,7 +291,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
             <button
               onClick={handleSaveNote}
               disabled={!note.trim() || updateMut.isPending}
-              className="rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-40"
+              className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-40"
               style={{ background: 'var(--primary)', color: '#fff' }}
             >
               {updateMut.isPending ? 'Salvando…' : 'Salvar nota'}
@@ -321,7 +321,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="rounded-lg px-4 py-1.5 text-[13px] font-medium"
+                className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-medium"
                 style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
               >
                 Cancelar
@@ -329,7 +329,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
               <button
                 onClick={() => deleteMut.mutate({ publicId })}
                 disabled={deleteMut.isPending}
-                className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold disabled:opacity-50"
+                className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold disabled:opacity-50"
                 style={{ background: '#e53e3e', color: '#fff' }}
               >
                 {deleteMut.isPending && <Loader2 size={13} className="animate-spin" />}

@@ -87,7 +87,7 @@ function DialogCard({ children, onClose, title }: {
           </h2>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
             style={{ color: 'var(--wl-text-muted)' }}
             aria-label="Fechar"
           >
@@ -120,6 +120,7 @@ function FormField({ label, error, children }: {
 }
 
 const inputCls = 'w-full rounded-lg px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-[var(--wl-text-dim)] focus:ring-1 focus:ring-[var(--primary)]'
+const selectCls = `${inputCls} cursor-pointer`
 const inputStyle = {
   background: 'var(--wl-surface-2)',
   border: '1px solid var(--wl-border)',
@@ -202,7 +203,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <FormField label="Cliente *" error={errors.clientId?.message}>
-              <select {...register('clientId')} className={inputCls} style={inputStyle}>
+              <select {...register('clientId')} className={selectCls} style={inputStyle}>
                 <option value="">Selecionar...</option>
                 {(clientsQ.data ?? []).map((c) => (
                   <option key={c.publicId} value={c.publicId ?? ''}>
@@ -213,7 +214,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
             </FormField>
 
             <FormField label="Sistema *" error={errors.systemId?.message}>
-              <select {...register('systemId')} className={inputCls} style={inputStyle}>
+              <select {...register('systemId')} className={selectCls} style={inputStyle}>
                 <option value="">Selecionar...</option>
                 {(systemsQ.data ?? []).map((s) => (
                   <option key={s.publicId} value={s.publicId ?? ''}>
@@ -225,7 +226,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
           </div>
 
           <FormField label="Status" error={errors.status?.message}>
-            <select {...register('status')} className={inputCls} style={inputStyle}>
+            <select {...register('status')} className={selectCls} style={inputStyle}>
               {UI_STATUS_WRITABLE.map((ui) => (
                 <option key={ui} value={uiToApiStatus(ui as UiWritableStatus)}>
                   {STATUS_META[ui as UiWritableStatus].label}
@@ -236,7 +237,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
 
           {isAdmin && (
             <FormField label="Autor" error={errors.userId?.message}>
-              <select {...register('userId')} className={inputCls} style={inputStyle}>
+              <select {...register('userId')} className={selectCls} style={inputStyle}>
                 {(usersQ.data ?? []).map((u) => (
                   <option key={u.publicId} value={u.publicId ?? ''}>
                     {u.name ?? u.email}
@@ -250,7 +251,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+              className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
               style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
             >
               Cancelar
@@ -258,7 +259,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
             <button
               type="submit"
               disabled={createMut.isPending}
-              className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50"
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50"
               style={{ background: 'var(--primary)', color: '#fff' }}
             >
               {createMut.isPending && <Loader2 size={13} className="animate-spin" />}
@@ -357,7 +358,7 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+              className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
               style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
             >
               Cancelar
@@ -365,7 +366,7 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
             <button
               type="submit"
               disabled={updateMut.isPending}
-              className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50"
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50"
               style={{ background: 'var(--primary)', color: '#fff' }}
             >
               {updateMut.isPending && <Loader2 size={13} className="animate-spin" />}
@@ -434,7 +435,7 @@ export function TicketDeleteDialog({ publicId, onClose }: TicketDeleteDialogProp
         <div className="mt-5 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="rounded-lg px-4 py-1.5 text-[13px] font-medium"
+            className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-medium"
             style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
           >
             Cancelar
@@ -442,7 +443,7 @@ export function TicketDeleteDialog({ publicId, onClose }: TicketDeleteDialogProp
           <button
             onClick={() => deleteMut.mutate({ publicId })}
             disabled={deleteMut.isPending}
-            className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold disabled:opacity-50"
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold disabled:opacity-50"
             style={{ background: '#e53e3e', color: '#fff' }}
           >
             {deleteMut.isPending && <Loader2 size={13} className="animate-spin" />}
