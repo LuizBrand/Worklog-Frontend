@@ -23,14 +23,6 @@ const FIELD_ICON: Record<string, React.ComponentType<{ size?: number; strokeWidt
   user: User,
 }
 
-const FIELD_COLOR: Record<string, string> = {
-  status: 'var(--primary)',
-  description: '#8b5cf6',
-  solution: '#0ea5e9',
-  title: '#f59e0b',
-  user: '#10b981',
-}
-
 function logFieldLabel(fieldChanged: string | undefined): string {
   if (!fieldChanged) return 'campo'
   return FIELD_LABEL[fieldChanged] ?? fieldChanged
@@ -38,13 +30,12 @@ function logFieldLabel(fieldChanged: string | undefined): string {
 
 function TimelineIcon({ fieldChanged }: { fieldChanged: string | undefined }) {
   const Icon = (fieldChanged && FIELD_ICON[fieldChanged]) ? FIELD_ICON[fieldChanged] : Circle
-  const color = (fieldChanged && FIELD_COLOR[fieldChanged]) ? FIELD_COLOR[fieldChanged] : 'var(--wl-text-muted)'
   return (
     <div
       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-      style={{ background: `${color}18`, border: `1px solid ${color}40` }}
+      style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)' }}
     >
-      <Icon size={11} strokeWidth={2} style={{ color }} />
+      <Icon size={11} strokeWidth={2} style={{ color: 'var(--wl-text-muted)' }} />
     </div>
   )
 }

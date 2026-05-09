@@ -14,7 +14,7 @@ import {
   useDeleteTicket,
 } from '@/api/generated/tickets/tickets'
 import { StatusChip, WlAvatar } from '@/components/worklog'
-import { apiToUiStatus, uiToApiStatus } from '@/lib/ticket-status'
+import { apiToUiStatus, uiToApiStatus, UI_STATUS_WRITABLE } from '@/lib/ticket-status'
 import { STATUS_META, fmtDate } from '@/lib/worklog-meta'
 import type { PageTicketLogResponse } from '@/api/generated/schemas'
 import { TicketUpdateRequestStatus } from '@/api/generated/schemas'
@@ -23,13 +23,8 @@ import { invalidateTickets } from '@/api/invalidate'
 import { TicketEditDialog } from './ticket-form'
 import { TicketActivity } from './ticket-activity'
 
-// All status buttons shown in panel; CANCELLED is disabled (backend gap)
-const STATUS_BUTTONS: Array<{ status: UiWritableStatus | 'CANCELLED'; label: string }> = [
-  { status: 'OPEN', label: 'Aberto' },
-  { status: 'IN_PROGRESS', label: 'Em andamento' },
-  { status: 'RESOLVED', label: 'Resolvido' },
-  { status: 'CANCELLED', label: 'Cancelado' },
-]
+// All writable statuses available for switching (CANCELLED excluded — backend gap)
+const SWITCHABLE_STATUSES: readonly UiWritableStatus[] = UI_STATUS_WRITABLE
 
 
 export interface TicketDetailProps {
@@ -166,7 +161,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
               <Loader2 size={20} className="animate-spin" style={{ color: 'var(--wl-text-muted)' }} />
             </div>
           ) : (
-            <div className="divide-y" style={{ '--tw-divide-color': 'var(--wl-border)' } as React.CSSProperties}>
+            <div className="space-y-0">
               {/* ── Meta grid ── */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-3 pb-4">
                 <MetaItem label="STATUS">
@@ -206,33 +201,25 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                 </MetaItem>
               </div>
 
-              {/* ── Status change ── */}
+              <Divider />
+
+              {/* ── Status change — shows only statuses different from current ── */}
               <div className="py-4">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>
                     Mudar status:
                   </span>
-                  {STATUS_BUTTONS.map(({ status, label }) => {
-                    const isCancelled = status === 'CANCELLED'
-                    const isActive = currentUiStatus === status
-                    const meta = STATUS_META[status as keyof typeof STATUS_META]
-
+                  {SWITCHABLE_STATUSES.filter((s) => s !== currentUiStatus).map((status) => {
+                    const meta = STATUS_META[status]
                     return (
                       <button
                         key={status}
-                        disabled={isCancelled || updateMut.isPending}
-                        onClick={() =>
-                          !isCancelled && handleStatusChange(status as UiWritableStatus)
-                        }
-                        className="text-[13px] transition-opacity disabled:cursor-not-allowed disabled:opacity-35 hover:opacity-70"
-                        style={{
-                          color: isCancelled ? 'var(--wl-text-muted)' : meta.color,
-                          fontWeight: isActive ? 700 : 500,
-                          textDecoration: isActive ? 'underline' : 'none',
-                          textUnderlineOffset: '3px',
-                        }}
+                        disabled={updateMut.isPending}
+                        onClick={() => handleStatusChange(status)}
+                        className="text-[13px] font-medium transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-35"
+                        style={{ color: meta.color }}
                       >
-                        {label}
+                        {meta.label}
                       </button>
                     )
                   })}
@@ -248,16 +235,21 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
 
               {/* ── Description ── */}
               {ticket?.description && (
-                <div className="py-4">
-                  <SectionTitle>DESCRIÇÃO</SectionTitle>
-                  <p
-                    className="text-[13px] leading-relaxed"
-                    style={{ color: 'var(--wl-text)' }}
-                  >
-                    {ticket.description}
-                  </p>
-                </div>
+                <>
+                  <Divider />
+                  <div className="py-4">
+                    <SectionTitle>DESCRIÇÃO</SectionTitle>
+                    <p
+                      className="text-[13px] leading-relaxed"
+                      style={{ color: 'var(--wl-text)' }}
+                    >
+                      {ticket.description}
+                    </p>
+                  </div>
+                </>
               )}
+
+              <Divider />
 
               {/* ── Activity ── */}
               <div className="pt-4">
@@ -357,6 +349,15 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
+
+function Divider() {
+  return (
+    <div
+      className="-mx-5 h-px"
+      style={{ background: 'var(--wl-border)' }}
+    />
+  )
+}
 
 function MetaItem({ label, children }: { label: string; children: React.ReactNode }) {
   return (

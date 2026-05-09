@@ -10,6 +10,11 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6k — Status filter dinâmico, separadores full-width, ícones neutros na timeline:
+  - `src/components/tickets/ticket-detail.tsx` — `Divider` helper com `-mx-5`; status atual filtrado de `SWITCHABLE_STATUSES`; CANCELLED removido; AWAITING_DEV incluído via UI_STATUS_WRITABLE
+  - `src/components/tickets/ticket-activity.tsx` — badge de ícone com cor neutra (wl-surface-2/wl-border/wl-text-muted)
+  - tsc ✓, lint ✓, visual evidence: slice-6k-status-filter-dividers.{png,md}
+
 - [x] 2026-05-09 — Slice 6j — Detail panel: separadores + status texto colorido + ícones de atividade:
   - `src/components/tickets/ticket-detail.tsx` — `divide-y` entre seções; status change como texto colorido (status color, bold+underline quando ativo, sem chip de fundo)
   - `src/components/tickets/ticket-activity.tsx` — ícones tipados por campo (RefreshCw/status, AlignLeft/descrição, MessageSquare/nota, Type/título, User/usuário); badge circular colorido; nota com left-border block
