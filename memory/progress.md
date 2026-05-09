@@ -10,6 +10,11 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6q — Animação slide-out do painel de detalhe:
+  - `src/app/globals.css` — keyframes slide-out-to-right + fade-out-backdrop; classes animate-slide-out-to-right / animate-fade-out-backdrop
+  - `src/components/tickets/ticket-detail.tsx` — isClosing state; handleClose() com setTimeout 230ms; painel/backdrop alternam classes entrada↔saída
+  - tsc ✓, lint ✓, visual evidence: slice-6q-panel-slide-out.md
+
 - [x] 2026-05-09 — Slice 6p — Animação slide-in do painel de detalhe:
   - `src/app/globals.css` — keyframes slide-in-from-right + fade-in-backdrop; classes .animate-slide-in-right / .animate-fade-in-backdrop
   - `src/components/tickets/ticket-detail.tsx` — painel e backdrop recebem as classes de animação

@@ -202,17 +202,33 @@
   to   { transform: translateX(0); }
 }
 
+@keyframes slide-out-to-right {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
 @keyframes fade-in-backdrop {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes fade-out-backdrop {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 @layer utilities {
   .animate-slide-in-right {
     animation: slide-in-from-right 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
+  .animate-slide-out-to-right {
+    animation: slide-out-to-right 0.24s cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
   .animate-fade-in-backdrop {
     animation: fade-in-backdrop 0.2s ease both;
+  }
+  .animate-fade-out-backdrop {
+    animation: fade-out-backdrop 0.2s ease both;
   }
 }
 

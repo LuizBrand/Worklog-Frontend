@@ -37,6 +37,13 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
   const [note, setNote] = useState('')
   const [showEdit, setShowEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+
+  function handleClose() {
+    if (isClosing) return
+    setIsClosing(true)
+    setTimeout(onClose, 230)
+  }
 
   const ticketQ = useGetTicketByPublicId(publicId)
   // Cast: API declares return as TicketLogResponse but returns PageTicketLogResponse (schema swap gotcha)
@@ -95,14 +102,14 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
     <>
       {/* Backdrop */}
       <div
-        className="animate-fade-in-backdrop fixed inset-0 z-40"
-        onClick={onClose}
+        className={`fixed inset-0 z-40 ${isClosing ? 'animate-fade-out-backdrop' : 'animate-fade-in-backdrop'}`}
+        onClick={handleClose}
         style={{ background: 'rgba(0,0,0,0.35)' }}
       />
 
       {/* Panel */}
       <div
-        className="animate-slide-in-right fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[560px]"
+        className={`fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[560px] ${isClosing ? 'animate-slide-out-to-right' : 'animate-slide-in-right'}`}
         style={{
           background: 'var(--wl-surface)',
           borderLeft: '1px solid var(--wl-border)',
@@ -145,7 +152,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
             </button>
           )}
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
             style={{ color: 'var(--wl-text-muted)' }}
             aria-label="Fechar"
