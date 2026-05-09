@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6d — Remover ID do header do painel de detalhe:
+  - `src/components/tickets/ticket-detail.tsx` — shortId span + separador • removidos; função shortId deletada; header: StatusChip → título → ações
+  - tsc ✓, lint ✓, visual evidence: slice-6d-header-no-id.{png,md}
+
 - [x] 2026-05-09 — Slice 6c — Histórico de alterações atualiza após editar via edit dialog:
   - `src/components/tickets/ticket-form.tsx` — `TicketEditDialog.onSuccess` agora chama `invalidateTicketLogs(qc, ticket.publicId)`; histórico recarrega automaticamente após salvar título/descrição/solução
   - tsc ✓, lint ✓, visual evidence: slice-6c-edit-logs-refresh.{png,md}

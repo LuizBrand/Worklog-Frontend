@@ -31,10 +31,6 @@ const STATUS_BUTTONS: Array<{ status: UiWritableStatus | 'CANCELLED'; label: str
   { status: 'CANCELLED', label: 'Cancelado' },
 ]
 
-function shortId(publicId: string | undefined): string {
-  if (!publicId) return '—'
-  return publicId.slice(0, 8)
-}
 
 export interface TicketDetailProps {
   publicId: string
@@ -122,17 +118,8 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
           className="flex shrink-0 items-center gap-2 px-5 py-3"
           style={{ borderBottom: '1px solid var(--wl-border)' }}
         >
-          <span
-            className="shrink-0 font-mono text-[12px]"
-            style={{ color: 'var(--wl-text-muted)' }}
-          >
-            {shortId(ticket?.publicId)}
-          </span>
           {currentUiStatus && (
-            <>
-              <span style={{ color: 'var(--wl-border-2)' }}>•</span>
-              <StatusChip status={currentUiStatus} size="sm" />
-            </>
+            <StatusChip status={currentUiStatus} size="sm" />
           )}
           <h2
             className="min-w-0 flex-1 truncate text-[14px] font-semibold"
