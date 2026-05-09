@@ -102,7 +102,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
 
       {/* Panel */}
       <div
-        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[480px]"
+        className="fixed inset-y-0 right-0 z-50 flex w-full flex-col sm:w-[560px]"
         style={{
           background: 'var(--wl-surface)',
           borderLeft: '1px solid var(--wl-border)',
@@ -216,7 +216,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                         key={status}
                         disabled={updateMut.isPending}
                         onClick={() => handleStatusChange(status)}
-                        className="text-[13px] font-medium transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-35"
+                        className="text-[12px] font-medium transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-35"
                         style={{ color: meta.color }}
                       >
                         {meta.label}

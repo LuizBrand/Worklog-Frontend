@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6m — Painel mais largo + fonte de status equalizada:
+  - `src/components/tickets/ticket-detail.tsx` — largura 480→560px; botões de status text-[13px]→text-[12px]
+  - tsc ✓, visual evidence: slice-6m-panel-wider-status-font.{png,md}
+
 - [x] 2026-05-09 — Slice 6l — Destaque visual para notas no histórico:
   - `src/components/tickets/ticket-activity.tsx` — entradas `solution` renderizadas como card destacado (tint azul, borda esquerda 3px, header NOTA com ícone)
   - tsc ✓, lint ✓, visual evidence: slice-6l-note-highlight.{png,md}
