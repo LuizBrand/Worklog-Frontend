@@ -4,11 +4,31 @@ import { cn } from '@/lib/utils'
 export interface StatusChipProps {
   status: TicketStatus
   size?: 'sm' | 'md'
+  iconOnly?: boolean
   className?: string
 }
 
-export function StatusChip({ status, size = 'md', className }: StatusChipProps) {
+export function StatusChip({ status, size = 'md', iconOnly = false, className }: StatusChipProps) {
   const meta = STATUS_META[status]
+  const iconSize = size === 'sm' ? 10 : 11
+
+  if (iconOnly) {
+    return (
+      <span
+        className={cn('inline-flex shrink-0 items-center justify-center rounded', className)}
+        style={{
+          background: meta.background,
+          color: meta.color,
+          width: 22,
+          height: 22,
+        }}
+        title={meta.label}
+      >
+        <meta.icon aria-hidden strokeWidth={2} style={{ width: 12, height: 12 }} />
+      </span>
+    )
+  }
+
   const padding = size === 'sm' ? '2px 7px' : '3px 9px'
   const fontSize = size === 'sm' ? 11 : 12
 
@@ -30,7 +50,7 @@ export function StatusChip({ status, size = 'md', className }: StatusChipProps) 
       <meta.icon
         aria-hidden
         strokeWidth={2}
-        style={{ width: size === 'sm' ? 10 : 11, height: size === 'sm' ? 10 : 11, flexShrink: 0 }}
+        style={{ width: iconSize, height: iconSize, flexShrink: 0 }}
       />
       {meta.label}
     </span>

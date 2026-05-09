@@ -10,6 +10,11 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6e — Ícone de status sem texto no header do painel:
+  - `src/components/worklog/status-chip.tsx` — prop `iconOnly` (bool): renderiza quadrado 22×22 com ícone colorido + tooltip; refactor de UI puro (TDD-check exemption)
+  - `src/components/tickets/ticket-detail.tsx` — usa `<StatusChip iconOnly />`; ícone atualiza automaticamente ao mudar status
+  - tsc ✓, lint ✓, visual evidence: slice-6e-icon-only-status.{png×2,md}
+
 - [x] 2026-05-09 — Slice 6d — Remover ID do header do painel de detalhe:
   - `src/components/tickets/ticket-detail.tsx` — shortId span + separador • removidos; função shortId deletada; header: StatusChip → título → ações
   - tsc ✓, lint ✓, visual evidence: slice-6d-header-no-id.{png,md}

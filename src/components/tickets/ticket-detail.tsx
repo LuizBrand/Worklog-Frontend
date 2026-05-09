@@ -119,7 +119,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
           style={{ borderBottom: '1px solid var(--wl-border)' }}
         >
           {currentUiStatus && (
-            <StatusChip status={currentUiStatus} size="sm" />
+            <StatusChip status={currentUiStatus} iconOnly />
           )}
           <h2
             className="min-w-0 flex-1 truncate text-[14px] font-semibold"
