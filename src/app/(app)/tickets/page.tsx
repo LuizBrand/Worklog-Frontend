@@ -9,7 +9,7 @@ import { useFindAllClients } from '@/api/generated/clientes/clientes'
 import { TicketFiltersParamsStatus } from '@/api/generated/schemas'
 import { TicketTable } from '@/components/tickets/ticket-table'
 import { TicketDetail } from '@/components/tickets/ticket-detail'
-import { TicketCreateDialog } from '@/components/tickets/ticket-form'
+import { TicketCreateDialog, TicketEditFetcher, TicketDeleteDialog } from '@/components/tickets/ticket-form'
 import type { PageTicketSummary } from '@/api/generated/schemas'
 import { STATUS_META } from '@/lib/worklog-meta'
 import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
@@ -36,6 +36,8 @@ export default function TicketsPage() {
 
   const [searchInput, setSearchInput] = useState(q)
   const [showCreate, setShowCreate] = useState(false)
+  const [editId, setEditId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const routerRef = useRef(router)
 
   useEffect(() => { routerRef.current = router }, [router])
@@ -181,7 +183,13 @@ export default function TicketsPage() {
       </div>
 
       {/* ── Table ── */}
-      <TicketTable tickets={tickets} loading={ticketsQ.isLoading} onRowClick={openDetail} />
+      <TicketTable
+        tickets={tickets}
+        loading={ticketsQ.isLoading}
+        onRowClick={openDetail}
+        onEdit={(id) => setEditId(id)}
+        onDelete={(id) => setDeleteId(id)}
+      />
 
       {/* ── Pagination ── */}
       {!ticketsQ.isLoading && totalPages > 1 && (
@@ -226,6 +234,10 @@ export default function TicketsPage() {
 
       {/* ── Create dialog ── */}
       {showCreate && <TicketCreateDialog onClose={() => setShowCreate(false)} />}
+
+      {/* ── Edit / Delete from row menu ── */}
+      {editId && <TicketEditFetcher publicId={editId} onClose={() => setEditId(null)} />}
+      {deleteId && <TicketDeleteDialog publicId={deleteId} onClose={() => setDeleteId(null)} />}
     </div>
   )
 }

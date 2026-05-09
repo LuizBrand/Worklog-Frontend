@@ -10,6 +10,12 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6g — Menu de ações por linha (···):
+  - `src/components/tickets/ticket-table.tsx` — coluna de ações com dropdown (Ver detalhes / Editar / Excluir); props `onEdit` e `onDelete`; TDD-check exemption: refactor de componente UI puro
+  - `src/components/tickets/ticket-form.tsx` — `TicketEditFetcher` + `TicketDeleteDialog` standalone; TDD-check exemption: UI components sem test runner configurado
+  - `src/app/(app)/tickets/page.tsx` — estados `editId`/`deleteId`; wiring dos novos dialogs
+  - tsc ✓, lint ✓, visual evidence: slice-6g-row-action-menu.{png×2,md}
+
 - [x] 2026-05-09 — Slice 6f — Botão excluir vermelho:
   - `src/components/tickets/ticket-detail.tsx` — ícone lixo e botão confirm trocados de `--status-open` (laranja) para `#e53e3e` (vermelho)
   - tsc ✓, lint ✓, visual evidence: slice-6f-delete-red.{png,md}

@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react'
+
 import { StatusChip, WlAvatar, EmptyState } from '@/components/worklog'
 import { apiToUiStatus } from '@/lib/ticket-status'
 import { fmtDateTime } from '@/lib/worklog-meta'
@@ -18,11 +21,17 @@ export interface TicketTableProps {
   tickets: TicketSummary[]
   loading?: boolean
   onRowClick?: (publicId: string) => void
+  onEdit?: (publicId: string) => void
+  onDelete?: (publicId: string) => void
 }
 
 const COLS = ['ID', 'TÍTULO', 'STATUS', 'PRIORIDADE', 'CLIENTE', 'SISTEMA', 'AUTOR', 'ATUALIZADO'] as const
 
-export function TicketTable({ tickets, loading, onRowClick }: TicketTableProps) {
+export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: TicketTableProps) {
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+
+  function closeMenu() { setOpenMenuId(null) }
+
   return (
     <div className="scroll-hide flex-1 overflow-y-auto">
       <table className="w-full border-collapse">
@@ -37,6 +46,8 @@ export function TicketTable({ tickets, loading, onRowClick }: TicketTableProps) 
                 {col}
               </th>
             ))}
+            {/* Actions column */}
+            <th className="w-10 px-2 py-2.5" />
           </tr>
         </thead>
 
@@ -52,12 +63,13 @@ export function TicketTable({ tickets, loading, onRowClick }: TicketTableProps) 
                     />
                   </td>
                 ))}
+                <td className="px-2 py-3" />
               </tr>
             ))}
 
           {!loading && tickets.length === 0 && (
             <tr>
-              <td colSpan={COLS.length} className="px-4 py-16 text-center">
+              <td colSpan={COLS.length + 1} className="px-4 py-16 text-center">
                 <EmptyState title="Nenhum ticket" description="Nenhum ticket encontrado para os filtros aplicados." />
               </td>
             </tr>
@@ -68,6 +80,7 @@ export function TicketTable({ tickets, loading, onRowClick }: TicketTableProps) 
               const uiStatus = t.status ? apiToUiStatus(t.status as ApiTicketStatus) : 'OPEN'
               const clientName = t.client?.name ?? '—'
               const authorName = t.user?.name ?? '—'
+              const isMenuOpen = openMenuId === t.publicId
 
               return (
                 <tr
@@ -136,11 +149,86 @@ export function TicketTable({ tickets, loading, onRowClick }: TicketTableProps) 
                       {fmtDateTime(t.updatedAt)}
                     </span>
                   </td>
+
+                  {/* AÇÕES */}
+                  <td
+                    className="relative px-2 py-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => setOpenMenuId(isMenuOpen ? null : (t.publicId ?? null))}
+                      className="flex h-7 w-7 items-center justify-center rounded-md opacity-0 transition-opacity group-hover:opacity-100"
+                      style={{ color: 'var(--wl-text-muted)' }}
+                      title="Ações"
+                      aria-label="Ações do ticket"
+                    >
+                      <MoreHorizontal size={15} />
+                    </button>
+
+                    {isMenuOpen && (
+                      <>
+                        {/* Click-away overlay */}
+                        <div className="fixed inset-0 z-10" onClick={closeMenu} />
+
+                        {/* Dropdown */}
+                        <div
+                          className="absolute right-0 top-full z-20 mt-1 min-w-[160px] overflow-hidden rounded-lg py-1 shadow-lg"
+                          style={{
+                            background: 'var(--wl-surface)',
+                            border: '1px solid var(--wl-border)',
+                          }}
+                        >
+                          <MenuItem
+                            icon={<Eye size={13} />}
+                            label="Ver detalhes"
+                            onClick={() => { closeMenu(); if (t.publicId) onRowClick?.(t.publicId) }}
+                          />
+                          <MenuItem
+                            icon={<Pencil size={13} />}
+                            label="Editar"
+                            onClick={() => { closeMenu(); if (t.publicId) onEdit?.(t.publicId) }}
+                          />
+                          <div style={{ height: 1, background: 'var(--wl-border)', margin: '4px 0' }} />
+                          <MenuItem
+                            icon={<Trash2 size={13} />}
+                            label="Excluir"
+                            danger
+                            onClick={() => { closeMenu(); if (t.publicId) onDelete?.(t.publicId) }}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </td>
                 </tr>
               )
             })}
         </tbody>
       </table>
     </div>
+  )
+}
+
+// ── Internal helpers ──────────────────────────────────────────────────────────
+
+function MenuItem({
+  icon,
+  label,
+  danger,
+  onClick,
+}: {
+  icon: React.ReactNode
+  label: string
+  danger?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-2.5 px-3 py-2 text-[13px] transition-colors hover:bg-[var(--wl-surface-2)]"
+      style={{ color: danger ? '#e53e3e' : 'var(--wl-text)' }}
+    >
+      {icon}
+      {label}
+    </button>
   )
 }

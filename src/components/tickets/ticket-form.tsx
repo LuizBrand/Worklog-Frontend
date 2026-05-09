@@ -8,7 +8,7 @@ import { X, Loader2 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import { useCreateTicket, useUpdateTicket } from '@/api/generated/tickets/tickets'
+import { useCreateTicket, useUpdateTicket, useGetTicketByPublicId, useDeleteTicket } from '@/api/generated/tickets/tickets'
 import { useFindAllClients } from '@/api/generated/clientes/clientes'
 import { useFindAllSystems } from '@/api/generated/sistemas/sistemas'
 import { useFindAllUsers } from '@/api/generated/usuários/usuários'
@@ -273,6 +273,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
 
 // ── Edit dialog ───────────────────────────────────────────────────────────────
 
+
 export interface TicketEditDialogProps {
   ticket: TicketResponse
   onClose: () => void
@@ -373,6 +374,82 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
           </div>
         </form>
       </DialogCard>
+    </>
+  )
+}
+
+// ── Edit fetcher (opens edit dialog by publicId) ──────────────────────────────
+
+export interface TicketEditFetcherProps {
+  publicId: string
+  onClose: () => void
+}
+
+export function TicketEditFetcher({ publicId, onClose }: TicketEditFetcherProps) {
+  const ticketQ = useGetTicketByPublicId(publicId)
+  if (!ticketQ.data) return null
+  return <TicketEditDialog ticket={ticketQ.data} onClose={onClose} />
+}
+
+// ── Standalone delete confirm dialog ─────────────────────────────────────────
+
+export interface TicketDeleteDialogProps {
+  publicId: string
+  onClose: () => void
+}
+
+export function TicketDeleteDialog({ publicId, onClose }: TicketDeleteDialogProps) {
+  const qc = useQueryClient()
+
+  const deleteMut = useDeleteTicket({
+    mutation: {
+      onSuccess: () => {
+        invalidateTickets(qc)
+        toast.success('Ticket excluído')
+        onClose()
+      },
+      onError: () => {
+        toast.error('Erro ao excluir ticket')
+      },
+    },
+  })
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-40"
+        onClick={onClose}
+        style={{ background: 'rgba(0,0,0,0.45)' }}
+      />
+      <div
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl p-6 shadow-2xl"
+        style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
+      >
+        <h3 className="text-[15px] font-semibold" style={{ color: 'var(--wl-text)' }}>
+          Excluir ticket?
+        </h3>
+        <p className="mt-1 text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
+          Esta ação não pode ser desfeita.
+        </p>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-lg px-4 py-1.5 text-[13px] font-medium"
+            style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={() => deleteMut.mutate({ publicId })}
+            disabled={deleteMut.isPending}
+            className="flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-semibold disabled:opacity-50"
+            style={{ background: '#e53e3e', color: '#fff' }}
+          >
+            {deleteMut.isPending && <Loader2 size={13} className="animate-spin" />}
+            Excluir
+          </button>
+        </div>
+      </div>
     </>
   )
 }
