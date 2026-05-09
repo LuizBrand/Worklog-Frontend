@@ -13,7 +13,7 @@ import { useFindAllClients } from '@/api/generated/clientes/clientes'
 import { useFindAllSystems } from '@/api/generated/sistemas/sistemas'
 import { useFindAllUsers } from '@/api/generated/usuários/usuários'
 import { TicketRequestStatus } from '@/api/generated/schemas'
-import { invalidateTickets, invalidateTicket } from '@/api/invalidate'
+import { invalidateTickets, invalidateTicket, invalidateTicketLogs } from '@/api/invalidate'
 import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
 import { STATUS_META } from '@/lib/worklog-meta'
 import { useAuthStore } from '@/state/auth'
@@ -295,6 +295,7 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
       onSuccess: () => {
         if (ticket.publicId) {
           invalidateTicket(qc, ticket.publicId)
+          invalidateTicketLogs(qc, ticket.publicId)
           invalidateTickets(qc)
         }
         toast.success('Ticket atualizado')

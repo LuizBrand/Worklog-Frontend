@@ -10,6 +10,10 @@ changed but this file wasn't updated.
 
 <!-- nothing in progress -->
 
+- [x] 2026-05-09 — Slice 6c — Histórico de alterações atualiza após editar via edit dialog:
+  - `src/components/tickets/ticket-form.tsx` — `TicketEditDialog.onSuccess` agora chama `invalidateTicketLogs(qc, ticket.publicId)`; histórico recarrega automaticamente após salvar título/descrição/solução
+  - tsc ✓, lint ✓, visual evidence: slice-6c-edit-logs-refresh.{png,md}
+
 - [x] 2026-05-09 — Slice 6b — Create form + status live update fixes:
   - `src/components/tickets/ticket-detail.tsx` — `updateMut.onSuccess` agora chama `invalidateTickets(qc)`: tabela atualiza automaticamente ao mudar status no painel
   - `src/components/tickets/ticket-form.tsx` — `createSchema` + `userId`/`status`; `TicketCreateDialog` com select de status (padrão PENDING/Aberto) e select de autor visível apenas para ADMIN (pré-selecionado com usuário logado; não-admin não vê o campo, userId do store enviado silenciosamente)
