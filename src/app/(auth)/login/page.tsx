@@ -20,17 +20,23 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Senha obrigatória'),
 })
 
-const registerSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  email: z.string().email('E-mail inválido'),
-  password: z
-    .string()
-    .min(8, 'Senha deve ter pelo menos 8 caracteres')
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-      'Senha deve conter letras maiúsculas, minúsculas e números',
-    ),
-})
+const registerSchema = z
+  .object({
+    name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+    email: z.string().email('E-mail inválido'),
+    password: z
+      .string()
+      .min(8, 'Senha deve ter pelo menos 8 caracteres')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
+        'Senha deve conter letras maiúsculas, minúsculas e números',
+      ),
+    confirmPassword: z.string().min(1, 'Confirme sua senha'),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: 'As senhas não coincidem',
+    path: ['confirmPassword'],
+  })
 
 type LoginValues = z.infer<typeof loginSchema>
 type RegisterValues = z.infer<typeof registerSchema>
@@ -83,7 +89,7 @@ export default function LoginPage() {
     formState: { errors: regErrors },
   } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: '', email: '', password: '' },
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
   })
 
   const { mutate: login, isPending: isLoginPending } = useLogin({
@@ -93,6 +99,9 @@ export default function LoginPage() {
         setTokens(data.acessToken, data.refreshToken)
         router.replace('/dashboard')
       },
+      onError() {
+        toast.error('E-mail ou senha inválidos')
+      },
     },
   })
 
@@ -101,7 +110,15 @@ export default function LoginPage() {
       onSuccess() {
         toast.success('Conta criada! Faça login para continuar.')
         regReset()
-        setTab('login')
+        switchTab('login')
+      },
+      onError(err: unknown) {
+        const status = (err as { response?: { status?: number } })?.response?.status
+        if (status === 409) {
+          toast.error('Este e-mail já está cadastrado')
+        } else {
+          toast.error('Erro ao criar conta. Tente novamente.')
+        }
       },
     },
   })
@@ -176,7 +193,7 @@ export default function LoginPage() {
       ) : (
         <form
           key="register"
-          onSubmit={regSubmit((v) => doRegister({ data: v }))}
+          onSubmit={regSubmit(({ confirmPassword: _, ...v }) => doRegister({ data: v }))}
           className={`space-y-4 ${direction === 'right' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}
         >
           <div>
@@ -219,6 +236,20 @@ export default function LoginPage() {
               {...regRegister('password')}
             />
             <FieldError msg={regErrors.password?.message} />
+          </div>
+
+          <div>
+            <FieldLabel htmlFor="reg-confirm">Confirmar senha</FieldLabel>
+            <input
+              id="reg-confirm"
+              type="password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              className={inputCls}
+              style={inputStyle}
+              {...regRegister('confirmPassword')}
+            />
+            <FieldError msg={regErrors.confirmPassword?.message} />
           </div>
 
           <Button type="submit" size="lg" className="w-full" disabled={isRegisterPending}>

@@ -8,6 +8,11 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-09 — fix — Auth/login: segurança — onError + confirmPassword — tsc ✓, lint ✓, visual: login-security-fix.md:
+  - `src/app/(auth)/login/page.tsx` — onError no login (toast "E-mail ou senha inválidos")
+  - `src/app/(auth)/login/page.tsx` — onError no registro (409 = e-mail duplicado; genérico para outros)
+  - `src/app/(auth)/login/page.tsx` — campo confirmPassword adicionado com refine de igualdade; excluído do payload da API
+
 - [x] 2026-05-09 — fix — Auth/login: inputs não digitavam + animação de troca de aba — tsc ✓, lint ✓:
   - `src/app/(auth)/login/page.tsx` — reescrito usando register() direto (sem Slot/FormControl); corrige inputs bloqueados no React 19 + RHF 7.73
   - `src/app/(auth)/login/page.tsx` — animação direcional slide+fade ao trocar entre Entrar ↔ Criar conta
