@@ -17,6 +17,7 @@ import { invalidateTickets, invalidateTicket, invalidateTicketLogs } from '@/api
 import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
 import { STATUS_META } from '@/lib/worklog-meta'
 import { useAuthStore } from '@/state/auth'
+import { FilterSelect, ClientCombobox } from '@/components/worklog'
 import type { TicketResponse } from '@/api/generated/schemas'
 import type { UiWritableStatus } from '@/lib/ticket-status'
 
@@ -142,7 +143,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
   const systemsQ = useFindAllSystems()
   const usersQ = useFindAllUsers({ query: { enabled: isAdmin } })
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateValues>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CreateValues>({
     resolver: zodResolver(createSchema),
     defaultValues: {
       status: TicketRequestStatus.PENDING,
@@ -203,47 +204,49 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <FormField label="Cliente *" error={errors.clientId?.message}>
-              <select {...register('clientId')} className={selectCls} style={inputStyle}>
-                <option value="">Selecionar...</option>
-                {(clientsQ.data ?? []).filter((c) => c.enabled !== false).map((c) => (
-                  <option key={c.publicId} value={c.publicId ?? ''}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <ClientCombobox
+                className="w-full"
+                value={watch('clientId') ?? ''}
+                onChange={(v) => setValue('clientId', v, { shouldValidate: true })}
+                options={(clientsQ.data ?? []).filter((c) => c.enabled !== false).map((c) => ({ value: c.publicId ?? '', label: c.name ?? '' }))}
+                emptyLabel="Selecionar..."
+              />
             </FormField>
 
             <FormField label="Sistema *" error={errors.systemId?.message}>
-              <select {...register('systemId')} className={selectCls} style={inputStyle}>
-                <option value="">Selecionar...</option>
-                {(systemsQ.data ?? []).map((s) => (
-                  <option key={s.publicId} value={s.publicId ?? ''}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              <FilterSelect
+                className="w-full"
+                value={watch('systemId') ?? ''}
+                onChange={(v) => setValue('systemId', v, { shouldValidate: true })}
+                options={[
+                  { value: '', label: 'Selecionar...' },
+                  ...(systemsQ.data ?? []).map((s) => ({ value: s.publicId ?? '', label: s.name ?? '' })),
+                ]}
+              />
             </FormField>
           </div>
 
           <FormField label="Status" error={errors.status?.message}>
-            <select {...register('status')} className={selectCls} style={inputStyle}>
-              {UI_STATUS_WRITABLE.map((ui) => (
-                <option key={ui} value={uiToApiStatus(ui as UiWritableStatus)}>
-                  {STATUS_META[ui as UiWritableStatus].label}
-                </option>
-              ))}
-            </select>
+            <FilterSelect
+              className="w-full"
+              value={watch('status') ?? ''}
+              onChange={(v) => setValue('status', v, { shouldValidate: true })}
+              options={UI_STATUS_WRITABLE.map((ui) => ({
+                value: uiToApiStatus(ui as UiWritableStatus),
+                label: STATUS_META[ui as UiWritableStatus].label,
+              }))}
+            />
           </FormField>
 
           {isAdmin && (
             <FormField label="Responsável" error={errors.userId?.message}>
-              <select {...register('userId')} className={selectCls} style={inputStyle}>
-                {(usersQ.data ?? []).map((u) => (
-                  <option key={u.publicId} value={u.publicId ?? ''}>
-                    {u.name ?? u.email}
-                  </option>
-                ))}
-              </select>
+              <ClientCombobox
+                className="w-full"
+                value={watch('userId') ?? ''}
+                onChange={(v) => setValue('userId', v, { shouldValidate: true })}
+                options={(usersQ.data ?? []).map((u) => ({ value: u.publicId ?? '', label: u.name ?? u.email ?? '' }))}
+                emptyLabel="Selecionar..."
+              />
             </FormField>
           )}
 

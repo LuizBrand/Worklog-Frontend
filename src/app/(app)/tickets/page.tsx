@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { useFindAllTickets } from '@/api/generated/tickets/tickets'
 import { useFindAllClients } from '@/api/generated/clientes/clientes'
@@ -10,6 +10,7 @@ import { TicketFiltersParamsStatus } from '@/api/generated/schemas'
 import { TicketTable } from '@/components/tickets/ticket-table'
 import { TicketDetail } from '@/components/tickets/ticket-detail'
 import { TicketCreateDialog, TicketEditFetcher, TicketDeleteDialog } from '@/components/tickets/ticket-form'
+import { FilterSelect, ClientCombobox } from '@/components/worklog'
 import type { PageTicketSummary } from '@/api/generated/schemas'
 import { STATUS_META } from '@/lib/worklog-meta'
 import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
@@ -118,7 +119,7 @@ export default function TicketsPage() {
     <div className="flex h-full flex-col">
       {/* ── Page header ── */}
       <div
-        className="flex shrink-0 items-center gap-3 px-6 py-3"
+        className="flex h-[52px] shrink-0 items-center gap-3 px-6"
         style={{ borderBottom: '1px solid var(--wl-border)' }}
       >
         <h1 className="text-[18px] font-semibold" style={{ color: 'var(--wl-text)' }}>
@@ -148,23 +149,15 @@ export default function TicketsPage() {
         </div>
 
         {/* Status filter */}
-        <FilterSelect value={status} onChange={(v) => setParam('status', v)}>
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </FilterSelect>
+        <FilterSelect value={status} onChange={(v) => setParam('status', v)} options={STATUS_OPTIONS} />
 
         {/* Client filter */}
-        <FilterSelect value={clientId} onChange={(v) => setParam('clientId', v)}>
-          <option value="">Todos clientes</option>
-          {(clientsQ.data ?? []).map((c) => (
-            <option key={c.publicId} value={c.publicId ?? ''}>
-              {c.name}
-            </option>
-          ))}
-        </FilterSelect>
+        <ClientCombobox
+          value={clientId}
+          onChange={(v) => setParam('clientId', v)}
+          options={(clientsQ.data ?? []).map((c) => ({ value: c.publicId ?? '', label: c.name ?? '' }))}
+          emptyLabel="Todos clientes"
+        />
 
         {/* + Novo */}
         <button
@@ -238,40 +231,6 @@ export default function TicketsPage() {
       {/* ── Edit / Delete from row menu ── */}
       {editId && <TicketEditFetcher publicId={editId} onClose={() => setEditId(null)} />}
       {deleteId && <TicketDeleteDialog publicId={deleteId} onClose={() => setDeleteId(null)} />}
-    </div>
-  )
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function FilterSelect({
-  value,
-  onChange,
-  children,
-}: {
-  value: string
-  onChange: (v: string) => void
-  children: React.ReactNode
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-[34px] cursor-pointer appearance-none rounded-lg py-0 pl-3 pr-8 text-[13px] outline-none transition-colors"
-        style={{
-          background: 'var(--wl-surface-2)',
-          border: '1px solid var(--wl-border)',
-          color: value ? 'var(--wl-text)' : 'var(--wl-text-muted)',
-        }}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        size={14}
-        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2"
-        style={{ color: 'var(--wl-text-muted)' }}
-      />
     </div>
   )
 }

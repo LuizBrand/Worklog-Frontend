@@ -15,7 +15,6 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'tickets',   label: 'Tickets',   href: '/tickets',   icon: Ticket },
   { id: 'clientes',  label: 'Clientes',  href: '/clientes',  icon: Users },
   { id: 'sistemas',  label: 'Sistemas',  href: '/sistemas',  icon: Layers },
-  { id: 'perfil',    label: 'Perfil',    href: '/perfil',    icon: User },
   {
     id: 'usuarios',
     label: 'Usuários',
@@ -24,4 +23,5 @@ export const NAV_ITEMS: NavItem[] = [
     adminOnly: true,
     desktopOnly: true,
   },
+  { id: 'perfil',    label: 'Perfil',    href: '/perfil',    icon: User },
 ]

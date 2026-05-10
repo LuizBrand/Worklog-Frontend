@@ -217,6 +217,16 @@
   to   { opacity: 0; }
 }
 
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes modal-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.96); }
+}
+
 @layer utilities {
   .animate-slide-in-right {
     animation: slide-in-from-right 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
@@ -229,6 +239,12 @@
   }
   .animate-fade-out-backdrop {
     animation: fade-out-backdrop 0.2s ease both;
+  }
+  .animate-modal-in {
+    animation: modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-modal-out {
+    animation: modal-out 0.18s ease-in both;
   }
 }
 

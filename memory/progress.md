@@ -8,7 +8,23 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-<!-- nothing in progress -->
+- [x] 2026-05-09 — Slice 9 — Usuários + Perfil:
+  - `src/api/invalidate.ts` — `invalidateUsers`
+  - `src/components/users/user-table.tsx` — `UserTable`, `UserRoleBadge`
+  - `src/app/(app)/usuarios/page.tsx` — lista ADMIN-only + desativar com confirm
+  - `src/app/(app)/perfil/page.tsx` — card de perfil + form alterar senha (zod/v3 + refreshToken do auth store)
+  - tsc ✓, visual evidence: slice-9-usuarios-perfil.md
+
+- [x] 2026-05-09 — refactor — FilterSelect customizado substituindo `<select>` nativo: `src/components/worklog/filter-select.tsx`, tickets/page.tsx, clientes/page.tsx — tsc ✓, lint ✓, visual evidence: slice-filter-select-open.md
+
+- [x] 2026-05-09 — Slice 7 — Módulo de Clientes (lista + detalhe + criar/editar):
+  - `src/api/invalidate.ts` — `invalidateClients`, `invalidateClient` helpers
+  - `src/components/clients/client-table.tsx` — tabela com STATUS badge, SISTEMAS, CRIADO, menu ações (Ver/Editar)
+  - `src/components/clients/client-form.tsx` — `ClientCreateDialog`, `ClientEditDialog`, `ClientEditFetcher`; sistemas via checkboxes; zod/v3
+  - `src/components/clients/client-detail.tsx` — painel lateral 560px com animações slide-in/out; META: STATUS+CRIADO; SISTEMAS como pills; edit inline
+  - `src/app/(app)/clientes/page.tsx` — busca client-side; filtro status TODOS/ATIVO/INATIVO; atalhos C/`/`/Esc
+  - `backend-gaps.md` — gaps #5 (sem disable API) e #6 (sem DELETE)
+  - tsc ✓, lint ✓
 
 - [x] 2026-05-09 — fix — Filtrar clientes inativos (client-side) no create dialog:
   - `src/components/tickets/ticket-form.tsx` — removido ClientFiltersParamsStatus.ATIVO (causava 403); filtro client-side via `c.enabled !== false`
@@ -193,6 +209,28 @@ changed but this file wasn't updated.
   is undefined during server pre-render. tsc ✓, lint ✓.
 - [x] 2026-05-01 — Confirmed Bug 2 (next-themes script tag / React 19) already
   addressed: `suppressHydrationWarning` present on `<html>` in `src/app/layout.tsx`.
+
+- [x] 2026-05-09 — Slice 8 — Módulo de Sistemas (lista + detalhe + criar/editar):
+  - `src/api/invalidate.ts` — `invalidateSystems`, `invalidateSystem` helpers
+  - `src/components/systems/system-table.tsx` — tabela NOME + menu Ver/Editar
+  - `src/components/systems/system-form.tsx` — `SystemCreateDialog`, `SystemEditDialog`, `SystemEditFetcher`; só campo nome; zod/v3
+  - `src/components/systems/system-detail.tsx` — modal centralizado animate-modal-in/out; mostra clientes que usam o sistema (useFindAllClients + filtro client-side)
+  - `src/app/(app)/sistemas/page.tsx` — busca client-side, atalhos C/`/`/Esc
+  - tsc ✓, lint ✓, visual evidence: slice-8-sistemas.md
+
+## TDD-check exemptions (slice 8 — sistemas)
+
+- `src/api/invalidate.ts` (novos helpers) — pure wrappers, sem lógica de negócio.
+- `src/components/systems/system-table.tsx` — UI puro, sem test runner.
+- `src/components/systems/system-form.tsx` — UI form, validado por tsc + visual.
+- `src/components/systems/system-detail.tsx` — client component, validado por tsc + visual.
+
+## TDD-check exemptions (slice 7 — clientes)
+
+- `src/api/invalidate.ts` (new helpers) — pure wrappers em torno de `qc.invalidateQueries`; sem lógica de negócio. Mesmo padrão dos helpers de tickets já isentos.
+- `src/components/clients/client-table.tsx` — componente UI puro; sem test runner configurado; validado por tsc + lint + evidência visual.
+- `src/components/clients/client-form.tsx` — UI form components; validado por tsc + lint + visual.
+- `src/components/clients/client-detail.tsx` — client component que orquestra query; validado por tsc + lint + visual.
 
 ## TDD-check exemptions (slice 6 — ticket create / edit / delete)
 
