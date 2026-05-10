@@ -15,6 +15,7 @@ changed but this file wasn't updated.
 
 - [x] 2026-05-09 — fix — Nav icons: substituídos ícones similares de pessoa:
   - `src/components/shell/nav-config.ts` — Clientes: Users→Building2; Usuários: Users2→UserCog; Perfil: User→CircleUser
+  - tsc ✓, lint ✓
 
 - [x] 2026-05-09 — feat — Dashboard interativo:
   - `src/components/dashboard/ticket-list.tsx` — link corrigido para `/tickets?id=<publicId>`; botão "+ Novo" navega para `/tickets?create=1`
