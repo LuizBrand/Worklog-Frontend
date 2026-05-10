@@ -104,7 +104,7 @@ export default function DashboardPage() {
           totalCount={countsLoading ? undefined : pendingTotal}
         />
 
-        <div className="flex h-full flex-col justify-between">
+        <div className="flex flex-col gap-4 lg:h-full lg:justify-between">
           <StatusDonut data={statusCounts} loading={countsLoading} />
           <PriorityDistribution />
           <QuickFilters />

@@ -18,7 +18,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
       className="flex flex-col rounded-xl p-4 lg:h-[660px]"
       style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
     >
-      <div className="flex items-center justify-between pb-3">
+      <div className="flex flex-col gap-2 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <span className="text-[13px]" style={{ color: 'var(--status-open)' }}>
             ⚠
@@ -43,7 +43,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
         </div>
         <Link
           href="/tickets?create=1"
-          className="rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-85"
+          className="w-fit self-end rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-85 sm:self-auto"
           style={{
             color: '#fff',
             background: 'var(--primary)',
@@ -145,7 +145,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
                       {fmtRelative(t.updatedAt)}
                     </span>
                     <span
-                      className="text-[12px] opacity-0 transition-opacity group-hover:opacity-100"
+                      className="hidden text-[12px] opacity-0 transition-opacity group-hover:opacity-100 sm:inline"
                       style={{ color: 'var(--wl-text-muted)' }}
                     >
                       →

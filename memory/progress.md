@@ -8,6 +8,16 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-10 — fix — Mobile UI: header do TicketList responsivo + seta oculta no mobile:
+  - `src/components/dashboard/ticket-list.tsx` — header: `flex items-center justify-between` → `flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between`; botão recebe `w-fit self-end sm:self-auto` (direita alinhado quando empilhado, lado a lado em sm+)
+  - `src/components/dashboard/ticket-list.tsx` — seta `→` recebe `hidden sm:inline` (não visível em touch, não consumia mais ~20px no mobile)
+  - tsc ✓
+
+- [x] 2026-05-09 — fix — Mobile UI: sem scroll horizontal + gaps no dashboard:
+  - `src/components/shell/app-shell.tsx` — `overflow-x-hidden` adicionado ao `<main>` mobile; impede que o carrossel `RecentActivity` vaze scroll horizontal para a página
+  - `src/app/(app)/dashboard/page.tsx` — coluna direita: `flex h-full flex-col justify-between` → `flex flex-col gap-4 lg:h-full lg:justify-between`; `h-full`/`justify-between` só aplicam em `lg:`; `gap-4` garante espaçamento entre StatusDonut / PriorityDistribution / QuickFilters no mobile
+  - tsc ✓ (visual evidence pendente — Playwright não instalado no ambiente)
+
 - [x] 2026-05-09 — fix — Auth/login: segurança — onError + confirmPassword — tsc ✓, lint ✓, visual: login-security-fix.md:
   - `src/app/(auth)/login/page.tsx` — onError no login (toast "E-mail ou senha inválidos")
   - `src/app/(auth)/login/page.tsx` — onError no registro (409 = e-mail duplicado; genérico para outros)
