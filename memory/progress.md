@@ -8,7 +8,7 @@ changed but this file wasn't updated.
 
 ## In Progress
 
-- [x] 2026-05-09 — fix — Auth/login: inputs não digitavam + animação de troca de aba:
+- [x] 2026-05-09 — fix — Auth/login: inputs não digitavam + animação de troca de aba — tsc ✓, lint ✓:
   - `src/app/(auth)/login/page.tsx` — reescrito usando register() direto (sem Slot/FormControl); corrige inputs bloqueados no React 19 + RHF 7.73
   - `src/app/(auth)/login/page.tsx` — animação direcional slide+fade ao trocar entre Entrar ↔ Criar conta
   - `src/app/globals.css` — keyframes tab-in-from-right / tab-in-from-left
