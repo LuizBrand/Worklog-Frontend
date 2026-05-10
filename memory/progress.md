@@ -8,6 +8,10 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-09 — fix — Sidebar TooltipProvider + alinhamento do separador:
+  - `src/components/shell/sidebar.tsx` — TooltipProvider adicionado (erro runtime ao colapsar)
+  - `src/app/(app)/tickets/page.tsx` — page header: py-3 → h-[52px] para alinhar com sidebar
+
 - [x] 2026-05-09 — Slice 9 — Usuários + Perfil:
   - `src/api/invalidate.ts` — `invalidateUsers`
   - `src/components/users/user-table.tsx` — `UserTable`, `UserRoleBadge`

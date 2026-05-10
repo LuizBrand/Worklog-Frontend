@@ -4,13 +4,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
-import { Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Sun, Moon, ArrowLeftToLine, ArrowRightToLine } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/state/auth'
 import { Logo } from '@/components/worklog/logo'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { NAV_ITEMS } from './nav-config'
 import { UserMenu } from './user-menu'
 
@@ -27,6 +27,7 @@ export function Sidebar() {
   ).filter((item) => !item.desktopOnly || true)
 
   return (
+    <TooltipProvider>
     <nav
       className={cn(
         'flex h-full flex-shrink-0 flex-col border-r transition-[width] duration-200',
@@ -53,7 +54,7 @@ export function Sidebar() {
             onClick={() => setCollapsed(true)}
             aria-label="Recolher menu"
           >
-            <PanelLeftClose strokeWidth={1.5} className="size-4" />
+            <ArrowLeftToLine strokeWidth={1.5} className="size-4" />
           </Button>
         )}
       </div>
@@ -68,7 +69,7 @@ export function Sidebar() {
             onClick={() => setCollapsed(false)}
             aria-label="Expandir menu"
           >
-            <PanelLeftOpen strokeWidth={1.5} className="size-4" />
+            <ArrowRightToLine strokeWidth={1.5} className="size-4" />
           </Button>
         )}
         {visibleItems.map((item) => {
@@ -148,5 +149,6 @@ export function Sidebar() {
         </div>
       </div>
     </nav>
+    </TooltipProvider>
   )
 }
