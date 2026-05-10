@@ -42,7 +42,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
           )}
         </div>
         <Link
-          href="/tickets"
+          href="/tickets?create=1"
           className="rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-85"
           style={{
             color: '#fff',
@@ -87,7 +87,7 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
                 <div style={{ height: 1, background: 'var(--wl-border)' }} />
               )}
               <Link
-                href={`/tickets/${t.publicId}`}
+                href={`/tickets?id=${t.publicId}`}
                 className="group flex items-stretch rounded-lg transition-colors hover:bg-[var(--wl-surface-2)]"
               >
                 {/* Left status accent — inset pill */}

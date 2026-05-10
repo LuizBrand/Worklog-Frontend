@@ -36,12 +36,22 @@ export default function TicketsPage() {
   const selectedId = params.get('id') ?? ''
 
   const [searchInput, setSearchInput] = useState(q)
-  const [showCreate, setShowCreate] = useState(false)
+  const [showCreate, setShowCreate] = useState(() => params.get('create') === '1')
   const [editId, setEditId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const routerRef = useRef(router)
 
   useEffect(() => { routerRef.current = router }, [router])
+
+  // Remove ?create=1 from URL after dialog is opened
+  useEffect(() => {
+    if (params.get('create') === '1') {
+      const next = new URLSearchParams(params.toString())
+      next.delete('create')
+      router.replace(`/tickets?${next.toString()}`)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Debounce search → URL
   useEffect(() => {

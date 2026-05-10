@@ -1,8 +1,11 @@
 'use client'
 
 import { Fragment } from 'react'
+import Link from 'next/link'
 
 import { STATUS_META } from '@/lib/worklog-meta'
+import { uiToApiStatus } from '@/lib/ticket-status'
+import type { UiWritableStatus } from '@/lib/ticket-status'
 import type { StatusCount } from '@/components/dashboard/status-donut'
 
 export interface StatsBarProps {
@@ -53,13 +56,14 @@ export function StatsBar({ statusCounts, loading }: StatsBarProps) {
       {/* Mobile: 2×2 grid of individual chips */}
       <div className="grid grid-cols-2 gap-2 sm:hidden">
         {statusCounts.map(({ status, count }) => (
-          <div
+          <Link
             key={status}
-            className="flex items-center gap-1.5 rounded-xl px-4 py-3"
+            href={`/tickets?status=${uiToApiStatus(status as UiWritableStatus)}`}
+            className="flex items-center gap-1.5 rounded-xl px-4 py-3 transition-opacity hover:opacity-80"
             style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
           >
             <ChipContent status={status} count={count} loading={loading} />
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -78,9 +82,12 @@ export function StatsBar({ statusCounts, loading }: StatsBarProps) {
                 |
               </span>
             )}
-            <div className="flex items-center gap-1.5">
+            <Link
+              href={`/tickets?status=${uiToApiStatus(status as UiWritableStatus)}`}
+              className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
+            >
               <ChipContent status={status} count={count} loading={loading} />
-            </div>
+            </Link>
           </Fragment>
         ))}
       </div>

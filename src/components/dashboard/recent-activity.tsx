@@ -131,7 +131,7 @@ export function RecentActivity({ tickets, loading }: RecentActivityProps) {
               return (
                 <Link
                   key={t.publicId}
-                  href={`/tickets/${t.publicId}`}
+                  href={`/tickets?id=${t.publicId}`}
                   className="flex w-[260px] shrink-0 flex-col gap-2 rounded-lg p-3 transition-opacity hover:opacity-80"
                   style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)' }}
                 >

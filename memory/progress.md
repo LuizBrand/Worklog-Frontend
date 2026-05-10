@@ -8,6 +8,20 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-09 — fix — Auth/login: inputs não digitavam + animação de troca de aba:
+  - `src/app/(auth)/login/page.tsx` — reescrito usando register() direto (sem Slot/FormControl); corrige inputs bloqueados no React 19 + RHF 7.73
+  - `src/app/(auth)/login/page.tsx` — animação direcional slide+fade ao trocar entre Entrar ↔ Criar conta
+  - `src/app/globals.css` — keyframes tab-in-from-right / tab-in-from-left
+
+- [x] 2026-05-09 — fix — Nav icons: substituídos ícones similares de pessoa:
+  - `src/components/shell/nav-config.ts` — Clientes: Users→Building2; Usuários: Users2→UserCog; Perfil: User→CircleUser
+
+- [x] 2026-05-09 — feat — Dashboard interativo:
+  - `src/components/dashboard/ticket-list.tsx` — link corrigido para `/tickets?id=<publicId>`; botão "+ Novo" navega para `/tickets?create=1`
+  - `src/components/dashboard/recent-activity.tsx` — link corrigido para `/tickets?id=<publicId>`
+  - `src/components/dashboard/stats-bar.tsx` — chips viram Link navegando para `/tickets?status=<apiStatus>`
+  - `src/app/(app)/tickets/page.tsx` — lê `?create=1` na montagem e abre dialog automaticamente; remove o param da URL
+
 - [x] 2026-05-09 — fix — Sidebar TooltipProvider + alinhamento do separador:
   - `src/components/shell/sidebar.tsx` — TooltipProvider adicionado (erro runtime ao colapsar)
   - `src/app/(app)/tickets/page.tsx` — page header: py-3 → h-[52px] para alinhar com sidebar
