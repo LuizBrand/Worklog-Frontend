@@ -21,22 +21,25 @@ Approved long-form plan with full rationale lives at
 
 1. **Status taxonomy — translation layer.** UI keeps the 5 mockup states
    (`OPEN | IN_PROGRESS | AWAITING_DEV | RESOLVED | CANCELLED`); API
-   stays at its 4 (`PENDING | AWAITING_CUSTOMER | AWAITING_DEVELOPMENT |
-   COMPLETED`). New `src/lib/ticket-status.ts` maps both ways.
-   `CANCELLED` is **write-blocked** — typed as `Exclude<TicketStatus,
-   'CANCELLED'>` on the request side, disabled in the UI dropdown with
-   a tooltip until the backend supports it.
+   now matches (CANCELLED added 2026-05-10). `src/lib/ticket-status.ts`
+   maps both ways. CANCELLED is writable in the **edit dialog and
+   detail panel** (constant `UI_STATUS_EDITABLE`) but **not** in the
+   create dialog (`UI_STATUS_WRITABLE`, 4 items) — you don't open a
+   ticket already cancelled.
 2. **Data table — `@tanstack/react-table`.** One typed `<DataTable<T>>`
    in `src/components/worklog/data-table.tsx`, reused by tickets /
    clientes / sistemas / usuarios.
 3. **Foundation commit (Slice 0).** Land the in-flight design system
    (31 files) + SSR guard + status mapper + `@tanstack/react-table`
    install as one foundation commit before feature slices.
-4. **Token field name.** Consume API's `acessToken` (typo) as-is;
-   document in `memory/gotchas.md`. Adapter would drift on regen.
-5. **Refresh strategy.** Axios response interceptor with single-flight
-   refresh on 401; on refresh failure → clear store, redirect to
-   `/login`.
+4. **Auth via cookie HttpOnly (2026-05-10).** Backend emite
+   `worklog_access` + `worklog_refresh` (HttpOnly, SameSite=Strict).
+   Frontend não persiste tokens em JS; `withCredentials: true` no
+   axios; `useAuthStore` guarda apenas `user`; gate de rota via
+   `GET /users/me`.
+5. **Refresh strategy.** Axios response interceptor com single-flight
+   refresh em 401: `POST /auth/refresh` sem body (cookie carrega o
+   refresh token); falha → clear store, redirect `/login`.
 6. **Route groups.** `(auth)/login` (no shell, no guard) and
    `(app)/...` (auth-gated, framed by `<AppShell>`).
 7. **Locale.** pt-BR.

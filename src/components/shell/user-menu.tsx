@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button'
 
 export function UserMenu() {
   const router = useRouter()
-  const { user, refreshToken, clear } = useAuthStore()
+  const { user, clear } = useAuthStore()
 
   const { mutate: logoutMutate } = useLogout({
     mutation: {
@@ -30,12 +30,7 @@ export function UserMenu() {
   })
 
   function handleLogout() {
-    if (refreshToken) {
-      logoutMutate({ data: { refreshToken } })
-    } else {
-      clear()
-      router.replace('/login')
-    }
+    logoutMutate()
   }
 
   const displayName = user?.name ?? 'Usuário'

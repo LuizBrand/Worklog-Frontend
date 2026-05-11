@@ -8,7 +8,6 @@ import { KeyRound, Loader2, Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useGetMe, useChangeMyPassword } from '@/api/generated/usuários/usuários'
-import { useAuthStore } from '@/state/auth'
 import { WlAvatar } from '@/components/worklog'
 import { RoleResponseRole } from '@/api/generated/schemas'
 
@@ -82,7 +81,6 @@ function PasswordInput({
 }
 
 export default function PerfilPage() {
-  const refreshToken = useAuthStore((s) => s.refreshToken)
   const meQ = useGetMe()
   const user = meQ.data
 
@@ -95,12 +93,10 @@ export default function PerfilPage() {
 
   const changePwMut = useChangeMyPassword({
     mutation: {
+      meta: { errorMessage: 'Senha atual incorreta ou erro ao alterar.' },
       onSuccess: () => {
         toast.success('Senha alterada com sucesso')
         reset()
-      },
-      onError: () => {
-        toast.error('Senha atual incorreta ou erro ao alterar')
       },
     },
   })
@@ -110,7 +106,6 @@ export default function PerfilPage() {
       data: {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
-        refreshToken: refreshToken ?? '',
       },
     })
   }

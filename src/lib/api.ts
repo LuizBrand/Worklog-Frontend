@@ -1,7 +1,7 @@
 import axios, { AxiosError, type AxiosRequestConfig } from 'axios'
 
-import type { AuthenticationResponse } from '@/api/generated/schemas'
 import { useAuthStore } from '@/state/auth'
+import { notifySessionExpired } from '@/lib/api-errors'
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080'
 
@@ -28,22 +28,17 @@ function serializeParams(params: Record<string, unknown>): string {
 
 export const api = axios.create({
   baseURL,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
   paramsSerializer: { serialize: (p) => serializeParams(p as Record<string, unknown>) },
 })
 
-api.interceptors.request.use((config) => {
-  if (typeof window === 'undefined') return config
-  const token = useAuthStore.getState().acessToken
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
-
-// Backend rotates BOTH tokens on every /auth/refresh call and invalidates
-// the previous refresh token immediately. The single-flight lock must hold
-// every concurrent 401 retry until the new pair is persisted, otherwise a
-// follow-up refresh hits a dead refresh token. See memory/plan.md §5.
-let refreshPromise: Promise<string> | null = null
+// Cookies (worklog_access, worklog_refresh) are HttpOnly and sent automatically
+// by the browser when withCredentials is true. On 401, we hit /auth/refresh —
+// the server reads worklog_refresh, rotates both cookies, and the retried
+// request rides the new worklog_access. The single-flight lock prevents
+// concurrent refresh races.
+let refreshPromise: Promise<void> | null = null
 
 api.interceptors.response.use(
   (response) => response,
@@ -59,23 +54,19 @@ api.interceptors.response.use(
       throw error
     }
 
-    const { refreshToken } = useAuthStore.getState()
-    if (!refreshToken) {
+    const url = originalRequest.url ?? ''
+    if (url.includes('/auth/refresh') || url.includes('/auth/login')) {
       forceLogout()
       throw error
     }
 
-    refreshPromise ??= refreshAccessToken(refreshToken).finally(() => {
+    refreshPromise ??= refreshSession().finally(() => {
       refreshPromise = null
     })
 
     try {
-      const newAcessToken = await refreshPromise
+      await refreshPromise
       originalRequest.__retried = true
-      originalRequest.headers = {
-        ...originalRequest.headers,
-        Authorization: `Bearer ${newAcessToken}`,
-      }
       return api(originalRequest)
     } catch (refreshErr) {
       forceLogout()
@@ -84,24 +75,17 @@ api.interceptors.response.use(
   },
 )
 
-async function refreshAccessToken(refreshToken: string): Promise<string> {
-  // Use a bare axios call to skip these interceptors and avoid recursion.
-  const response = await axios.post<AuthenticationResponse>(
-    `${baseURL}/worklog/auth/refresh`,
-    { refreshToken },
-    { headers: { 'Content-Type': 'application/json' } },
-  )
-  const { acessToken, refreshToken: newRefreshToken } = response.data
-  if (!acessToken || !newRefreshToken) {
-    throw new Error('Refresh response missing tokens')
-  }
-  useAuthStore.getState().setTokens(acessToken, newRefreshToken)
-  return acessToken
+async function refreshSession(): Promise<void> {
+  // Bare axios call to skip these interceptors and avoid recursion.
+  await axios.post(`${baseURL}/worklog/auth/refresh`, undefined, {
+    withCredentials: true,
+  })
 }
 
 function forceLogout() {
   useAuthStore.getState().clear()
   if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+    notifySessionExpired()
     window.location.href = '/login'
   }
 }

@@ -6,7 +6,12 @@
  * OpenAPI spec version: v1.0.0
  */
 
-export interface SystemRequest {
-  /** @minLength 1 */
-  name?: string;
-}
+export type TicketUpdateRequestPriority = typeof TicketUpdateRequestPriority[keyof typeof TicketUpdateRequestPriority];
+
+
+export const TicketUpdateRequestPriority = {
+  CRITICAL: 'CRITICAL',
+  HIGH: 'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW: 'LOW',
+} as const;

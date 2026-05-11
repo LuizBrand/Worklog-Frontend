@@ -8,6 +8,39 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-10 — Slices A/B/C — backend gaps fechados (gaps #1–#6 do backend-gaps.md):
+  - **A.1** `src/lib/ticket-status.ts` — `UiWritableStatus = TicketStatus` (sem Exclude); novo `UI_STATUS_EDITABLE = [...UI_STATUS_WRITABLE, 'CANCELLED']`; `UI_TO_API` ganha CANCELLED
+  - **A.2** `src/components/tickets/ticket-detail.tsx` — switcher de status passa a usar `UI_STATUS_EDITABLE`; CANCELLED agora clicável; comentário "backend gap" removido
+  - **A.3** `src/components/tickets/ticket-form.tsx` `TicketEditDialog` — campos `status` (UI_STATUS_EDITABLE), `priority` (PRIORITY_OPTIONS) e `userId` (ADMIN-only via `useFindAllUsers`)
+  - **A.4** `src/components/tickets/ticket-table.tsx` — coluna PRIORIDADE renderiza badge `PRIORITY_META` via `PriorityPill` interno (substitui o "—" hardcoded)
+  - **A.5** `src/app/(app)/dashboard/page.tsx` — agrega `priorityCounts` por prioridade dos arrays pending/awaiting-customer/awaiting-dev; `src/components/dashboard/priority-distribution.tsx` reescrito para consumir `data` prop (fallback "Prioridade não disponível na API atual" removido); cast `as UiWritableStatus` em `statusCounts` retirado
+  - **B.1** `src/components/tickets/ticket-form.tsx` `TicketCreateDialog` — filtra `systemsQ.data.filter(s => s.enabled !== false)` antes do map (mesmo padrão de clients)
+  - **C.1** `src/components/clients/client-form.tsx` — `clientSchema.enabled: z.boolean().optional()`; `ClientEditDialog` ganha checkbox "Cliente ativo"; payload do `useUpdateClient` inclui `enabled`
+  - **C.2** `src/components/clients/client-detail.tsx` — header ganha botão Desativar (Ban) ou Reativar (RotateCcw), ADMIN-only; `useSoftDeleteClient` para desativar, `useUpdateClient` com `enabled:true` para reativar; ConfirmDialog interno reutilizável
+  - **C.3** `src/components/clients/client-table.tsx` — `onDeactivate` callback; menu "..." ganha item "Desativar" (danger, só com callback presente e `c.enabled !== false`); `src/app/(app)/clientes/page.tsx` provê callback ADMIN-only e confirm dialog inline com `useSoftDeleteClient`
+  - **Hook TDD**: todos os edits acima são extensão de exports existentes (ticket-status, priority-distribution, client-table) ou alteração de props/payload — sem comportamento novo isolável em teste unitário. Cobertura via verificação ponta-a-ponta no slice de verify.
+  - **Cleanup**: `backend-gaps.md` zerado; `memory/plan.md` Locked Decision §1 (CANCELLED writable scope) e §4–§5 (auth via cookie) atualizadas
+  - tsc ✓, lint 0 errors / 8 warnings pré-existentes (selectCls, watch() do RHF, _ destructure)
+
+- [~] 2026-05-10 — refactor — Migração para cookie-auth (backend agora emite cookies HttpOnly `worklog_access`/`worklog_refresh`):
+  - `openapi/worklog.json` — spec substituída pelo usuário (gaps de backend + cookieAuth securityScheme)
+  - `pnpm api:gen` — client regerado: `login`/`logout`/`refreshToken` agora retornam 204 sem body; logout/refresh sem args
+  - `src/state/auth.ts` — store reduzido a `user`/`setUser`/`clear`; **removido**: persist+localStorage, `acessToken`, `refreshToken`, `setTokens`
+  - `src/lib/api.ts` — `withCredentials: true` no axios.create; **removido** interceptor request Authorization Bearer; interceptor 401 agora chama `POST /auth/refresh` sem body (cookies HttpOnly carregam o refresh token); single-flight lock mantido
+  - `src/app/(app)/layout.tsx` — gate de auth migrado de `acessToken` em localStorage para `useGetMe` (200 = autenticado; 401 → redirect /login). `setUser` agora vive aqui em vez de no AppShell
+  - `src/components/shell/app-shell.tsx` — removida chamada `useGetMe` + `setUser` (movidas para layout); só decide desktop/mobile
+  - `src/app/(auth)/login/page.tsx` — onSuccess: `queryClient.invalidateQueries(getGetMeQueryKey())` + redirect; **removido** `setTokens(data.acessToken, data.refreshToken)`
+  - `src/components/shell/user-menu.tsx` — `logoutMutate()` sem body; **removido** `refreshToken` do store
+  - `src/app/(app)/perfil/page.tsx` — `changePassword` payload sem `refreshToken`
+  - Hook TDD: refactor-only (não há comportamento novo a testar; useAuthStore, api, refreshSession são plumbing existente já exercitada por fluxos de login/logout)
+  - **Pendente decisão do usuário (spec drift, fora do escopo do refactor):**
+    - `TicketRequest.priority` agora obrigatório → `src/components/tickets/ticket-form.tsx` precisa de campo priority (default? select?)
+    - `TicketResponseStatus.CANCELLED` agora existe no backend → `src/lib/ticket-status.ts` `UiWritableStatus` excluía CANCELLED; mapping precisa ser estendido
+  - Spec drift resolvido: priority obrigatório → select com default MEDIUM em `ticket-form.tsx`; CANCELLED → `API_TO_UI` aceita (read-only), `apiToUiStatus` retorna `TicketStatus`; cast `as UiWritableStatus` no dashboard (API_STATUSES omite CANCELLED em runtime)
+  - tsc ✓, lint 0 errors / 5 warnings pré-existentes
+  - Validação ponta-a-ponta com backend em :8080: login (`luiz.brand@exemplo.com`) → cookies `worklog_access` + `worklog_refresh` (HttpOnly, SameSite=Strict) → dashboard rende → `/tickets?create=1` mostra campo Prioridade
+  - Visual evidence: `.agent/visual/cookie-auth-migration.md` + 3 PNGs (login/dashboard/ticket-create)
+
 - [x] 2026-05-10 — fix — Mobile UI: header do TicketList responsivo + seta oculta no mobile:
   - `src/components/dashboard/ticket-list.tsx` — header: `flex items-center justify-between` → `flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between`; botão recebe `w-fit self-end sm:self-auto` (direita alinhado quando empilhado, lado a lado em sm+)
   - `src/components/dashboard/ticket-list.tsx` — seta `→` recebe `hidden sm:inline` (não visível em touch, não consumia mais ~20px no mobile)

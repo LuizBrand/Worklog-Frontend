@@ -1,31 +1,38 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
+import { useGetMe } from '@/api/generated/usuários/usuários'
 import { useAuthStore } from '@/state/auth'
+import { notifySessionExpired } from '@/lib/api-errors'
 import { AppShell } from '@/components/shell/app-shell'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const acessToken = useAuthStore((s) => s.acessToken)
-  const [hydrated, setHydrated] = useState(false)
+  const setUser = useAuthStore((s) => s.setUser)
+
+  // Cookie auth: we can't read the HttpOnly cookie from JS, so we probe
+  // /users/me. 200 → authenticated; 401 → redirect to /login. The axios
+  // interceptor handles refresh transparently before this surface sees 401.
+  const { data, isLoading, isError, error } = useGetMe({
+    query: { retry: false },
+  })
 
   useEffect(() => {
-    // Register the listener BEFORE calling rehydrate() so it is in place
-    // when hydration completes synchronously (localStorage is sync).
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true))
-    useAuthStore.persist.rehydrate()
-    return unsub
-  }, [])
+    if (data) setUser(data)
+  }, [data, setUser])
 
   useEffect(() => {
-    if (hydrated && !acessToken) {
+    if (!isError) return
+    const status = (error as { response?: { status?: number } } | null)?.response?.status
+    if (status === 401) {
+      notifySessionExpired()
       router.replace('/login')
     }
-  }, [hydrated, acessToken, router])
+  }, [isError, error, router])
 
-  if (!hydrated || !acessToken) return null
+  if (isLoading || isError || !data) return null
 
   return <AppShell>{children}</AppShell>
 }

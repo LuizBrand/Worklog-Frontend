@@ -7,11 +7,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod/v3'
 import { toast } from 'sonner'
 
+import { useQueryClient } from '@tanstack/react-query'
+
 import {
   useLogin,
   useRegister,
 } from '@/api/generated/autenticação/autenticação'
-import { useAuthStore } from '@/state/auth'
+import { getGetMeQueryKey } from '@/api/generated/usuários/usuários'
 import { Logo } from '@/components/worklog/logo'
 import { Button } from '@/components/ui/button'
 
@@ -64,7 +66,7 @@ function FieldError({ msg }: { msg?: string }) {
 
 export default function LoginPage() {
   const router = useRouter()
-  const setTokens = useAuthStore((s) => s.setTokens)
+  const queryClient = useQueryClient()
   const [tab, setTab] = useState<'login' | 'register'>('login')
   const [direction, setDirection] = useState<'left' | 'right'>('right')
 
@@ -94,19 +96,17 @@ export default function LoginPage() {
 
   const { mutate: login, isPending: isLoginPending } = useLogin({
     mutation: {
-      onSuccess(data) {
-        if (!data.acessToken || !data.refreshToken) return
-        setTokens(data.acessToken, data.refreshToken)
+      meta: { errorMessage: 'E-mail ou senha inválidos.' },
+      async onSuccess() {
+        await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() })
         router.replace('/dashboard')
-      },
-      onError() {
-        toast.error('E-mail ou senha inválidos')
       },
     },
   })
 
   const { mutate: doRegister, isPending: isRegisterPending } = useRegister({
     mutation: {
+      meta: { silent: true },
       onSuccess() {
         toast.success('Conta criada! Faça login para continuar.')
         regReset()
