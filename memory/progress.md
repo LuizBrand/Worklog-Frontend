@@ -10,7 +10,8 @@ changed but this file wasn't updated.
 
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
-  - Next: feat: close backend gaps and surface priority across UI (A/B/C) + chore: centralize API error helper
+  - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)
+  - Next: refactor(errors): centralize API error → user-message helper
 
 - [x] 2026-05-10 — Slices A/B/C — backend gaps fechados (gaps #1–#6 do backend-gaps.md):
   - **A.1** `src/lib/ticket-status.ts` — `UiWritableStatus = TicketStatus` (sem Exclude); novo `UI_STATUS_EDITABLE = [...UI_STATUS_WRITABLE, 'CANCELLED']`; `UI_TO_API` ganha CANCELLED

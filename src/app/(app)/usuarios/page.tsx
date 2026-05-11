@@ -46,7 +46,6 @@ export default function UsuariosPage() {
         setConfirmId(null)
       },
       onError: () => {
-        toast.error('Erro ao desativar usuário')
         setConfirmId(null)
       },
     },

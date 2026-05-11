@@ -80,7 +80,6 @@ export function SystemCreateDialog({ onClose }: { onClose: () => void }) {
   const createMut = useSaveSystem({
     mutation: {
       onSuccess: () => { invalidateSystems(qc); toast.success('Sistema criado'); onClose() },
-      onError: () => toast.error('Erro ao criar sistema'),
     },
   })
 
@@ -129,7 +128,6 @@ export function SystemEditDialog({ system, onClose }: { system: SystemResponse; 
         toast.success('Sistema atualizado')
         onClose()
       },
-      onError: () => toast.error('Erro ao atualizar sistema'),
     },
   })
 

@@ -8,25 +8,10 @@ import {
 } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { useState } from 'react'
-import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 
 import { Toaster } from '@/components/ui/sonner'
-import type { ApiExceptionResponse } from '@/api/generated/schemas'
-
-function flattenApiError(err: unknown): string {
-  if (err instanceof AxiosError) {
-    const data = err.response?.data as ApiExceptionResponse | undefined
-    if (data?.message) return data.message
-    if (data?.fieldErrors) {
-      const first = Object.values(data.fieldErrors)[0]
-      if (Array.isArray(first) && first[0]) return String(first[0])
-      if (typeof first === 'string') return first
-    }
-    return err.message
-  }
-  return err instanceof Error ? err.message : 'Erro inesperado'
-}
+import { apiErrorToMessage, getApiErrorStatus } from '@/lib/api-errors'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -44,15 +29,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
         queryCache: new QueryCache({
           onError: (error) => {
-            const status =
-              error instanceof AxiosError ? error.response?.status : undefined
-            if (status === 401) return
-            toast.error(flattenApiError(error))
+            // 401 is handled by the axios interceptor + auth gate.
+            if (getApiErrorStatus(error) === 401) return
+            toast.error(apiErrorToMessage(error))
           },
         }),
         mutationCache: new MutationCache({
-          onError: (error) => {
-            toast.error(flattenApiError(error))
+          onError: (error, _vars, _ctx, mutation) => {
+            // 401 → forceLogout owns the toast (session-expired id).
+            if (getApiErrorStatus(error) === 401) return
+            // `meta.silent`: local onError fully owns the feedback.
+            if (mutation.meta?.silent) return
+            const override = mutation.meta?.errorMessage as string | undefined
+            toast.error(override ?? apiErrorToMessage(error))
           },
         }),
       }),
