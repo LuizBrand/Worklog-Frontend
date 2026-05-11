@@ -51,8 +51,20 @@ export function SystemTable({ systems, clientCountBySystem, loading, onRowClick,
               key={s.publicId}
               onClick={() => s.publicId && onRowClick?.(s.publicId)}
               className="group relative cursor-pointer rounded-xl p-4 transition-colors hover:bg-[var(--wl-surface-2)]"
-              style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
+              style={{
+                background: 'var(--wl-surface)',
+                border: '1px solid var(--wl-border)',
+                opacity: s.enabled === false ? 0.6 : 1,
+              }}
             >
+              {s.enabled === false && (
+                <span
+                  className="absolute left-2.5 top-2.5 inline-flex items-center rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                  style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
+                >
+                  Inativo
+                </span>
+              )}
               {/* Edit button */}
               <button
                 onClick={(e) => { e.stopPropagation(); if (s.publicId) onEdit?.(s.publicId) }}

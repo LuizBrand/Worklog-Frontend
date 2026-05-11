@@ -1,10 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Loader2, Pencil } from 'lucide-react'
+import { X, Loader2, Pencil, Ban, RotateCcw } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
-import { useFindClientByPublicId } from '@/api/generated/clientes/clientes'
+import {
+  useFindClientByPublicId,
+  useSoftDeleteClient,
+  useUpdateClient,
+} from '@/api/generated/clientes/clientes'
 import { fmtDate } from '@/lib/worklog-meta'
+import { invalidateClients, invalidateClient } from '@/api/invalidate'
+import { useAuthStore } from '@/state/auth'
 import { ClientStatusBadge } from './client-table'
 import { ClientEditDialog } from './client-form'
 
@@ -14,8 +22,13 @@ export interface ClientDetailProps {
 }
 
 export function ClientDetail({ publicId, onClose }: ClientDetailProps) {
+  const qc = useQueryClient()
+  const currentUser = useAuthStore((s) => s.user)
+  const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
+
   const [showEdit, setShowEdit] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<'deactivate' | 'reactivate' | null>(null)
 
   function handleClose() {
     if (isClosing) return
@@ -25,6 +38,42 @@ export function ClientDetail({ publicId, onClose }: ClientDetailProps) {
 
   const clientQ = useFindClientByPublicId(publicId)
   const client = clientQ.data
+
+  const deactivateMut = useSoftDeleteClient({
+    mutation: {
+      onSuccess: () => {
+        invalidateClient(qc, publicId)
+        invalidateClients(qc)
+        toast.success('Cliente desativado')
+        setConfirmAction(null)
+      },
+      onError: () => setConfirmAction(null),
+    },
+  })
+
+  const reactivateMut = useUpdateClient({
+    mutation: {
+      onSuccess: () => {
+        invalidateClient(qc, publicId)
+        invalidateClients(qc)
+        toast.success('Cliente reativado')
+        setConfirmAction(null)
+      },
+      onError: () => setConfirmAction(null),
+    },
+  })
+
+  function handleReactivate() {
+    if (!client) return
+    reactivateMut.mutate({
+      publicId,
+      data: {
+        name: client.name ?? '',
+        systemsPublicIds: client.systems?.map((s) => s.publicId ?? '').filter(Boolean) ?? [],
+        enabled: true,
+      },
+    })
+  }
 
   return (
     <>
@@ -70,6 +119,29 @@ export function ClientDetail({ publicId, onClose }: ClientDetailProps) {
               >
                 <Pencil size={13} />
               </button>
+            )}
+            {client && isAdmin && (
+              client.enabled === false ? (
+                <button
+                  onClick={() => setConfirmAction('reactivate')}
+                  className="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+                  style={{ color: 'var(--wl-text-muted)' }}
+                  aria-label="Reativar cliente"
+                  title="Reativar"
+                >
+                  <RotateCcw size={13} />
+                </button>
+              ) : (
+                <button
+                  onClick={() => setConfirmAction('deactivate')}
+                  className="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+                  style={{ color: '#e53e3e' }}
+                  aria-label="Desativar cliente"
+                  title="Desativar"
+                >
+                  <Ban size={13} />
+                </button>
+              )
             )}
             <button
               onClick={handleClose}
@@ -141,6 +213,77 @@ export function ClientDetail({ publicId, onClose }: ClientDetailProps) {
           onClose={() => setShowEdit(false)}
         />
       )}
+
+      {/* ── Confirm deactivate/reactivate ── */}
+      {confirmAction && client && (
+        <ConfirmDialog
+          title={confirmAction === 'deactivate' ? 'Desativar cliente?' : 'Reativar cliente?'}
+          message={
+            confirmAction === 'deactivate'
+              ? `O cliente "${client.name ?? ''}" será marcado como inativo.`
+              : `O cliente "${client.name ?? ''}" será reativado.`
+          }
+          confirmLabel={confirmAction === 'deactivate' ? 'Desativar' : 'Reativar'}
+          danger={confirmAction === 'deactivate'}
+          loading={deactivateMut.isPending || reactivateMut.isPending}
+          onCancel={() => setConfirmAction(null)}
+          onConfirm={() => {
+            if (confirmAction === 'deactivate') deactivateMut.mutate({ publicId })
+            else handleReactivate()
+          }}
+        />
+      )}
+    </>
+  )
+}
+
+function ConfirmDialog({
+  title,
+  message,
+  confirmLabel,
+  danger,
+  loading,
+  onCancel,
+  onConfirm,
+}: {
+  title: string
+  message: string
+  confirmLabel: string
+  danger?: boolean
+  loading?: boolean
+  onCancel: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <>
+      <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.45)' }} onClick={onCancel} />
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" style={{ pointerEvents: 'none' }}>
+        <div
+          className="w-full max-w-sm rounded-xl p-5 shadow-2xl"
+          style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)', pointerEvents: 'auto' }}
+        >
+          <h3 className="mb-1 text-[14px] font-semibold" style={{ color: 'var(--wl-text)' }}>{title}</h3>
+          <p className="mb-4 text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>{message}</p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={onCancel}
+              className="cursor-pointer rounded-lg px-3 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
+              style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={loading}
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50"
+              style={{ background: danger ? '#e53e3e' : 'var(--primary)', color: '#fff' }}
+            >
+              {loading && <Loader2 size={13} className="animate-spin" />}
+              {confirmLabel}
+            </button>
+          </div>
+        </div>
+      </div>
     </>
   )
 }

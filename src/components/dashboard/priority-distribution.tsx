@@ -1,7 +1,14 @@
 import { PriorityBar } from '@/components/worklog'
-import { PRIORITY_ORDER } from '@/lib/worklog-meta'
+import { PRIORITY_ORDER, type TicketPriority } from '@/lib/worklog-meta'
 
-export function PriorityDistribution() {
+export interface PriorityDistributionProps {
+  data: { priority: TicketPriority; count: number }[]
+}
+
+export function PriorityDistribution({ data }: PriorityDistributionProps) {
+  const counts = new Map(data.map(({ priority, count }) => [priority, count]))
+  const total = data.reduce((sum, { count }) => sum + count, 0)
+
   return (
     <div
       className="flex flex-col gap-2.5 rounded-xl p-4"
@@ -16,16 +23,9 @@ export function PriorityDistribution() {
 
       <div className="flex flex-col gap-2">
         {PRIORITY_ORDER.map((p) => (
-          <PriorityBar key={p} priority={p} value={0} total={0} />
+          <PriorityBar key={p} priority={p} value={counts.get(p) ?? 0} total={total} />
         ))}
       </div>
-
-      <p
-        className="text-center text-[11px]"
-        style={{ color: 'var(--wl-text-muted)' }}
-      >
-        Prioridade não disponível na API atual.
-      </p>
     </div>
   )
 }

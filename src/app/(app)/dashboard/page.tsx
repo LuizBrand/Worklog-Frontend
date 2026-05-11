@@ -3,8 +3,9 @@
 import { useFindAllTickets } from '@/api/generated/tickets/tickets'
 import { TicketFiltersParamsStatus } from '@/api/generated/schemas'
 import { apiToUiStatus } from '@/lib/ticket-status'
-import type { ApiTicketStatus } from '@/lib/ticket-status'
+import type { ApiTicketStatus, UiWritableStatus } from '@/lib/ticket-status'
 import type { PageTicketSummary } from '@/api/generated/schemas'
+import { PRIORITY_ORDER, type TicketPriority } from '@/lib/worklog-meta'
 import { StatsBar } from '@/components/dashboard/stats-bar'
 import { TicketList } from '@/components/dashboard/ticket-list'
 import { StatusDonut } from '@/components/dashboard/status-donut'
@@ -67,6 +68,16 @@ export default function DashboardPage() {
 
   const recentTickets = toPage(recentQ.data)?.content
 
+  // Priority distribution over active (pending + awaiting customer/dev) tickets.
+  const priorityCounts = PRIORITY_ORDER.map((priority) => {
+    const count = [
+      ...(toPage(pendingQ.data)?.content ?? []),
+      ...(toPage(awaitingCustomerQ.data)?.content ?? []),
+      ...(toPage(awaitingDevQ.data)?.content ?? []),
+    ].filter((t) => t.priority === priority).length
+    return { priority, count }
+  })
+
   // Combine active-status lists; deduplicate by publicId, filter resolved, sort by updatedAt desc.
   const seen = new Set<string>()
   const activeTickets = [
@@ -106,7 +117,7 @@ export default function DashboardPage() {
 
         <div className="flex flex-col gap-4 lg:h-full lg:justify-between">
           <StatusDonut data={statusCounts} loading={countsLoading} />
-          <PriorityDistribution />
+          <PriorityDistribution data={priorityCounts} />
           <QuickFilters />
         </div>
       </div>

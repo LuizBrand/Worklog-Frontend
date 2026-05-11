@@ -8,6 +8,10 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
+  - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
+  - Next: feat: close backend gaps and surface priority across UI (A/B/C) + chore: centralize API error helper
+
 - [x] 2026-05-10 — Slices A/B/C — backend gaps fechados (gaps #1–#6 do backend-gaps.md):
   - **A.1** `src/lib/ticket-status.ts` — `UiWritableStatus = TicketStatus` (sem Exclude); novo `UI_STATUS_EDITABLE = [...UI_STATUS_WRITABLE, 'CANCELLED']`; `UI_TO_API` ganha CANCELLED
   - **A.2** `src/components/tickets/ticket-detail.tsx` — switcher de status passa a usar `UI_STATUS_EDITABLE`; CANCELLED agora clicável; comentário "backend gap" removido

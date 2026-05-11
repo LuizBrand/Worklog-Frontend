@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MoreHorizontal, Eye, Pencil } from 'lucide-react'
+import { MoreHorizontal, Eye, Pencil, Ban } from 'lucide-react'
 
 import { EmptyState } from '@/components/worklog'
 import { fmtDate } from '@/lib/worklog-meta'
@@ -10,11 +10,12 @@ export interface ClientTableProps {
   loading?: boolean
   onRowClick?: (publicId: string) => void
   onEdit?: (publicId: string) => void
+  onDeactivate?: (publicId: string, name: string) => void
 }
 
 const COLS = ['NOME', 'SISTEMAS', 'CRIADO', 'STATUS'] as const
 
-export function ClientTable({ clients, loading, onRowClick, onEdit }: ClientTableProps) {
+export function ClientTable({ clients, loading, onRowClick, onEdit, onDeactivate }: ClientTableProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   function closeMenu() { setOpenMenuId(null) }
@@ -143,6 +144,20 @@ export function ClientTable({ clients, loading, onRowClick, onEdit }: ClientTabl
                             label="Editar"
                             onClick={() => { closeMenu(); if (c.publicId) onEdit?.(c.publicId) }}
                           />
+                          {onDeactivate && c.enabled !== false && (
+                            <>
+                              <div style={{ height: 1, background: 'var(--wl-border)', margin: '4px 0' }} />
+                              <MenuItem
+                                icon={<Ban size={13} />}
+                                label="Desativar"
+                                danger
+                                onClick={() => {
+                                  closeMenu()
+                                  if (c.publicId) onDeactivate(c.publicId, c.name ?? '')
+                                }}
+                              />
+                            </>
+                          )}
                         </div>
                       </>
                     )}
@@ -176,17 +191,19 @@ export function ClientStatusBadge({ enabled }: { enabled?: boolean }) {
 function MenuItem({
   icon,
   label,
+  danger,
   onClick,
 }: {
   icon: React.ReactNode
   label: string
+  danger?: boolean
   onClick: () => void
 }) {
   return (
     <button
       onClick={onClick}
       className="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-[13px] transition-colors hover:bg-[var(--wl-surface-2)]"
-      style={{ color: 'var(--wl-text)' }}
+      style={{ color: danger ? '#e53e3e' : 'var(--wl-text)' }}
     >
       {icon}
       {label}

@@ -12,9 +12,14 @@ import { useCreateTicket, useUpdateTicket, useGetTicketByPublicId, useDeleteTick
 import { useFindAllClients } from '@/api/generated/clientes/clientes'
 import { useFindAllSystems } from '@/api/generated/sistemas/sistemas'
 import { useFindAllUsers } from '@/api/generated/usuários/usuários'
-import { TicketRequestStatus } from '@/api/generated/schemas'
+import {
+  TicketRequestStatus,
+  TicketRequestPriority,
+  TicketUpdateRequestStatus,
+  TicketUpdateRequestPriority,
+} from '@/api/generated/schemas'
 import { invalidateTickets, invalidateTicket, invalidateTicketLogs } from '@/api/invalidate'
-import { UI_STATUS_WRITABLE, uiToApiStatus } from '@/lib/ticket-status'
+import { UI_STATUS_WRITABLE, UI_STATUS_EDITABLE, uiToApiStatus } from '@/lib/ticket-status'
 import { STATUS_META } from '@/lib/worklog-meta'
 import { useAuthStore } from '@/state/auth'
 import { FilterSelect, ClientCombobox } from '@/components/worklog'
@@ -29,13 +34,24 @@ const createSchema = z.object({
   clientId: z.string().min(1, 'Selecione um cliente'),
   systemId: z.string().min(1, 'Selecione um sistema'),
   status: z.string().min(1, 'Selecione um status'),
+  priority: z.string().min(1, 'Selecione uma prioridade'),
   userId: z.string().optional(),
 })
+
+const PRIORITY_OPTIONS: { value: TicketRequestPriority; label: string }[] = [
+  { value: TicketRequestPriority.CRITICAL, label: 'Crítica' },
+  { value: TicketRequestPriority.HIGH, label: 'Alta' },
+  { value: TicketRequestPriority.MEDIUM, label: 'Média' },
+  { value: TicketRequestPriority.LOW, label: 'Baixa' },
+]
 
 const editSchema = z.object({
   title: z.string().min(1, 'Título não pode ser vazio').optional().or(z.literal('')),
   description: z.string().optional(),
   solution: z.string().optional(),
+  status: z.string().optional(),
+  priority: z.string().optional(),
+  userId: z.string().optional(),
 })
 
 type CreateValues = z.infer<typeof createSchema>
@@ -147,6 +163,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
     resolver: zodResolver(createSchema),
     defaultValues: {
       status: TicketRequestStatus.PENDING,
+      priority: TicketRequestPriority.MEDIUM,
       userId: currentUser?.publicId ?? '',
     },
   })
@@ -157,9 +174,6 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
         invalidateTickets(qc)
         toast.success('Ticket criado com sucesso')
         onClose()
-      },
-      onError: () => {
-        toast.error('Erro ao criar ticket')
       },
     },
   })
@@ -172,6 +186,7 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
         clientId: values.clientId,
         systemId: values.systemId,
         status: values.status as TicketRequestStatus,
+        priority: values.priority as TicketRequestPriority,
         userId: values.userId || currentUser?.publicId || undefined,
       },
     })
@@ -220,23 +235,36 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
                 onChange={(v) => setValue('systemId', v, { shouldValidate: true })}
                 options={[
                   { value: '', label: 'Selecionar...' },
-                  ...(systemsQ.data ?? []).map((s) => ({ value: s.publicId ?? '', label: s.name ?? '' })),
+                  ...(systemsQ.data ?? [])
+                    .filter((s) => s.enabled !== false)
+                    .map((s) => ({ value: s.publicId ?? '', label: s.name ?? '' })),
                 ]}
               />
             </FormField>
           </div>
 
-          <FormField label="Status" error={errors.status?.message}>
-            <FilterSelect
-              className="w-full"
-              value={watch('status') ?? ''}
-              onChange={(v) => setValue('status', v, { shouldValidate: true })}
-              options={UI_STATUS_WRITABLE.map((ui) => ({
-                value: uiToApiStatus(ui as UiWritableStatus),
-                label: STATUS_META[ui as UiWritableStatus].label,
-              }))}
-            />
-          </FormField>
+          <div className="grid grid-cols-2 gap-3">
+            <FormField label="Status" error={errors.status?.message}>
+              <FilterSelect
+                className="w-full"
+                value={watch('status') ?? ''}
+                onChange={(v) => setValue('status', v, { shouldValidate: true })}
+                options={UI_STATUS_WRITABLE.map((ui) => ({
+                  value: uiToApiStatus(ui as UiWritableStatus),
+                  label: STATUS_META[ui as UiWritableStatus].label,
+                }))}
+              />
+            </FormField>
+
+            <FormField label="Prioridade" error={errors.priority?.message}>
+              <FilterSelect
+                className="w-full"
+                value={watch('priority') ?? ''}
+                onChange={(v) => setValue('priority', v, { shouldValidate: true })}
+                options={PRIORITY_OPTIONS}
+              />
+            </FormField>
+          </div>
 
           {isAdmin && (
             <FormField label="Responsável" error={errors.userId?.message}>
@@ -285,13 +313,20 @@ export interface TicketEditDialogProps {
 
 export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
   const qc = useQueryClient()
+  const currentUser = useAuthStore((s) => s.user)
+  const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
 
-  const { register, handleSubmit, formState: { errors } } = useForm<EditValues>({
+  const usersQ = useFindAllUsers({ query: { enabled: isAdmin } })
+
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<EditValues>({
     resolver: zodResolver(editSchema),
     defaultValues: {
       title: ticket.title ?? '',
       description: ticket.description ?? '',
       solution: ticket.solution ?? '',
+      status: ticket.status ?? TicketUpdateRequestStatus.PENDING,
+      priority: ticket.priority ?? TicketUpdateRequestPriority.MEDIUM,
+      userId: ticket.user?.publicId ?? '',
     },
   })
 
@@ -306,9 +341,6 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
         toast.success('Ticket atualizado')
         onClose()
       },
-      onError: () => {
-        toast.error('Erro ao atualizar ticket')
-      },
     },
   })
 
@@ -320,6 +352,9 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
         title: values.title || undefined,
         description: values.description || undefined,
         solution: values.solution || undefined,
+        status: (values.status || undefined) as TicketUpdateRequestStatus | undefined,
+        priority: (values.priority || undefined) as TicketUpdateRequestPriority | undefined,
+        userId: isAdmin ? (values.userId || undefined) : undefined,
       },
     })
   }
@@ -356,6 +391,41 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
               style={inputStyle}
             />
           </FormField>
+
+          <div className="grid grid-cols-2 gap-3">
+            <FormField label="Status" error={errors.status?.message}>
+              <FilterSelect
+                className="w-full"
+                value={watch('status') ?? ''}
+                onChange={(v) => setValue('status', v, { shouldValidate: true })}
+                options={UI_STATUS_EDITABLE.map((ui) => ({
+                  value: uiToApiStatus(ui as UiWritableStatus),
+                  label: STATUS_META[ui as UiWritableStatus].label,
+                }))}
+              />
+            </FormField>
+
+            <FormField label="Prioridade" error={errors.priority?.message}>
+              <FilterSelect
+                className="w-full"
+                value={watch('priority') ?? ''}
+                onChange={(v) => setValue('priority', v, { shouldValidate: true })}
+                options={PRIORITY_OPTIONS}
+              />
+            </FormField>
+          </div>
+
+          {isAdmin && (
+            <FormField label="Responsável" error={errors.userId?.message}>
+              <ClientCombobox
+                className="w-full"
+                value={watch('userId') ?? ''}
+                onChange={(v) => setValue('userId', v, { shouldValidate: true })}
+                options={(usersQ.data ?? []).map((u) => ({ value: u.publicId ?? '', label: u.name ?? u.email ?? '' }))}
+                emptyLabel="Selecionar..."
+              />
+            </FormField>
+          )}
 
           <div className="flex justify-end gap-2 pt-1">
             <button
@@ -411,9 +481,6 @@ export function TicketDeleteDialog({ publicId, onClose }: TicketDeleteDialogProp
         invalidateTickets(qc)
         toast.success('Ticket excluído')
         onClose()
-      },
-      onError: () => {
-        toast.error('Erro ao excluir ticket')
       },
     },
   })

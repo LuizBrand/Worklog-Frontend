@@ -3,8 +3,10 @@ import { TicketResponseStatus } from '@/api/generated/schemas/ticketResponseStat
 
 export type ApiTicketStatus = (typeof TicketResponseStatus)[keyof typeof TicketResponseStatus]
 
-export type UiWritableStatus = Exclude<TicketStatus, 'CANCELLED'>
+export type UiWritableStatus = TicketStatus
 
+// Creatable: status options exposed in the "Novo ticket" dialog. CANCELLED
+// is intentionally absent — you cannot create a ticket already cancelled.
 export const UI_STATUS_WRITABLE: readonly UiWritableStatus[] = [
   'OPEN',
   'IN_PROGRESS',
@@ -12,13 +14,19 @@ export const UI_STATUS_WRITABLE: readonly UiWritableStatus[] = [
   'RESOLVED',
 ] as const
 
-// Backend has 4 states, mockups define 5. CANCELLED is UI-only until
-// the backend supports it — see memory/plan.md "Locked Decisions" #1.
+// Editable: status options exposed in the edit dialog and the detail
+// panel's status switcher. Includes CANCELLED.
+export const UI_STATUS_EDITABLE: readonly UiWritableStatus[] = [
+  ...UI_STATUS_WRITABLE,
+  'CANCELLED',
+] as const
+
 const API_TO_UI: Record<ApiTicketStatus, UiWritableStatus> = {
   PENDING: 'OPEN',
   AWAITING_CUSTOMER: 'IN_PROGRESS',
   AWAITING_DEVELOPMENT: 'AWAITING_DEV',
   COMPLETED: 'RESOLVED',
+  CANCELLED: 'CANCELLED',
 }
 
 const UI_TO_API: Record<UiWritableStatus, ApiTicketStatus> = {
@@ -26,6 +34,7 @@ const UI_TO_API: Record<UiWritableStatus, ApiTicketStatus> = {
   IN_PROGRESS: 'AWAITING_CUSTOMER',
   AWAITING_DEV: 'AWAITING_DEVELOPMENT',
   RESOLVED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
 }
 
 export function apiToUiStatus(api: ApiTicketStatus): UiWritableStatus {

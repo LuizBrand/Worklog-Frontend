@@ -18,6 +18,7 @@ import type { ClientResponse } from '@/api/generated/schemas'
 const clientSchema = z.object({
   name: z.string().min(1, 'Nome obrigatório'),
   systemsPublicIds: z.array(z.string()).min(1, 'Selecione ao menos um sistema'),
+  enabled: z.boolean().optional(),
 })
 
 type ClientValues = z.infer<typeof clientSchema>
@@ -128,9 +129,6 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
         toast.success('Cliente criado com sucesso')
         onClose()
       },
-      onError: () => {
-        toast.error('Erro ao criar cliente')
-      },
     },
   })
 
@@ -198,6 +196,7 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
     defaultValues: {
       name: client.name ?? '',
       systemsPublicIds: client.systems?.map((s) => s.publicId ?? '').filter(Boolean) ?? [],
+      enabled: client.enabled ?? true,
     },
   })
 
@@ -211,9 +210,6 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
         toast.success('Cliente atualizado')
         onClose()
       },
-      onError: () => {
-        toast.error('Erro ao atualizar cliente')
-      },
     },
   })
 
@@ -221,7 +217,11 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
     if (!client.publicId) return
     updateMut.mutate({
       publicId: client.publicId,
-      data: { name: values.name, systemsPublicIds: values.systemsPublicIds },
+      data: {
+        name: values.name,
+        systemsPublicIds: values.systemsPublicIds,
+        enabled: values.enabled,
+      },
     })
   }
 
@@ -242,6 +242,17 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
           <FormField label="Sistemas *" error={errors.systemsPublicIds?.message}>
             <SystemsCheckboxList register={register} systems={systemsQ.data ?? []} loading={systemsQ.isLoading} />
           </FormField>
+
+          <label className="flex cursor-pointer items-center gap-2.5">
+            <input
+              type="checkbox"
+              {...register('enabled')}
+              className="cursor-pointer accent-[var(--primary)]"
+            />
+            <span className="text-[13px]" style={{ color: 'var(--wl-text)' }}>
+              Cliente ativo
+            </span>
+          </label>
 
           <div className="flex justify-end gap-2 pt-1">
             <button

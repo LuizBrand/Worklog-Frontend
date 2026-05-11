@@ -3,9 +3,10 @@ import { MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react'
 
 import { StatusChip, WlAvatar, EmptyState } from '@/components/worklog'
 import { apiToUiStatus } from '@/lib/ticket-status'
-import { fmtDateTime } from '@/lib/worklog-meta'
+import { fmtDateTime, PRIORITY_META } from '@/lib/worklog-meta'
 import type { TicketSummary } from '@/api/generated/schemas'
 import type { ApiTicketStatus } from '@/lib/ticket-status'
+import type { TicketPriority } from '@/lib/worklog-meta'
 
 function fmtId(publicId: string | undefined): string {
   if (!publicId) return '—'
@@ -109,16 +110,31 @@ export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: 
                     <StatusChip status={uiStatus} size="sm" />
                   </td>
 
-                  {/* PRIORIDADE — sem campo no backend */}
+                  {/* PRIORIDADE */}
                   <td className="px-4 py-3">
-                    <span className="text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>—</span>
+                    {t.priority ? (
+                      <PriorityPill priority={t.priority as TicketPriority} />
+                    ) : (
+                      <span className="text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>—</span>
+                    )}
                   </td>
 
                   {/* CLIENTE */}
                   <td className="px-4 py-3">
-                    <span className="text-[13px] font-medium" style={{ color: 'var(--wl-text)' }}>
-                      {clientName}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[13px] font-medium" style={{ color: 'var(--wl-text)' }}>
+                        {clientName}
+                      </span>
+                      {t.client?.enabled === false && (
+                        <span
+                          className="inline-flex items-center rounded px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                          style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
+                          title="Cliente inativo"
+                        >
+                          Inativo
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* SISTEMA */}
@@ -204,6 +220,18 @@ export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: 
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
+
+function PriorityPill({ priority }: { priority: TicketPriority }) {
+  const meta = PRIORITY_META[priority]
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+      style={{ color: meta.color, border: `1px solid ${meta.color}33`, background: `${meta.color}14` }}
+    >
+      {meta.label}
+    </span>
+  )
+}
 
 function MenuItem({
   icon,
