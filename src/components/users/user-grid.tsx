@@ -71,11 +71,15 @@ export function UserGrid({ users, loading, onCardClick, onToggleActive }: UserGr
                 cursor: onCardClick ? 'pointer' : undefined,
               }}
             >
-              {/* Decorative status dot (top-right) */}
+              {/* Decorative status dot (top-right). When inactive, dims to
+                  near the card border so it visually "turns off". */}
               <span
                 aria-hidden="true"
                 className="absolute right-3 top-3 inline-block h-2 w-2 rounded-full"
-                style={{ background: isActive ? '#22c55e' : 'var(--wl-text-muted)' }}
+                style={{
+                  background: isActive ? '#4ade80' : 'var(--wl-border-2)',
+                  boxShadow: isActive ? '0 0 6px rgba(74, 222, 128, 0.6)' : 'none',
+                }}
               />
 
               {/* Centered body */}
@@ -114,7 +118,7 @@ export function UserGrid({ users, loading, onCardClick, onToggleActive }: UserGr
                     color: isActive ? '#e53e3e' : 'var(--primary)',
                   }}
                 >
-                  {isActive ? 'Desativar' : 'Reativar'}
+                  {isActive ? 'Desativar' : 'Ativar'}
                 </button>
               )}
             </div>

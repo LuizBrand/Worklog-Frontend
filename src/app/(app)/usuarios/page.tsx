@@ -98,7 +98,7 @@ export default function UsuariosPage() {
         onToggleActive={(publicId, active, name) => {
           if (!active) {
             // Backend has no reactivate endpoint for users; surface that here.
-            toast.error('Reativar usuário ainda não é suportado pelo backend')
+            toast.error('Ativar usuário ainda não é suportado pelo backend')
             return
           }
           setConfirmTarget({ publicId, name, active })

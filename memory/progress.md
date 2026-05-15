@@ -55,6 +55,13 @@ changed but this file wasn't updated.
   - Evidência atualizada: `.agent/visual/r2-sistemas-desktop.{png,md}`
   - tsc ✓, lint ✓
 
+- [x] 2026-05-15 — Refinamento R3 — Usuários (feedback do dono):
+  - `src/components/users/user-grid.tsx` — bolinha decorativa agora muda de `#22c55e` (verde escuro) para `#4ade80` (verde brilhante com glow `boxShadow`) quando ativa; quando inativa, passa para `var(--wl-border-2)` (dim, "apagada"); botão muda de `Reativar` para `Ativar` (texto mais curto)
+  - `src/app/(app)/usuarios/page.tsx` — toast de Ativar atualizado para refletir o nome novo do botão
+  - `memory/plan.md` §8 — pendência de backend adicional: `UserResponse` não inclui `enabled`. Sem isso, o dot e o botão não conseguem refletir o estado real após desativação — a UI logic está correta para quando o backend liberar o campo.
+  - Evidência atualizada: `.agent/visual/r3-usuarios-desktop.{png,md}`
+  - tsc ✓, lint ✓
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)

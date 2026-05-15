@@ -51,7 +51,10 @@ Approved long-form plan with full rationale lives at
    `src/components/worklog/` + `systemShortCode` em `worklog-meta.ts`.
    Pendências de backend que renderizam `—` até o backend liberar:
    `ClientResponse.email`, `SystemResponse.description`,
-   `enabled` em `SystemRequest`, endpoint de reativar usuário.
+   `enabled` em `SystemRequest`, endpoint de reativar usuário,
+   `enabled` em `UserResponse` (sem isso o dot decorativo e o botão
+   Desativar/Ativar não conseguem refletir o estado real após
+   desativação).
 
 ## Vertical Slices
 
