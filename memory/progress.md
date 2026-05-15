@@ -24,6 +24,12 @@ changed but this file wasn't updated.
   - Pendência backend: `ClientResponse.email`
   - tsc ✓, lint ✓, evidência: `.agent/visual/r1-clientes-{desktop,mobile}.{png,md}`
 
+- [x] 2026-05-15 — Redesign V2 R2 — Sistemas (card grid):
+  - `src/components/systems/system-table.tsx` → `system-grid.tsx` — header com padrão `repeating-linear-gradient`, ID `s-XXX` via `systemShortCode`, avatar grande centrado, StatusPill, descrição placeholder (oculta até backend liberar), 2 StatCells TOTAL/ABERTOS, Desativar/Ativar admin-only
+  - `src/app/(app)/sistemas/page.tsx` — `orderedSystems` por nome+publicId para shortcode estável; `statsBySystem` agrega abertos; toggle envia `{ enabled }` via `useUpdateSystem` cast em `SystemRequest` (gap de spec)
+  - Pendências backend: `SystemResponse.description` ausente; `SystemRequest.enabled` ausente da spec (toggle usa cast)
+  - tsc ✓, lint ✓, evidência: `.agent/visual/r2-sistemas-{desktop,mobile}.{png,md}`
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)
