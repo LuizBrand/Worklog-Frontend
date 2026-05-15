@@ -105,6 +105,10 @@ export function avatarColor(seed: string): string {
   return AVATAR_COLORS[seed.charCodeAt(0) % AVATAR_COLORS.length]
 }
 
+export function systemShortCode(index: number): string {
+  return `s-${String(index + 1).padStart(3, '0')}`
+}
+
 const DATE_TIME_FMT = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
   month: 'short',

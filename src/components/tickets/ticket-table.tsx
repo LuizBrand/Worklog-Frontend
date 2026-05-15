@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react'
 
-import { StatusChip, WlAvatar, EmptyState } from '@/components/worklog'
+import { StatusChip, StatusPill, WlAvatar, EmptyState } from '@/components/worklog'
 import { apiToUiStatus } from '@/lib/ticket-status'
 import { fmtDateTime, PRIORITY_META } from '@/lib/worklog-meta'
 import type { TicketSummary } from '@/api/generated/schemas'
@@ -125,15 +125,7 @@ export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: 
                       <span className="text-[13px] font-medium" style={{ color: 'var(--wl-text)' }}>
                         {clientName}
                       </span>
-                      {t.client?.enabled === false && (
-                        <span
-                          className="inline-flex items-center rounded px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
-                          style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
-                          title="Cliente inativo"
-                        >
-                          Inativo
-                        </span>
-                      )}
+                      {t.client?.enabled === false && <StatusPill active={false} variant="badge" />}
                     </div>
                   </td>
 

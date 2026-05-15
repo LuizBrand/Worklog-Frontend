@@ -13,7 +13,7 @@ import {
   useUpdateTicket,
   useDeleteTicket,
 } from '@/api/generated/tickets/tickets'
-import { StatusChip, WlAvatar } from '@/components/worklog'
+import { StatusChip, StatusPill, WlAvatar } from '@/components/worklog'
 import { apiToUiStatus, uiToApiStatus, UI_STATUS_EDITABLE } from '@/lib/ticket-status'
 import { STATUS_META, fmtDate } from '@/lib/worklog-meta'
 import type { PageTicketLogResponse } from '@/api/generated/schemas'
@@ -178,7 +178,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                     <span className="text-[13px] font-medium" style={{ color: 'var(--wl-text)' }}>
                       {ticket?.client?.name ?? '—'}
                     </span>
-                    {ticket?.client?.enabled === false && <InactiveBadge />}
+                    {ticket?.client?.enabled === false && <StatusPill active={false} variant="badge" />}
                   </div>
                 </MetaItem>
                 <MetaItem label="SISTEMA">
@@ -186,7 +186,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                     <span className="text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
                       {ticket?.system?.name ?? '—'}
                     </span>
-                    {ticket?.system?.enabled === false && <InactiveBadge />}
+                    {ticket?.system?.enabled === false && <StatusPill active={false} variant="badge" />}
                   </div>
                 </MetaItem>
                 <MetaItem label="RESPONSÁVEL">
@@ -361,18 +361,6 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
-
-function InactiveBadge() {
-  return (
-    <span
-      className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-      style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}
-      title="Esta entidade está inativa"
-    >
-      Inativo
-    </span>
-  )
-}
 
 function Divider() {
   return (

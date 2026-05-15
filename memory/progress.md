@@ -8,6 +8,15 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-15 — Redesign V2 R0 — primitivos compartilhados:
+  - `src/components/worklog/entity-card.tsx` (novo) — shell `rounded-xl` com `inactive`/`selected`/`onClick`/`children`
+  - `src/components/worklog/stat-cell.tsx` (novo) — `valor / LABEL` em coluna com `tone: 'default' | 'warn' | 'danger'`
+  - `src/components/worklog/status-pill.tsx` (novo) — variantes `text` (mockup card) e `badge` (substitui `InactiveBadge` inline em `ticket-detail.tsx` e `ticket-table.tsx`)
+  - `src/lib/worklog-meta.ts` — adiciona `systemShortCode(i)` que retorna `s-{0-padded 3-digit}`
+  - exports em `src/components/worklog/index.ts`
+  - TDD-exemption: UI pura sem test runner; `systemShortCode` é função pura trivial.
+  - tsc ✓, lint ✓
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)
