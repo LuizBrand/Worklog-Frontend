@@ -1,7 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRef, useState, useEffect } from 'react'
 import { Search, ShieldOff } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -9,11 +8,9 @@ import { toast } from 'sonner'
 import { useFindAllUsers, useDeactiveUserByPublicId } from '@/api/generated/usuários/usuários'
 import { useAuthStore } from '@/state/auth'
 import { invalidateUsers } from '@/api/invalidate'
-import { UserTable } from '@/components/users/user-table'
+import { UserGrid } from '@/components/users/user-grid'
 
 export default function UsuariosPage() {
-  const router = useRouter()
-  const params = useSearchParams()
   const qc = useQueryClient()
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -21,10 +18,7 @@ export default function UsuariosPage() {
   const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
 
   const [searchInput, setSearchInput] = useState('')
-  const [confirmId, setConfirmId] = useState<string | null>(null)
-
-  const routerRef = useRef(router)
-  useEffect(() => { routerRef.current = router }, [router])
+  const [confirmTarget, setConfirmTarget] = useState<{ publicId: string; name: string; active: boolean } | null>(null)
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -43,10 +37,10 @@ export default function UsuariosPage() {
       onSuccess: () => {
         invalidateUsers(qc)
         toast.success('Usuário desativado')
-        setConfirmId(null)
+        setConfirmTarget(null)
       },
       onError: () => {
-        setConfirmId(null)
+        setConfirmTarget(null)
       },
     },
   })
@@ -97,20 +91,27 @@ export default function UsuariosPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <UserTable
+      {/* Grid */}
+      <UserGrid
         users={filtered}
         loading={usersQ.isLoading}
-        onDeactivate={(id) => setConfirmId(id)}
+        onToggleActive={(publicId, active, name) => {
+          if (!active) {
+            // Backend has no reactivate endpoint for users; surface that here.
+            toast.error('Reativar usuário ainda não é suportado pelo backend')
+            return
+          }
+          setConfirmTarget({ publicId, name, active })
+        }}
       />
 
       {/* Deactivate confirm overlay */}
-      {confirmId && (
+      {confirmTarget && (
         <>
           <div
             className="fixed inset-0 z-50"
             style={{ background: 'rgba(0,0,0,0.45)' }}
-            onClick={() => setConfirmId(null)}
+            onClick={() => setConfirmTarget(null)}
           />
           <div
             className="fixed left-1/2 top-1/2 z-[60] w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl p-6 shadow-2xl"
@@ -120,18 +121,18 @@ export default function UsuariosPage() {
               Desativar usuário?
             </p>
             <p className="mb-5 text-[13px]" style={{ color: 'var(--wl-text-muted)' }}>
-              O usuário perderá acesso ao sistema. Esta ação não pode ser desfeita pelo painel.
+              O usuário &quot;{confirmTarget.name}&quot; perderá acesso ao sistema. Esta ação não pode ser desfeita pelo painel.
             </p>
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setConfirmId(null)}
+                onClick={() => setConfirmTarget(null)}
                 className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70"
                 style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
               >
                 Cancelar
               </button>
               <button
-                onClick={() => deactivateMut.mutate({ publicId: confirmId })}
+                onClick={() => deactivateMut.mutate({ publicId: confirmTarget.publicId })}
                 disabled={deactivateMut.isPending}
                 className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50 hover:opacity-85"
                 style={{ background: '#ef4444', color: '#fff' }}

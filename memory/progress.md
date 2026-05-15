@@ -30,6 +30,12 @@ changed but this file wasn't updated.
   - Pendências backend: `SystemResponse.description` ausente; `SystemRequest.enabled` ausente da spec (toggle usa cast)
   - tsc ✓, lint ✓, evidência: `.agent/visual/r2-sistemas-{desktop,mobile}.{png,md}`
 
+- [x] 2026-05-15 — Redesign V2 R3 — Usuários (card grid):
+  - `src/components/users/user-table.tsx` → `user-grid.tsx` — card centrado, ponto verde/cinza decorativo no canto, avatar 56px, nome+e-mail, role badge ADMIN/USER, rodapé Desativar/Reativar
+  - `src/app/(app)/usuarios/page.tsx` — `confirmTarget` substitui `confirmId`; "Reativar" mostra toast.error (backend sem endpoint); removidas refs não usadas a `router`/`params`
+  - Pendência backend: endpoint para reativar usuário inexistente — botão Reativar bloqueado com toast
+  - tsc ✓, lint ✓, evidência: `.agent/visual/r3-usuarios-{desktop,mobile}.{png,md}`
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)
