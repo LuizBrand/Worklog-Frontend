@@ -13,7 +13,7 @@ import {
 import { fmtDate } from '@/lib/worklog-meta'
 import { invalidateClients, invalidateClient } from '@/api/invalidate'
 import { useAuthStore } from '@/state/auth'
-import { ClientStatusBadge } from './client-table'
+import { StatusPill } from '@/components/worklog'
 import { ClientEditDialog } from './client-form'
 
 export interface ClientDetailProps {
@@ -164,7 +164,7 @@ export function ClientDetail({ publicId, onClose }: ClientDetailProps) {
                 {/* ── Meta grid ── */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3 pb-4">
                   <MetaItem label="STATUS">
-                    <ClientStatusBadge enabled={client?.enabled} />
+                    <StatusPill active={client?.enabled !== false} variant="badge" />
                   </MetaItem>
                   <MetaItem label="CRIADO">
                     <span className="text-[13px]" style={{ color: 'var(--wl-text)' }}>

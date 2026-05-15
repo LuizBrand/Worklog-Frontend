@@ -17,6 +17,13 @@ changed but this file wasn't updated.
   - TDD-exemption: UI pura sem test runner; `systemShortCode` é função pura trivial.
   - tsc ✓, lint ✓
 
+- [x] 2026-05-15 — Redesign V2 R1 — Clientes (card grid):
+  - `src/components/clients/client-table.tsx` → `client-grid.tsx` — grid `1/2/3/4/5` cols, avatar + e-mail placeholder (oculto até backend liberar) + StatusPill + 3 StatCells TICKETS/ABERTOS/CRÍTICOS + Ver tickets + Desativar/Ativar admin-only
+  - `src/components/clients/client-detail.tsx` — usa `StatusPill variant="badge"` (substitui o antigo `ClientStatusBadge`)
+  - `src/app/(app)/clientes/page.tsx` — agrega `statsByClient` via `useFindAllTickets({ size: 500 })` (sem aggregation endpoint); `Ver tickets` faz `router.push('/tickets?clientId=…')`; novo botão `+ Cliente`; confirm dialog suporta desativar (`useSoftDeleteClient`) e reativar (`useUpdateClient { enabled: true }`)
+  - Pendência backend: `ClientResponse.email`
+  - tsc ✓, lint ✓, evidência: `.agent/visual/r1-clientes-{desktop,mobile}.{png,md}`
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)
