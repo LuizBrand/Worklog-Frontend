@@ -43,6 +43,15 @@ Examples:
   expected next step before falling back to whatever was already
   pending.
 
+- **2026-05-15** — `SystemRequest` na spec OpenAPI só expõe `name`, mas
+  `SystemResponse` carrega `enabled`. PATCH `/systems/{id}` aceita o
+  campo na prática, então o frontend faz cast `{ enabled } as
+  SystemRequest` para alternar ativação até a spec ser corrigida.
+  → **Rule**: Quando a spec mostra divergência entre Request e Response
+  para um campo claramente de domínio (enabled/active/etc.), cast no
+  call-site é aceitável temporariamente; documentar como pendência em
+  `memory/plan.md` e abrir gap no backend.
+
 ## Orval nested params vs Spring Boot flat params
 
 Orval gera `FindAllTicketsParams = {filters: {...}, pageable: {...}}`.

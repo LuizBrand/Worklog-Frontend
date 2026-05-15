@@ -36,6 +36,12 @@ changed but this file wasn't updated.
   - Pendência backend: endpoint para reativar usuário inexistente — botão Reativar bloqueado com toast
   - tsc ✓, lint ✓, evidência: `.agent/visual/r3-usuarios-{desktop,mobile}.{png,md}`
 
+- [x] 2026-05-15 — Redesign V2 R4 — polimento + memória:
+  - `memory/plan.md` — Locked Decision §8 (V2 admin modules = card grid; admin-only toggles; pendências de backend listadas)
+  - `memory/gotchas.md` — entry sobre divergência Request/Response na spec do backend (cast `{ enabled } as SystemRequest`)
+  - `scripts/capture-redesign.mjs` (novo) — script Playwright autocontido para capturar as 6 telas (login + 3 rotas × 2 viewports)
+  - 6 PNGs + 6 notas em `.agent/visual/r{1,2,3}-{desktop,mobile}.{png,md}`
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)

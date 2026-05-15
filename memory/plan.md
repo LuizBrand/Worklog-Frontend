@@ -43,6 +43,15 @@ Approved long-form plan with full rationale lives at
 6. **Route groups.** `(auth)/login` (no shell, no guard) and
    `(app)/...` (auth-gated, framed by `<AppShell>`).
 7. **Locale.** pt-BR.
+8. **V2 admin modules — card grid (2026-05-15).** Clientes, Sistemas e
+   Usuários renderizam grid responsivo de cards (mockups
+   `mockups/V2-*.png`); não usam mais `<DataTable>`. Mobile em escopo
+   (coluna única). Ativar/desativar é ADMIN-only (`useAuthStore.isAdmin`).
+   Primitivos compartilhados: `EntityCard`, `StatCell`, `StatusPill` em
+   `src/components/worklog/` + `systemShortCode` em `worklog-meta.ts`.
+   Pendências de backend que renderizam `—` até o backend liberar:
+   `ClientResponse.email`, `SystemResponse.description`,
+   `enabled` em `SystemRequest`, endpoint de reativar usuário.
 
 ## Vertical Slices
 
