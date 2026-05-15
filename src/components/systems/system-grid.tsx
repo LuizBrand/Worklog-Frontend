@@ -1,5 +1,5 @@
 import { EmptyState, EntityCard, StatCell, StatusPill, WlAvatar } from '@/components/worklog'
-import { systemShortCode } from '@/lib/worklog-meta'
+import { avatarColor, getInitials, systemShortCode } from '@/lib/worklog-meta'
 import type { SystemResponse } from '@/api/generated/schemas'
 
 export interface SystemStats {
@@ -17,9 +17,15 @@ export interface SystemGridProps {
 
 const EMPTY_STATS: SystemStats = { total: 0, open: 0 }
 
-const HEADER_PATTERN =
+const GRID_PATTERN =
   'repeating-linear-gradient(0deg, transparent 0 18px, rgba(255,255,255,0.04) 18px 19px), ' +
   'repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,255,255,0.04) 18px 19px)'
+
+// Hex color with appended alpha pair (00–ff). Centralized so the
+// background/glow tints stay in sync.
+function withAlpha(hex: string, hexAlpha: string): string {
+  return `${hex}${hexAlpha}`
+}
 
 export function SystemGrid({
   systems,
@@ -55,21 +61,28 @@ export function SystemGrid({
           const isActive = s.enabled !== false
           const stats = statsBySystem[s.publicId ?? ''] ?? EMPTY_STATS
           const name = s.name ?? '—'
-          // system.description is a pending backend field; line hides until exposed
-          const description = (s as { description?: string }).description
+          // system.description is a pending backend field; renders `—` placeholder
+          // so the slot stays reserved until the backend exposes the value.
+          const description = (s as { description?: string }).description ?? '—'
+          const initials = getInitials(name)
+          const color = avatarColor(initials)
+          // Layered header background: grid pattern over a radial color-tint
+          // centered on the avatar (creates the "glow" effect).
+          const headerBackground =
+            `${GRID_PATTERN}, ` +
+            `radial-gradient(circle at center, ${withAlpha(color, '4d')} 0%, ${withAlpha(color, '26')} 55%, ${withAlpha(color, '10')} 100%)`
           return (
             <EntityCard
               key={s.publicId}
               inactive={!isActive}
               onClick={s.publicId ? () => onCardClick?.(s.publicId!) : undefined}
             >
-              {/* Header with pattern background */}
+              {/* Header */}
               <div
                 className="relative flex h-[88px] items-center justify-center overflow-hidden rounded-t-xl"
                 style={{
-                  background: HEADER_PATTERN,
-                  backgroundColor: 'var(--wl-surface-2)',
-                  borderBottom: '1px solid var(--wl-border)',
+                  background: headerBackground,
+                  borderBottom: '1px solid var(--wl-border-2)',
                 }}
               >
                 <span
@@ -81,7 +94,15 @@ export function SystemGrid({
                 <div className="absolute right-3 top-2">
                   <StatusPill active={isActive} />
                 </div>
-                <WlAvatar name={name} size={56} className="rounded-lg" />
+                <WlAvatar
+                  name={name}
+                  size={56}
+                  className="rounded-lg"
+                  style={{
+                    boxShadow: `0 0 24px ${withAlpha(color, '80')}, 0 0 8px ${withAlpha(color, 'aa')}`,
+                    filter: 'brightness(1.18) saturate(1.1)',
+                  }}
+                />
               </div>
 
               {/* Body */}
@@ -89,20 +110,20 @@ export function SystemGrid({
                 <p className="truncate text-[14px] font-semibold leading-tight" style={{ color: 'var(--wl-text)' }}>
                   {name}
                 </p>
-                {description && (
-                  <p
-                    className="line-clamp-2 text-[12px] leading-snug"
-                    style={{ color: 'var(--wl-text-muted)' }}
-                  >
-                    {description}
-                  </p>
-                )}
+                <p
+                  className="line-clamp-2 text-[12px] leading-snug"
+                  style={{ color: 'var(--wl-text-muted)' }}
+                >
+                  {description}
+                </p>
               </div>
+
+              {/* Inset separator */}
+              <div className="mx-4 border-t" style={{ borderColor: 'var(--wl-border-2)' }} />
 
               {/* Footer */}
               <div
                 className="mt-auto flex items-center justify-between gap-3 px-4 py-3"
-                style={{ borderTop: '1px solid var(--wl-border)' }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-end gap-5">
@@ -113,7 +134,7 @@ export function SystemGrid({
                   <button
                     type="button"
                     onClick={() => onToggleActive(s.publicId!, isActive, name)}
-                    className="cursor-pointer text-[12px] font-medium transition-opacity hover:opacity-80"
+                    className="cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-opacity hover:opacity-80"
                     style={{ color: isActive ? '#e53e3e' : 'var(--primary)' }}
                   >
                     {isActive ? 'Desativar' : 'Ativar'}
@@ -136,16 +157,14 @@ function SystemCardSkeleton() {
     >
       <div
         className="h-[88px] rounded-t-xl"
-        style={{ background: 'var(--wl-surface-2)', borderBottom: '1px solid var(--wl-border)' }}
+        style={{ background: 'var(--wl-surface-2)', borderBottom: '1px solid var(--wl-border-2)' }}
       />
       <div className="space-y-1.5 p-4">
         <div className="h-4 w-1/2 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
         <div className="h-3 w-3/4 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
       </div>
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderTop: '1px solid var(--wl-border)' }}
-      >
+      <div className="mx-4 border-t" style={{ borderColor: 'var(--wl-border-2)' }} />
+      <div className="flex items-center justify-between px-4 py-3">
         <div className="flex gap-5">
           {[0, 1].map((i) => (
             <div key={i} className="space-y-1">

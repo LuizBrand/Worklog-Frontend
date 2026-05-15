@@ -48,6 +48,13 @@ changed but this file wasn't updated.
   - Evidência atualizada: `.agent/visual/r1-clientes-desktop.{png,md}`
   - tsc ✓, lint ✓
 
+- [x] 2026-05-15 — Refinamento R2 — Sistemas (feedback do dono):
+  - `src/components/systems/system-grid.tsx` — header agora usa `radial-gradient` tintado com a cor do avatar (`withAlpha(color, '4d→26→10')`) sobreposto ao padrão de grid; avatar ganha `boxShadow` (glow na mesma cor) e `filter: brightness(1.18) saturate(1.1)` para aspecto brilhante; separador entre header e body fica borda-a-borda (`borderBottom` no header); separador entre body e footer é inset (`mx-4 border-t`); descrição mostra `—` placeholder; Desativar ganha padding `px-3 py-1.5` + cantos arredondados; skeleton atualizado
+  - `src/components/worklog/avatar.tsx` — `WlAvatar` ganha prop opcional `style?: React.CSSProperties` para receber glow/filter quando usado em Sistemas (TDD-exemption: extensão de prop em UI puro existente)
+  - `StatusPill` (variante `text`) já compartilha o verde brilhante `#4ade80` com Clientes
+  - Evidência atualizada: `.agent/visual/r2-sistemas-desktop.{png,md}`
+  - tsc ✓, lint ✓
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)

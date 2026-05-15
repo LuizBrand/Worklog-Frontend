@@ -5,9 +5,10 @@ export interface WlAvatarProps {
   name: string
   size?: number
   className?: string
+  style?: React.CSSProperties
 }
 
-export function WlAvatar({ name, size = 28, className }: WlAvatarProps) {
+export function WlAvatar({ name, size = 28, className, style }: WlAvatarProps) {
   const initials = getInitials(name)
   const bg = avatarColor(initials)
 
@@ -23,6 +24,7 @@ export function WlAvatar({ name, size = 28, className }: WlAvatarProps) {
         background: bg,
         fontSize: Math.round(size * 0.38),
         letterSpacing: '0.02em',
+        ...style,
       }}
       aria-label={name}
     >
