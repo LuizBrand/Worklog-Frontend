@@ -42,6 +42,12 @@ changed but this file wasn't updated.
   - `scripts/capture-redesign.mjs` (novo) — script Playwright autocontido para capturar as 6 telas (login + 3 rotas × 2 viewports)
   - 6 PNGs + 6 notas em `.agent/visual/r{1,2,3}-{desktop,mobile}.{png,md}`
 
+- [x] 2026-05-15 — Refinamento R1 — Clientes (feedback do dono):
+  - `src/components/clients/client-grid.tsx` — avatar agora `rounded-md size=40` (igual ao card de Sistemas, deixou de ser circular); placeholder `—` sempre visível embaixo do nome (slot reservado para o e-mail futuro); 2 separadores inset (`mx-4`) entre seções (header/stats e stats/footer), sem tocar as bordas; `Ver tickets` ganha `flex-1` (mais comprido); `Desativar` ganha padding `px-3 py-1.5` e cantos arredondados; stats viram `grid grid-cols-3` (distribuição igual entre TICKETS/ABERTOS/CRÍTICOS); skeleton atualizado
+  - `src/components/worklog/status-pill.tsx` — variante `text` troca verde `#22c55e` por `#4ade80` (mais vibrante), mantém variante `badge` inalterada
+  - Evidência atualizada: `.agent/visual/r1-clientes-desktop.{png,md}`
+  - tsc ✓, lint ✓
+
 - [x] 2026-05-11 — Committed pending work from 2026-05-10 session:
   - `448f228` refactor(auth): migrate to HttpOnly cookie session (cookie-auth + openapi regen + handoff doc)
   - `876992b` feat: close backend gaps and surface priority across UI (A/B/C)

@@ -22,7 +22,7 @@ export function StatusPill({ active, variant = 'text', className }: StatusPillPr
   return (
     <span
       className={`inline-flex items-center text-[11px] font-medium ${className ?? ''}`}
-      style={{ color: active ? '#22c55e' : '#ef4444' }}
+      style={{ color: active ? '#4ade80' : '#ef4444' }}
     >
       {active ? 'Ativo' : 'Inativo'}
     </span>

@@ -53,8 +53,9 @@ export function ClientGrid({
           const isActive = c.enabled !== false
           const stats = statsByClient[c.publicId ?? ''] ?? EMPTY_STATS
           const name = c.name ?? '—'
-          // client.email is a pending backend field; line hides until exposed
-          const email = (c as { email?: string }).email
+          // client.email is a pending backend field; renders `—` placeholder
+          // so the line keeps its slot until the backend exposes the value.
+          const email = (c as { email?: string }).email ?? '—'
           return (
             <EntityCard
               key={c.publicId}
@@ -62,38 +63,41 @@ export function ClientGrid({
               onClick={c.publicId ? () => onCardClick?.(c.publicId!) : undefined}
             >
               {/* Header */}
-              <div className="flex items-start gap-3 p-4 pb-3">
-                <WlAvatar name={name} size={36} />
+              <div className="flex items-start gap-3 px-4 pb-3 pt-4">
+                <WlAvatar name={name} size={40} className="shrink-0 rounded-md" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-semibold leading-tight" style={{ color: 'var(--wl-text)' }}>
                     {name}
                   </p>
-                  {email && (
-                    <p className="truncate text-[11px] leading-tight" style={{ color: 'var(--wl-text-muted)' }}>
-                      {email}
-                    </p>
-                  )}
+                  <p className="truncate text-[11px] leading-tight" style={{ color: 'var(--wl-text-muted)' }}>
+                    {email}
+                  </p>
                 </div>
                 <StatusPill active={isActive} className="shrink-0" />
               </div>
 
-              {/* Stats */}
-              <div className="flex items-end gap-6 px-4 pb-3">
+              {/* Inset separator */}
+              <div className="mx-4 border-t" style={{ borderColor: 'var(--wl-border-2)' }} />
+
+              {/* Stats: 3 evenly distributed columns */}
+              <div className="grid grid-cols-3 px-4 py-3">
                 <StatCell value={stats.total} label="TICKETS" />
                 <StatCell value={stats.open} label="ABERTOS" tone={stats.open > 0 ? 'warn' : 'default'} />
                 <StatCell value={stats.critical} label="CRÍTICOS" tone={stats.critical > 0 ? 'danger' : 'default'} />
               </div>
 
+              {/* Inset separator */}
+              <div className="mx-4 border-t" style={{ borderColor: 'var(--wl-border-2)' }} />
+
               {/* Footer */}
               <div
-                className="mt-auto flex items-center justify-between gap-2 px-4 py-3"
-                style={{ borderTop: '1px solid var(--wl-border)' }}
+                className="mt-auto flex items-center gap-2 px-4 py-3"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
                   type="button"
                   onClick={() => c.publicId && onViewTickets?.(c.publicId)}
-                  className="cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors hover:bg-[var(--wl-surface-2)]"
+                  className="flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors hover:bg-[var(--wl-surface-2)]"
                   style={{
                     background: 'transparent',
                     color: 'var(--wl-text)',
@@ -106,7 +110,7 @@ export function ClientGrid({
                   <button
                     type="button"
                     onClick={() => onToggleActive(c.publicId!, isActive, name)}
-                    className="cursor-pointer text-[12px] font-medium transition-opacity hover:opacity-80"
+                    className="cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-opacity hover:opacity-80"
                     style={{ color: isActive ? '#e53e3e' : 'var(--primary)' }}
                   >
                     {isActive ? 'Desativar' : 'Ativar'}
@@ -127,14 +131,15 @@ function ClientCardSkeleton() {
       className="flex flex-col rounded-xl"
       style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
     >
-      <div className="flex items-start gap-3 p-4 pb-3">
-        <div className="h-9 w-9 animate-pulse rounded-full" style={{ background: 'var(--wl-surface-2)' }} />
+      <div className="flex items-start gap-3 px-4 pb-3 pt-4">
+        <div className="h-10 w-10 animate-pulse rounded-md" style={{ background: 'var(--wl-surface-2)' }} />
         <div className="flex-1 space-y-1.5">
           <div className="h-3.5 w-3/4 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
           <div className="h-3 w-2/3 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
         </div>
       </div>
-      <div className="flex gap-6 px-4 pb-3">
+      <div className="mx-4 border-t" style={{ borderColor: 'var(--wl-border-2)' }} />
+      <div className="grid grid-cols-3 px-4 py-3">
         {[0, 1, 2].map((i) => (
           <div key={i} className="space-y-1">
             <div className="h-4 w-6 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
@@ -142,12 +147,10 @@ function ClientCardSkeleton() {
           </div>
         ))}
       </div>
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderTop: '1px solid var(--wl-border)' }}
-      >
-        <div className="h-6 w-20 animate-pulse rounded-md" style={{ background: 'var(--wl-surface-2)' }} />
-        <div className="h-3 w-14 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
+      <div className="mx-4 border-t" style={{ borderColor: 'var(--wl-border-2)' }} />
+      <div className="flex items-center gap-2 px-4 py-3">
+        <div className="h-7 flex-1 animate-pulse rounded-md" style={{ background: 'var(--wl-surface-2)' }} />
+        <div className="h-3 w-16 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
       </div>
     </div>
   )
