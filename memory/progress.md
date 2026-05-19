@@ -8,6 +8,14 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-05-19 — Mobile UI redesign: tickets page + FAB + filter icon em todas as páginas:
+  - `src/components/worklog/mobile-fab.tsx` (novo) — FAB fixo acima do BottomTabBar
+  - `src/components/tickets/ticket-table.tsx` — adiciona `MobileTicketCards` para lista de cards em mobile
+  - `src/app/(app)/tickets/page.tsx` — redesign mobile: header simplificado, barra de busca full-width, chips de status, lista de cards, filtro de cliente via ícone, FAB
+  - `src/app/(app)/clientes/page.tsx` — FAB (oculta "+" no header em mobile) + ícone de filtro para status
+  - `src/app/(app)/sistemas/page.tsx` — FAB (oculta "+" no header em mobile)
+  - TDD-exemption: componentes UI puros; sem test runner configurado.
+
 - [x] 2026-05-15 — Redesign V2 R0 — primitivos compartilhados:
   - `src/components/worklog/entity-card.tsx` (novo) — shell `rounded-xl` com `inactive`/`selected`/`onClick`/`children`
   - `src/components/worklog/stat-cell.tsx` (novo) — `valor / LABEL` em coluna com `tone: 'default' | 'warn' | 'danger'`
