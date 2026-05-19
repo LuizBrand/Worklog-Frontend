@@ -14,7 +14,10 @@ changed but this file wasn't updated.
   - `src/app/(app)/tickets/page.tsx` — redesign mobile: header simplificado, barra de busca full-width, chips de status, lista de cards, filtro de cliente via ícone, FAB
   - `src/app/(app)/clientes/page.tsx` — FAB (oculta "+" no header em mobile) + ícone de filtro para status
   - `src/app/(app)/sistemas/page.tsx` — FAB (oculta "+" no header em mobile)
+  - `src/app/(app)/dashboard/page.tsx` — adiciona MobileFab com href para /tickets?create=1
+  - `src/components/dashboard/ticket-list.tsx` — simplifica layout do header do painel pendentes
   - TDD-exemption: componentes UI puros; sem test runner configurado.
+  - tsc ✓, lint ✓
 
 - [x] 2026-05-15 — Redesign V2 R0 — primitivos compartilhados:
   - `src/components/worklog/entity-card.tsx` (novo) — shell `rounded-xl` com `inactive`/`selected`/`onClick`/`children`

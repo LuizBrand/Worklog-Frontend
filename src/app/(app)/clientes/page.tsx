@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, Loader2 } from 'lucide-react'
+import { Search, Loader2, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -15,7 +15,7 @@ import { useFindAllTickets } from '@/api/generated/tickets/tickets'
 import { ClientGrid, type ClientStats } from '@/components/clients/client-grid'
 import { ClientDetail } from '@/components/clients/client-detail'
 import { ClientCreateDialog, ClientEditFetcher } from '@/components/clients/client-form'
-import { FilterSelect } from '@/components/worklog'
+import { FilterSelect, MobileFab } from '@/components/worklog'
 import { invalidateClients, invalidateClient } from '@/api/invalidate'
 import { useAuthStore } from '@/state/auth'
 import type { ClientResponse, PageTicketSummary, TicketSummary } from '@/api/generated/schemas'
@@ -46,6 +46,7 @@ export default function ClientesPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [toggleTarget, setToggleTarget] = useState<{ publicId: string; name: string; active: boolean } | null>(null)
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
 
   const deactivateMut = useSoftDeleteClient({
     mutation: {
@@ -167,9 +168,9 @@ export default function ClientesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* ── Page header ── */}
+      {/* ── Desktop header ── */}
       <div
-        className="flex h-[52px] shrink-0 items-center gap-3 px-6"
+        className="hidden md:flex h-[52px] shrink-0 items-center gap-3 px-6"
         style={{ borderBottom: '1px solid var(--wl-border)' }}
       >
         <h1 className="text-[18px] font-semibold" style={{ color: 'var(--wl-text)' }}>
@@ -178,14 +179,9 @@ export default function ClientesPage() {
 
         <div className="flex-1" />
 
-        {/* Search */}
         <div
           className="flex items-center gap-2 rounded-lg px-3 py-1.5"
-          style={{
-            background: 'var(--wl-surface-2)',
-            border: '1px solid var(--wl-border)',
-            minWidth: 220,
-          }}
+          style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', minWidth: 220 }}
         >
           <Search size={14} style={{ color: 'var(--wl-text-muted)', flexShrink: 0 }} />
           <input
@@ -198,10 +194,8 @@ export default function ClientesPage() {
           />
         </div>
 
-        {/* Status filter */}
         <FilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v as typeof statusFilter)} options={STATUS_OPTIONS} />
 
-        {/* + Cliente */}
         <button
           onClick={() => setShowCreate(true)}
           className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
@@ -216,6 +210,76 @@ export default function ClientesPage() {
           </kbd>
         </button>
       </div>
+
+      {/* ── Mobile header ── */}
+      <div
+        className="md:hidden flex h-[52px] shrink-0 items-center gap-2 px-4"
+        style={{ borderBottom: '1px solid var(--wl-border)' }}
+      >
+        <h1 className="text-[18px] font-semibold" style={{ color: 'var(--wl-text)' }}>
+          Clientes
+        </h1>
+
+        <div className="flex-1" />
+
+        {/* Search (mobile) */}
+        <div
+          className="flex items-center gap-2 rounded-lg px-3 py-1.5 flex-1 max-w-[180px]"
+          style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)' }}
+        >
+          <Search size={13} style={{ color: 'var(--wl-text-muted)', flexShrink: 0 }} />
+          <input
+            ref={searchRef}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Buscar..."
+            className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-[var(--wl-text-muted)] min-w-0"
+            style={{ color: 'var(--wl-text)' }}
+          />
+        </div>
+
+        {/* Filter icon */}
+        <button
+          onClick={() => setMobileFilterOpen((v) => !v)}
+          className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-[var(--wl-surface-2)]"
+          style={{ color: statusFilter ? 'var(--primary)' : 'var(--wl-text-muted)' }}
+          aria-label="Filtros"
+        >
+          <Filter size={18} />
+          {statusFilter && (
+            <span
+              className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full"
+              style={{ background: 'var(--primary)' }}
+            />
+          )}
+        </button>
+      </div>
+
+      {/* ── Mobile filter panel (status) ── */}
+      {mobileFilterOpen && (
+        <div
+          className="md:hidden flex gap-2 px-4 py-3"
+          style={{ borderBottom: '1px solid var(--wl-border)' }}
+        >
+          {STATUS_OPTIONS.map((opt) => {
+            const active = statusFilter === opt.value
+            return (
+              <button
+                key={opt.value}
+                onClick={() => { setStatusFilter(opt.value as typeof statusFilter); setMobileFilterOpen(false) }}
+                className="flex shrink-0 cursor-pointer items-center rounded-full px-3 py-1.5 text-[12px] font-medium whitespace-nowrap transition-colors"
+                style={{
+                  border: `1px solid ${active ? 'var(--primary)' : 'var(--wl-border)'}`,
+                  background: active ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'var(--wl-surface-2)',
+                  color: active ? 'var(--primary)' : 'var(--wl-text-muted)',
+                }}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* ── Grid ── */}
       <ClientGrid
@@ -235,6 +299,9 @@ export default function ClientesPage() {
 
       {/* ── Edit from row menu (legacy entry) ── */}
       {editId && <ClientEditFetcher publicId={editId} onClose={() => setEditId(null)} />}
+
+      {/* ── Mobile FAB ── */}
+      <MobileFab onClick={() => setShowCreate(true)} />
 
       {/* ── Confirm deactivate/activate ── */}
       {toggleTarget && (

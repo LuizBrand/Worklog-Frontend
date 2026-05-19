@@ -17,6 +17,7 @@ import { SystemDetail } from '@/components/systems/system-detail'
 import { SystemCreateDialog, SystemEditFetcher } from '@/components/systems/system-form'
 import { invalidateSystems, invalidateSystem } from '@/api/invalidate'
 import { useAuthStore } from '@/state/auth'
+import { MobileFab } from '@/components/worklog'
 import type {
   SystemResponse,
   SystemRequest,
@@ -158,9 +159,9 @@ export default function SistemasPage() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* ── Header ── */}
+      {/* ── Desktop header ── */}
       <div
-        className="flex h-[52px] shrink-0 items-center gap-3 px-6"
+        className="hidden md:flex h-[52px] shrink-0 items-center gap-3 px-6"
         style={{ borderBottom: '1px solid var(--wl-border)' }}
       >
         <h1 className="text-[18px] font-semibold" style={{ color: 'var(--wl-text)' }}>
@@ -169,7 +170,6 @@ export default function SistemasPage() {
 
         <div className="flex-1" />
 
-        {/* Search */}
         <div
           className="flex items-center gap-2 rounded-lg px-3 py-1.5"
           style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', minWidth: 220 }}
@@ -185,7 +185,6 @@ export default function SistemasPage() {
           />
         </div>
 
-        {/* + Sistema */}
         <button
           onClick={() => setShowCreate(true)}
           className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
@@ -199,6 +198,33 @@ export default function SistemasPage() {
             C
           </kbd>
         </button>
+      </div>
+
+      {/* ── Mobile header ── */}
+      <div
+        className="md:hidden flex h-[52px] shrink-0 items-center gap-2 px-4"
+        style={{ borderBottom: '1px solid var(--wl-border)' }}
+      >
+        <h1 className="text-[18px] font-semibold" style={{ color: 'var(--wl-text)' }}>
+          Sistemas
+        </h1>
+
+        <div className="flex-1" />
+
+        <div
+          className="flex items-center gap-2 rounded-lg px-3 py-1.5 flex-1 max-w-[200px]"
+          style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)' }}
+        >
+          <Search size={13} style={{ color: 'var(--wl-text-muted)', flexShrink: 0 }} />
+          <input
+            ref={searchRef}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Buscar..."
+            className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-[var(--wl-text-muted)] min-w-0"
+            style={{ color: 'var(--wl-text)' }}
+          />
+        </div>
       </div>
 
       {/* ── Grid ── */}
@@ -218,6 +244,9 @@ export default function SistemasPage() {
 
       {/* ── Edit from row menu (legacy entry) ── */}
       {editId && <SystemEditFetcher publicId={editId} onClose={() => setEditId(null)} />}
+
+      {/* ── Mobile FAB ── */}
+      <MobileFab onClick={() => setShowCreate(true)} />
 
       {/* ── Confirm toggle ── */}
       {toggleTarget && (

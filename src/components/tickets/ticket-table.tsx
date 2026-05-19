@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { MoreHorizontal, Eye, Pencil, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Eye, Pencil, Trash2, ChevronRight } from 'lucide-react'
 
-import { StatusChip, StatusPill, WlAvatar, EmptyState } from '@/components/worklog'
+import { StatusChip, StatusPill, WlAvatar, EmptyState, PriorityDot } from '@/components/worklog'
 import { apiToUiStatus } from '@/lib/ticket-status'
-import { fmtDateTime, PRIORITY_META } from '@/lib/worklog-meta'
+import { fmtDateTime, PRIORITY_META, STATUS_META } from '@/lib/worklog-meta'
 import type { TicketSummary } from '@/api/generated/schemas'
 import type { ApiTicketStatus } from '@/lib/ticket-status'
 import type { TicketPriority } from '@/lib/worklog-meta'
@@ -207,6 +207,159 @@ export function TicketTable({ tickets, loading, onRowClick, onEdit, onDelete }: 
             })}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+// ── Mobile card list ─────────────────────────────────────────────────────────
+
+export interface MobileTicketCardsProps {
+  tickets: TicketSummary[]
+  loading?: boolean
+  onTicketClick?: (publicId: string) => void
+  onEdit?: (publicId: string) => void
+  onDelete?: (publicId: string) => void
+}
+
+export function MobileTicketCards({ tickets, loading, onTicketClick, onEdit, onDelete }: MobileTicketCardsProps) {
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+
+  if (loading) {
+    return (
+      <div className="flex flex-col">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-[82px] animate-pulse"
+            style={{ borderBottom: '1px solid var(--wl-border)' }}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  if (tickets.length === 0) {
+    return (
+      <div className="py-16">
+        <EmptyState title="Nenhum ticket" description="Nenhum ticket encontrado para os filtros aplicados." />
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {tickets.map((t) => {
+        const uiStatus = t.status ? apiToUiStatus(t.status as ApiTicketStatus) : 'OPEN'
+        const meta = STATUS_META[uiStatus]
+        const priority = t.priority as TicketPriority | undefined
+        const clientName = t.client?.name ?? '—'
+        const systemName = t.system?.name
+        const isMenuOpen = openMenuId === t.publicId
+
+        return (
+          <div key={t.publicId} className="relative" style={{ borderBottom: '1px solid var(--wl-border)' }}>
+            <div className="flex items-stretch">
+              {/* Left status accent */}
+              <div
+                className="ml-4 w-[3px] shrink-0 rounded-full my-3"
+                style={{ background: meta.color }}
+              />
+
+              {/* Card body */}
+              <button
+                onClick={() => t.publicId && onTicketClick?.(t.publicId)}
+                className="flex-1 min-w-0 text-left px-3 py-3 transition-colors active:bg-[var(--wl-surface-2)]"
+              >
+                {/* Row 1: Title + short ID + chevron */}
+                <div className="flex items-start gap-2">
+                  <p
+                    className="flex-1 text-[13px] font-medium leading-snug line-clamp-2"
+                    style={{ color: 'var(--wl-text)' }}
+                  >
+                    {t.title ?? '(sem título)'}
+                  </p>
+                  <div className="flex shrink-0 items-center gap-0.5 mt-0.5">
+                    <span className="font-mono text-[10px]" style={{ color: 'var(--wl-text-muted)' }}>
+                      {t.publicId ? `t-${t.publicId.slice(0, 4)}` : '—'}
+                    </span>
+                    <ChevronRight size={13} style={{ color: 'var(--wl-text-muted)' }} />
+                  </div>
+                </div>
+
+                {/* Row 2: Status chip + Priority */}
+                <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                  <StatusChip status={uiStatus} size="sm" />
+                  {priority && <PriorityDot priority={priority} />}
+                </div>
+
+                {/* Row 3: Client + System badge */}
+                <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>
+                    {clientName}
+                  </span>
+                  {systemName && (
+                    <>
+                      <span className="text-[11px]" style={{ color: 'var(--wl-text-muted)' }}>·</span>
+                      <span
+                        className="rounded px-1.5 py-0.5 text-[10px] font-semibold"
+                        style={{
+                          background: 'color-mix(in oklch, var(--primary) 18%, transparent)',
+                          color: 'var(--primary)',
+                        }}
+                      >
+                        {systemName}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </button>
+
+              {/* Row action menu */}
+              <div
+                className="relative flex shrink-0 items-center pr-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setOpenMenuId(isMenuOpen ? null : (t.publicId ?? null))}
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+                  style={{ color: 'var(--wl-text-muted)' }}
+                  aria-label="Ações"
+                >
+                  <MoreHorizontal size={15} />
+                </button>
+
+                {isMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setOpenMenuId(null)} />
+                    <div
+                      className="absolute right-2 top-full z-20 mt-1 min-w-[160px] overflow-hidden rounded-lg py-1 shadow-lg"
+                      style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
+                    >
+                      <MenuItem
+                        icon={<Eye size={13} />}
+                        label="Ver detalhes"
+                        onClick={() => { setOpenMenuId(null); if (t.publicId) onTicketClick?.(t.publicId) }}
+                      />
+                      <MenuItem
+                        icon={<Pencil size={13} />}
+                        label="Editar"
+                        onClick={() => { setOpenMenuId(null); if (t.publicId) onEdit?.(t.publicId) }}
+                      />
+                      <div style={{ height: 1, background: 'var(--wl-border)', margin: '4px 0' }} />
+                      <MenuItem
+                        icon={<Trash2 size={13} />}
+                        label="Excluir"
+                        danger
+                        onClick={() => { setOpenMenuId(null); if (t.publicId) onDelete?.(t.publicId) }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

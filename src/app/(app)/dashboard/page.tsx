@@ -12,6 +12,7 @@ import { StatusDonut } from '@/components/dashboard/status-donut'
 import { PriorityDistribution } from '@/components/dashboard/priority-distribution'
 import { QuickFilters } from '@/components/dashboard/quick-filters'
 import { RecentActivity } from '@/components/dashboard/recent-activity'
+import { MobileFab } from '@/components/worklog'
 
 const API_STATUSES = [
   TicketFiltersParamsStatus.PENDING,
@@ -123,6 +124,8 @@ export default function DashboardPage() {
       </div>
 
       <RecentActivity tickets={recentTickets} loading={recentQ.isLoading} />
+
+      <MobileFab href="/tickets?create=1" />
     </main>
   )
 }

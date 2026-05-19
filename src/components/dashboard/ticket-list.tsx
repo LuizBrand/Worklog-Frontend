@@ -1,5 +1,4 @@
 import Link from 'next/link'
-
 import { StatusChip, EmptyState } from '@/components/worklog'
 import { apiToUiStatus } from '@/lib/ticket-status'
 import { fmtRelative, STATUS_META } from '@/lib/worklog-meta'
@@ -18,39 +17,23 @@ export function TicketList({ tickets, loading, totalCount }: TicketListProps) {
       className="flex flex-col rounded-xl p-4 lg:h-[660px]"
       style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)' }}
     >
-      <div className="flex flex-col gap-2 pb-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-[13px]" style={{ color: 'var(--status-open)' }}>
-            ⚠
-          </span>
+      <div className="flex items-center gap-2 pb-3">
+        <span className="text-[13px]" style={{ color: 'var(--status-open)' }}>⚠</span>
+        <span className="text-[13px] font-semibold" style={{ color: 'var(--wl-text)' }}>
+          Pendentes
+        </span>
+        <div className="flex-1" />
+        {totalCount !== undefined && !loading && (
           <span
-            className="text-[13px] font-semibold"
-            style={{ color: 'var(--wl-text)' }}
+            className="rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums"
+            style={{
+              background: 'color-mix(in oklch, var(--status-open) 18%, transparent)',
+              color: 'var(--status-open)',
+            }}
           >
-            Pendentes &amp; em andamento
+            {totalCount}
           </span>
-          {totalCount !== undefined && !loading && (
-            <span
-              className="rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums"
-              style={{
-                background: 'color-mix(in oklch, var(--status-open) 18%, transparent)',
-                color: 'var(--status-open)',
-              }}
-            >
-              {totalCount}
-            </span>
-          )}
-        </div>
-        <Link
-          href="/tickets?create=1"
-          className="w-fit self-end rounded-md px-3 py-1.5 text-[12px] font-semibold transition-opacity hover:opacity-85 sm:self-auto"
-          style={{
-            color: '#fff',
-            background: 'var(--primary)',
-          }}
-        >
-          + Novo ticket
-        </Link>
+        )}
       </div>
 
       <div style={{ height: 1, background: 'var(--wl-border)', flexShrink: 0 }} />
