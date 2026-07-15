@@ -13,8 +13,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const setUser = useAuthStore((s) => s.setUser)
 
   // Cookie auth: we can't read the HttpOnly cookie from JS, so we probe
-  // /users/me. 200 → authenticated; 401 → redirect to /login. The axios
-  // interceptor handles refresh transparently before this surface sees 401.
+  // /users/me. 200 → authenticated. The axios interceptor tries a transparent
+  // refresh first; if that fails the probe surfaces 401 (dead refresh) or 403
+  // (no valid session) here — either way, send the user to /login.
   const { data, isLoading, isError, error } = useGetMe({
     query: { retry: false },
   })
@@ -26,7 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isError) return
     const status = (error as { response?: { status?: number } } | null)?.response?.status
-    if (status === 401) {
+    if (status === 401 || status === 403) {
       notifySessionExpired()
       router.replace('/login')
     }

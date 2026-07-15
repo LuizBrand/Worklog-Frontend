@@ -34,31 +34,36 @@ export const api = axios.create({
 })
 
 // Cookies (worklog_access, worklog_refresh) are HttpOnly and sent automatically
-// by the browser when withCredentials is true. On 401, we hit /auth/refresh —
-// the server reads worklog_refresh, rotates both cookies, and the retried
-// request rides the new worklog_access. The single-flight lock prevents
-// concurrent refresh races.
+// by the browser when withCredentials is true. When the access token is
+// missing/expired, Spring Security answers protected routes with 403 (not 401),
+// so we treat both 401 and 403 as "try to refresh". We hit /auth/refresh — the
+// server reads worklog_refresh, rotates both cookies, and the retried request
+// rides the new worklog_access. The single-flight lock prevents concurrent
+// refresh races. We only force logout when the refresh itself fails (dead
+// session); a 403 that survives a successful refresh is a genuine authorization
+// denial and must not log the user out.
 let refreshPromise: Promise<void> | null = null
 
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (typeof window === 'undefined') throw error
-    if (error.response?.status !== 401) throw error
+    const status = error.response?.status
+    if (status !== 401 && status !== 403) throw error
 
     const originalRequest = error.config as
       | (AxiosRequestConfig & { __retried?: boolean })
       | undefined
-    if (!originalRequest || originalRequest.__retried) {
-      forceLogout()
-      throw error
-    }
 
-    const url = originalRequest.url ?? ''
+    const url = originalRequest?.url ?? ''
     if (url.includes('/auth/refresh') || url.includes('/auth/login')) {
       forceLogout()
       throw error
     }
+
+    // Already retried after a successful refresh: the session is valid, so this
+    // is a real authorization failure — surface it without killing the session.
+    if (!originalRequest || originalRequest.__retried) throw error
 
     refreshPromise ??= refreshSession().finally(() => {
       refreshPromise = null
@@ -66,12 +71,13 @@ api.interceptors.response.use(
 
     try {
       await refreshPromise
-      originalRequest.__retried = true
-      return api(originalRequest)
     } catch (refreshErr) {
       forceLogout()
       throw refreshErr
     }
+
+    originalRequest.__retried = true
+    return api(originalRequest)
   },
 )
 

@@ -186,7 +186,12 @@ export default function LoginPage() {
             <FieldError msg={loginErrors.password?.message} />
           </div>
 
-          <Button type="submit" size="lg" className="w-full" disabled={isLoginPending}>
+          <Button
+            type="submit"
+            size="lg"
+            className="mt-1 h-10 w-full text-sm font-semibold tracking-tight"
+            disabled={isLoginPending}
+          >
             {isLoginPending ? 'Entrando…' : 'Entrar'}
           </Button>
         </form>
@@ -252,7 +257,12 @@ export default function LoginPage() {
             <FieldError msg={regErrors.confirmPassword?.message} />
           </div>
 
-          <Button type="submit" size="lg" className="w-full" disabled={isRegisterPending}>
+          <Button
+            type="submit"
+            size="lg"
+            className="mt-1 h-10 w-full text-sm font-semibold tracking-tight"
+            disabled={isRegisterPending}
+          >
             {isRegisterPending ? 'Criando conta…' : 'Criar conta'}
           </Button>
         </form>

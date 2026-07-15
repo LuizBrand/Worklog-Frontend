@@ -8,6 +8,20 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-07-15 — Bugfix auth: sessão expirada não jogava para /login + polish do CTA de login:
+  - `src/lib/api.ts` — interceptor axios agora trata **401 e 403** como "tentar refresh"
+    (backend Spring devolve 403, não 401, quando o access cookie sumiu/expirou).
+    Só faz forceLogout quando o próprio `/auth/refresh` falha; 403 que sobrevive a um
+    refresh bem-sucedido é negação de permissão real e não desloga. Ver [[auth-403-contract]].
+  - `src/app/(app)/layout.tsx` — guarda `/users/me` redireciona para /login em 401 **ou** 403.
+  - `src/app/(auth)/login/page.tsx` — botão submit (Entrar / Criar conta) para
+    `h-10 w-full text-sm font-semibold tracking-tight` (largura casa com os inputs,
+    fonte 14px semibold em vez do 12px do `size=lg`).
+  - Verificado no navegador (3 cenários): sessão inválida → /login; access expirado +
+    refresh válido → refresh transparente (403→204→200); login válido → dashboard.
+  - Evidência visual: `.agent/visual/auth-403-and-login-cta.md`.
+  - tsc ✓, lint ✓ (só warning pré-existente do `_` em page.tsx).
+
 - [x] 2026-05-19 — Mobile UI redesign: tickets page + FAB + filter icon em todas as páginas:
   - `src/components/worklog/mobile-fab.tsx` (novo) — FAB fixo acima do BottomTabBar
   - `src/components/tickets/ticket-table.tsx` — adiciona `MobileTicketCards` para lista de cards em mobile
