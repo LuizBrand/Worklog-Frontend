@@ -8,6 +8,20 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-07-15 — Infra de deploy (VPS, front + back, cookie HttpOnly):
+  - Auth já estava migrada pro modelo de cookie (nada a mudar no código de auth):
+    `withCredentials`, sem localStorage/Bearer/CSRF, login espera 204, guard via
+    `/users/me`, interceptor renova no 403.
+  - `next.config.ts` — `output: "standalone"` (imagem Docker enxuta). Build validado
+    (`pnpm build` gera `.next/standalone/server.js`).
+  - `Dockerfile` multi-stage (pnpm/corepack, runner non-root); `NEXT_PUBLIC_API_URL`
+    entra como build ARG porque é congelado no build. `.dockerignore` adicionado.
+  - `deploy/` — `docker-compose.yml` (Caddy auto-HTTPS + frontend + backend
+    placeholder), `Caddyfile`, `.env.example` (APP_DOMAIN/API_DOMAIN, subdomínios
+    same-site app./api.). `.gitignore` libera `deploy/.env.example`.
+  - `DEPLOY.md` — passo a passo primeira-vez (DNS → Docker → compose up → verificar),
+    centrado no contrato do cookie SameSite=Strict e no gotcha 403 vs 401.
+
 - [x] 2026-07-15 — Remover auto-cadastro da tela de login:
   - Backend passou a expor `/auth/register` só para admin; admin padrão é criado no
     boot e cria usuários internamente via `/users`. Auto-cadastro público não se aplica.

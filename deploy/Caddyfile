@@ -1,0 +1,13 @@
+# Caddy obtains and renews Let's Encrypt certificates automatically for both
+# domains. No certbot, no manual renewal. Requires ports 80 + 443 open and the
+# DNS A records already pointing at this VPS.
+
+{$APP_DOMAIN} {
+	encode gzip
+	reverse_proxy frontend:3000
+}
+
+{$API_DOMAIN} {
+	encode gzip
+	reverse_proxy backend:8080
+}

@@ -1,0 +1,77 @@
+# Full stack on one VPS, behind Caddy (automatic HTTPS via Let's Encrypt).
+#
+#   app.seu-dominio.com  ->  frontend (Next.js standalone, :3000)
+#   api.seu-dominio.com  ->  backend  (Spring Boot, :8080)
+#
+# Both are same-site subdomains of seu-dominio.com, which is what makes the
+# SameSite=Strict HttpOnly cookies (worklog_access / worklog_refresh) flow
+# between the two. Caddy terminates TLS, so the cookies' Secure flag is honored.
+#
+# Values marked <<< CHANGE >>> come from deploy/.env (copy deploy/.env.example).
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+      API_DOMAIN: ${API_DOMAIN}
+    depends_on:
+      - frontend
+      - backend
+
+  frontend:
+    build:
+      # Build context is the repo root (this file lives in deploy/).
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        # Baked into the client bundle at build time — must be the public API URL.
+        NEXT_PUBLIC_API_URL: "https://${API_DOMAIN}"
+    restart: unless-stopped
+    expose:
+      - "3000"
+
+  backend:
+    # <<< CHANGE >>> point this at how you actually build/run the backend:
+    #   - image: your-registry/worklog-backend:latest
+    #   - or build: { context: ../../worklog-backend }
+    image: worklog-backend:latest
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      # Prod profile: HTTPS + Secure cookies (the default). Do NOT use the dev
+      # profile here — dev sets cookies.secure=false, which browsers reject on https.
+      SPRING_PROFILES_ACTIVE: prod
+      # Must match the front origin EXACTLY (scheme + host, no trailing slash).
+      WORKLOG_CORS_ORIGINS: "https://${APP_DOMAIN}"
+      # <<< CHANGE >>> add your DB / secret env vars below.
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/worklog
+      # SPRING_DATASOURCE_USERNAME: worklog
+      # SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    # depends_on:
+    #   - db
+
+  # Uncomment if the backend needs its own database.
+  # db:
+  #   image: postgres:16-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: worklog
+  #     POSTGRES_USER: worklog
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+
+volumes:
+  caddy_data:
+  caddy_config:
+  # db_data:

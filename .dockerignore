@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.env*
+npm-debug.log*
+.pnpm-debug.log*
+.DS_Store
+coverage
+.agent
+mockups
+.claude
+*.md
+!README.md
+Dockerfile
+.dockerignore
+deploy
