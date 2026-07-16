@@ -1,18 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod/v3'
-import { toast } from 'sonner'
 
 import { useQueryClient } from '@tanstack/react-query'
 
-import {
-  useLogin,
-  useRegister,
-} from '@/api/generated/autenticação/autenticação'
+import { useLogin } from '@/api/generated/autenticação/autenticação'
 import { getGetMeQueryKey } from '@/api/generated/usuários/usuários'
 import { Logo } from '@/components/worklog/logo'
 import { Button } from '@/components/ui/button'
@@ -22,26 +17,7 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Senha obrigatória'),
 })
 
-const registerSchema = z
-  .object({
-    name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-    email: z.string().email('E-mail inválido'),
-    password: z
-      .string()
-      .min(8, 'Senha deve ter pelo menos 8 caracteres')
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
-        'Senha deve conter letras maiúsculas, minúsculas e números',
-      ),
-    confirmPassword: z.string().min(1, 'Confirme sua senha'),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: 'As senhas não coincidem',
-    path: ['confirmPassword'],
-  })
-
 type LoginValues = z.infer<typeof loginSchema>
-type RegisterValues = z.infer<typeof registerSchema>
 
 const inputCls =
   'h-9 w-full rounded-md border px-3 py-1 text-sm outline-none transition-colors focus:ring-2 focus:ring-ring/30 focus:border-ring'
@@ -67,13 +43,6 @@ function FieldError({ msg }: { msg?: string }) {
 export default function LoginPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const [tab, setTab] = useState<'login' | 'register'>('login')
-  const [direction, setDirection] = useState<'left' | 'right'>('right')
-
-  function switchTab(next: 'login' | 'register') {
-    setDirection(next === 'register' ? 'right' : 'left')
-    setTab(next)
-  }
 
   const {
     register: loginRegister,
@@ -84,41 +53,12 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   })
 
-  const {
-    register: regRegister,
-    handleSubmit: regSubmit,
-    reset: regReset,
-    formState: { errors: regErrors },
-  } = useForm<RegisterValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
-  })
-
   const { mutate: login, isPending: isLoginPending } = useLogin({
     mutation: {
       meta: { errorMessage: 'E-mail ou senha inválidos.' },
       async onSuccess() {
         await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() })
         router.replace('/dashboard')
-      },
-    },
-  })
-
-  const { mutate: doRegister, isPending: isRegisterPending } = useRegister({
-    mutation: {
-      meta: { silent: true },
-      onSuccess() {
-        toast.success('Conta criada! Faça login para continuar.')
-        regReset()
-        switchTab('login')
-      },
-      onError(err: unknown) {
-        const status = (err as { response?: { status?: number } })?.response?.status
-        if (status === 409) {
-          toast.error('Este e-mail já está cadastrado')
-        } else {
-          toast.error('Erro ao criar conta. Tente novamente.')
-        }
       },
     },
   })
@@ -133,140 +73,54 @@ export default function LoginPage() {
         </span>
       </div>
 
-      {/* Tab switcher */}
-      <div className="flex w-full rounded-lg p-1" style={{ background: 'var(--wl-surface-2)' }}>
-        {(['login', 'register'] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => switchTab(t)}
-            className="flex-1 rounded-md py-1.5 text-[13px] font-medium transition-colors"
-            style={{
-              background: tab === t ? 'var(--wl-surface)' : 'transparent',
-              color: tab === t ? 'var(--wl-text)' : 'var(--wl-text-muted)',
-            }}
-          >
-            {t === 'login' ? 'Entrar' : 'Criar conta'}
-          </button>
-        ))}
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--wl-text)' }}>
+          Entrar na sua conta
+        </h1>
+        <p className="text-sm" style={{ color: 'var(--wl-text-muted)' }}>
+          Use as credenciais fornecidas pelo administrador.
+        </p>
       </div>
 
-      {tab === 'login' ? (
-        <form
-          key="login"
-          onSubmit={loginSubmit((v) => login({ data: v }))}
-          className={`space-y-4 ${direction === 'left' ? 'animate-tab-in-left' : 'animate-tab-in-right'}`}
+      <form onSubmit={loginSubmit((v) => login({ data: v }))} className="space-y-4">
+        <div>
+          <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
+          <input
+            id="login-email"
+            type="email"
+            placeholder="voce@empresa.com"
+            autoComplete="email"
+            autoFocus
+            className={inputCls}
+            style={inputStyle}
+            {...loginRegister('email')}
+          />
+          <FieldError msg={loginErrors.email?.message} />
+        </div>
+
+        <div>
+          <FieldLabel htmlFor="login-password">Senha</FieldLabel>
+          <input
+            id="login-password"
+            type="password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            className={inputCls}
+            style={inputStyle}
+            {...loginRegister('password')}
+          />
+          <FieldError msg={loginErrors.password?.message} />
+        </div>
+
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-1 h-10 w-full text-sm font-semibold tracking-tight"
+          disabled={isLoginPending}
         >
-          <div>
-            <FieldLabel htmlFor="login-email">E-mail</FieldLabel>
-            <input
-              id="login-email"
-              type="email"
-              placeholder="voce@empresa.com"
-              autoComplete="email"
-              autoFocus
-              className={inputCls}
-              style={inputStyle}
-              {...loginRegister('email')}
-            />
-            <FieldError msg={loginErrors.email?.message} />
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="login-password">Senha</FieldLabel>
-            <input
-              id="login-password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              className={inputCls}
-              style={inputStyle}
-              {...loginRegister('password')}
-            />
-            <FieldError msg={loginErrors.password?.message} />
-          </div>
-
-          <Button
-            type="submit"
-            size="lg"
-            className="mt-1 h-10 w-full text-sm font-semibold tracking-tight"
-            disabled={isLoginPending}
-          >
-            {isLoginPending ? 'Entrando…' : 'Entrar'}
-          </Button>
-        </form>
-      ) : (
-        <form
-          key="register"
-          onSubmit={regSubmit(({ confirmPassword: _, ...v }) => doRegister({ data: v }))}
-          className={`space-y-4 ${direction === 'right' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}
-        >
-          <div>
-            <FieldLabel htmlFor="reg-name">Nome</FieldLabel>
-            <input
-              id="reg-name"
-              placeholder="Seu nome"
-              autoComplete="name"
-              autoFocus
-              className={inputCls}
-              style={inputStyle}
-              {...regRegister('name')}
-            />
-            <FieldError msg={regErrors.name?.message} />
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="reg-email">E-mail</FieldLabel>
-            <input
-              id="reg-email"
-              type="email"
-              placeholder="voce@empresa.com"
-              autoComplete="email"
-              className={inputCls}
-              style={inputStyle}
-              {...regRegister('email')}
-            />
-            <FieldError msg={regErrors.email?.message} />
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="reg-password">Senha</FieldLabel>
-            <input
-              id="reg-password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              className={inputCls}
-              style={inputStyle}
-              {...regRegister('password')}
-            />
-            <FieldError msg={regErrors.password?.message} />
-          </div>
-
-          <div>
-            <FieldLabel htmlFor="reg-confirm">Confirmar senha</FieldLabel>
-            <input
-              id="reg-confirm"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="new-password"
-              className={inputCls}
-              style={inputStyle}
-              {...regRegister('confirmPassword')}
-            />
-            <FieldError msg={regErrors.confirmPassword?.message} />
-          </div>
-
-          <Button
-            type="submit"
-            size="lg"
-            className="mt-1 h-10 w-full text-sm font-semibold tracking-tight"
-            disabled={isRegisterPending}
-          >
-            {isRegisterPending ? 'Criando conta…' : 'Criar conta'}
-          </Button>
-        </form>
-      )}
+          {isLoginPending ? 'Entrando…' : 'Entrar'}
+        </Button>
+      </form>
     </div>
   )
 }

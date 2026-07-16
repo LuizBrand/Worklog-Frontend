@@ -8,6 +8,18 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-07-15 — Remover auto-cadastro da tela de login:
+  - Backend passou a expor `/auth/register` só para admin; admin padrão é criado no
+    boot e cria usuários internamente via `/users`. Auto-cadastro público não se aplica.
+  - `src/app/(auth)/login/page.tsx` — removidos aba "Criar conta", form/schema de
+    registro e `useRegister`. Tela agora é só login (título + subtítulo orientando
+    que credenciais vêm do admin).
+  - `src/app/globals.css` — removidos keyframes `tab-in-from-*` e utilitários
+    `.animate-tab-in-*` (usados só pelo switcher de abas do login).
+  - Pendente (quando backend subir): regenerar client Orval e criar fluxo admin de
+    "Criar usuário" na página `/usuarios` via novo `POST /users`.
+  - Evidência: `.agent/visual/login-only-no-register.md`. tsc ✓, lint ✓.
+
 - [x] 2026-07-15 — Bugfix auth: sessão expirada não jogava para /login + polish do CTA de login:
   - `src/lib/api.ts` — interceptor axios agora trata **401 e 403** como "tentar refresh"
     (backend Spring devolve 403, não 401, quando o access cookie sumiu/expirou).
