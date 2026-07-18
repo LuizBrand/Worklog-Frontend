@@ -8,6 +8,12 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-07-18 — Fix build Docker na VPS (`pnpm install --frozen-lockfile`
+  exit 1): corepack usava pnpm default (9.x) no container, divergindo do
+  lockfile 9.0 gerado por pnpm 10. Fixado a versão: `packageManager:
+  "pnpm@10.33.2"` no `package.json` e `corepack prepare pnpm@10.33.2
+  --activate` no `Dockerfile`. `--frozen-lockfile` revalidado local (OK).
+
 - [x] 2026-07-15 — Infra de deploy (VPS, front + back, cookie HttpOnly):
   - Auth já estava migrada pro modelo de cookie (nada a mudar no código de auth):
     `withCredentials`, sem localStorage/Bearer/CSRF, login espera 204, guard via
