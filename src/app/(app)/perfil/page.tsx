@@ -6,10 +6,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod/v3'
 import { KeyRound, Loader2, Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+
+import { getApiErrorStatus, apiErrorToMessage } from '@/lib/api-errors'
 
 import { useGetMe, useChangeMyPassword } from '@/api/generated/usuários/usuários'
+import { useLogout } from '@/api/generated/autenticação/autenticação'
 import { WlAvatar } from '@/components/worklog'
 import { RoleResponseRole } from '@/api/generated/schemas'
+import { useAuthStore } from '@/state/auth'
 
 const pwSchema = z
   .object({
@@ -81,22 +86,59 @@ function PasswordInput({
 }
 
 export default function PerfilPage() {
+  const router = useRouter()
+  const clearAuth = useAuthStore((s) => s.clear)
   const meQ = useGetMe()
   const user = meQ.data
 
   const isAdmin = user?.roles?.some((r) => r.role === RoleResponseRole.ADMIN) ?? false
   const name = user?.name ?? ''
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<PwValues>({
+  const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<PwValues>({
     resolver: zodResolver(pwSchema),
   })
 
+  const logoutMut = useLogout()
+
+  // O backend revoga TODAS as sessões ao trocar a senha, inclusive esta. Sem
+  // encerrar aqui, a tela fica viva com uma sessão morta até a próxima chamada
+  // falhar — e aí o interceptor mostraria "sua sessão expirou", que é um
+  // diagnóstico enganoso para quem acabou de trocar a senha de propósito.
   const changePwMut = useChangeMyPassword({
     mutation: {
-      meta: { errorMessage: 'Senha atual incorreta ou erro ao alterar.' },
+      meta: { silent: true },
       onSuccess: () => {
-        toast.success('Senha alterada com sucesso')
         reset()
+        logoutMut.mutate(undefined, {
+          onSettled: () => {
+            clearAuth()
+            toast.success('Senha alterada. Entre novamente com a nova senha.', {
+              id: 'password-changed',
+            })
+            // router.replace, não window.location: um reload de página inteira
+            // destrói o toast antes de ele ser visto.
+            //
+            // E nada de qc.clear() aqui: isso invalidaria o /users/me do guard
+            // em (app)/layout.tsx com a sessão já revogada, disparando o
+            // forceLogout do interceptor — que navega via window.location e
+            // mata o toast, além de anunciar "sessão expirou" para quem trocou
+            // a senha de propósito. O logout do menu de usuário também não
+            // limpa o cache; sair da rota (app) já basta.
+            router.replace('/login')
+          },
+        })
+      },
+      onError: (err) => {
+        const status = getApiErrorStatus(err)
+        if (status === 422) {
+          setError('currentPassword', { message: 'Senha atual incorreta' })
+          return
+        }
+        if (status === 400) {
+          setError('newPassword', { message: apiErrorToMessage(err, 'Nova senha inválida') })
+          return
+        }
+        toast.error(apiErrorToMessage(err, 'Erro ao alterar a senha'))
       },
     },
   })

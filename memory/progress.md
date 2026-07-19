@@ -664,7 +664,7 @@ Assets do designer em `nova-branding/` (gitignored).
     script Playwright de ponta a ponta.
   - tsc ✓, lint ✓
 
-- [ ] `forceLogout` em `src/lib/api.ts:91` chama `notifySessionExpired()`
+- [ ] (aberto) `forceLogout` em `src/lib/api.ts:91` chama `notifySessionExpired()`
   e logo depois `window.location.href` — o reload destrói o toast antes
   de ser visto, então o aviso de sessão expirada provavelmente nunca
   aparece. Descoberto ao depurar a troca de senha. Pré-existente, não
