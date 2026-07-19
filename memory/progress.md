@@ -571,11 +571,19 @@ changed but this file wasn't updated.
 Spec da marca: `memory/brand.md`. Plano: `memory/plan.md` § Slice R.
 Assets do designer em `nova-branding/` (gitignored).
 
-- [ ] R1 — tokens em `globals.css` (base fria + hue 277.117 + danger/
-  success)
-- [~] R2 — Space Grotesk carregada via `next/font/google` e exposta
-  como `--font-display`. Falta ligar `--font-heading` a ela (R1) e os
-  favicons (R6).
+- [x] R1 — tokens em `globals.css`. Base fria nos dois temas, hue OKLCH
+  255.8 → 277.117, tokens `--wl-danger` / `--wl-success` novos.
+  Evidência: `.agent/visual/r1-tokens-rebranding.md`.
+
+  Dois desvios documentados em `memory/brand.md`:
+  1. Neutros do shadcn apontam para os mesmos hex da escala `--wl-*`.
+     Eram independentes e nunca bateram (branco puro vs. bege), e a UI
+     tem ~69 usos de `bg-muted`/`bg-popover`.
+  2. Tema claro usa tons escuros **saturados** (83–98%), não os hex de
+     marca escurecidos por multiplicação de RGB — isso dessatura e suja
+     (a âmbar caía para 47% de saturação).
+- [~] R2 — Space Grotesk carregada e `--font-heading` ligada a ela.
+  Faltam os favicons (R6).
 - [ ] R3 — `logo.tsx` com o símbolo SVG
 - [ ] R4 — `AVATAR_COLORS` na paleta fria
 - [ ] R5 — varredura dos ~30 hex hardcoded → tokens

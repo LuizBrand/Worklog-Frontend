@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -68,6 +68,12 @@
   --color-priority-medium: var(--priority-medium);
   --color-priority-low: var(--priority-low);
 
+  /* WorkLog semantic */
+  --color-wl-danger: var(--wl-danger);
+  --color-wl-danger-bg: var(--wl-danger-bg);
+  --color-wl-success: var(--wl-success);
+  --color-wl-success-bg: var(--wl-success-bg);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -78,123 +84,163 @@
 }
 
 /* ============================================
-   TEMA: WorkLog — Mira + Sky · Dark default
+   TEMA: WorkLog — Indigo · Dark default
+   Spec da marca: memory/brand.md
+   Accent = Tailwind indigo-500/400, hue OKLCH 277.117.
+   Os neutros do shadcn apontam para os mesmos hex da escala --wl-*
+   de propósito: são a mesma superfície, e mantê-los separados fazia
+   popovers e skeletons derivarem do resto da UI.
    ============================================ */
 
 :root {
   /* shadcn base — light */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.623 0.214 255.8);
+  --background: #f2f2f4;
+  --foreground: #0b0b10;
+  --card: #ffffff;
+  --card-foreground: #0b0b10;
+  --popover: #ffffff;
+  --popover-foreground: #0b0b10;
+  --primary: oklch(0.585 0.233 277.117);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.951 0.026 255.8);
-  --accent-foreground: oklch(0.379 0.146 255.8);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.623 0.214 255.8);
-  --chart-1: oklch(0.623 0.214 255.8);
-  --chart-2: oklch(0.717 0.175 255.8);
-  --chart-3: oklch(0.811 0.111 255.8);
-  --chart-4: oklch(0.439 0.16 255.8);
-  --chart-5: oklch(0.322 0.118 255.8);
+  --secondary: #e8e8ec;
+  --secondary-foreground: #0b0b10;
+  --muted: #e8e8ec;
+  --muted-foreground: #6b6875;
+  --accent: oklch(0.951 0.026 277.117);
+  --accent-foreground: oklch(0.379 0.146 277.117);
+  --destructive: #d6453d;
+  --border: #dedee3;
+  --input: #dedee3;
+  --ring: oklch(0.585 0.233 277.117);
+  --chart-1: oklch(0.585 0.233 277.117);
+  --chart-2: oklch(0.673 0.182 276.935);
+  --chart-3: oklch(0.785 0.115 276.9);
+  --chart-4: oklch(0.457 0.19 277.117);
+  --chart-5: oklch(0.348 0.14 277.117);
   --radius: 0.5rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.623 0.214 255.8);
+  --sidebar: #f7f7f9;
+  --sidebar-foreground: #0b0b10;
+  --sidebar-primary: oklch(0.585 0.233 277.117);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.951 0.026 255.8);
-  --sidebar-accent-foreground: oklch(0.379 0.146 255.8);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.623 0.214 255.8);
+  --sidebar-accent: oklch(0.951 0.026 277.117);
+  --sidebar-accent-foreground: oklch(0.379 0.146 277.117);
+  --sidebar-border: #dedee3;
+  --sidebar-ring: oklch(0.585 0.233 277.117);
 
   /* WorkLog surface scale — light */
-  --wl-bg: #f5f3ef;
+  --wl-bg: #f2f2f4;
   --wl-surface: #ffffff;
-  --wl-surface-2: #eeeae4;
-  --wl-border: #ddd9d2;
-  --wl-border-2: #ccc8c0;
-  --wl-text: #1a1714;
-  --wl-text-muted: #7a7269;
-  --wl-text-dim: #b0aba3;
+  --wl-surface-2: #e8e8ec;
+  --wl-border: #dedee3;
+  --wl-border-2: #c9c9d1;
+  --wl-text: #0b0b10;
+  --wl-text-muted: #6b6875;
+  --wl-text-dim: #a3a0ac;
 
-  /* WorkLog status — light backgrounds */
-  --status-open: #f97316;
-  --status-open-bg: #fff3e6;
-  --status-progress: #0ea5e9;
-  --status-progress-bg: #e6f4fc;
-  --status-awaiting: #a78bfa;
-  --status-awaiting-bg: #f0ebff;
-  --status-resolved: #34d399;
-  --status-resolved-bg: #e6faf3;
-  --status-cancelled: #5a5550;
-  --status-cancelled-bg: #f0efee;
+  /* WorkLog status — light
+     Estes tokens colorem o TEXTO dos chips, não só o preenchimento, e
+     amarelo/verde de luminância média são ilegíveis como texto sobre
+     tinta clara. A saída NÃO é escurecer o tom de marca multiplicando
+     o RGB — isso dessatura e produz marrom sujo (âmbar caiu para 47%
+     de saturação). Usamos tons escuros e SATURADOS (83–98%), que são
+     vivos e passam AA. O escuro reverte para os hex de marca. */
+  --status-open: #b45309;
+  --status-open-bg: #fef3c7;
+  --status-progress: #4f46e5;
+  --status-progress-bg: #e0e7ff;
+  --status-awaiting: #0369a1;
+  --status-awaiting-bg: #e0f2fe;
+  --status-resolved: #047857;
+  --status-resolved-bg: #d1fae5;
+  --status-cancelled: #5a5860;
+  --status-cancelled-bg: #f1f0f3;
 
-  /* WorkLog priority */
-  --priority-critical: #c0443a;
-  --priority-high: #c97a1a;
-  --priority-medium: #7a7269;
-  --priority-low: #4a4640;
+  /* WorkLog priority — light */
+  --priority-critical: #dc2626;
+  --priority-high: #b45309;
+  --priority-medium: #787581;
+  --priority-low: #55535e;
+
+  /* WorkLog semantic — light */
+  --wl-danger: #d6453d;
+  --wl-danger-bg: #fdecea;
+  --wl-success: #2fae7c;
+  --wl-success-bg: #e6f7f0;
 }
 
 .dark {
   /* shadcn base — dark */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.717 0.175 255.8);
-  --primary-foreground: oklch(0.1 0.02 255.8);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.25 0.04 255.8);
-  --accent-foreground: oklch(0.717 0.175 255.8);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.717 0.175 255.8);
-  --chart-1: oklch(0.717 0.175 255.8);
-  --chart-2: oklch(0.623 0.214 255.8);
-  --chart-3: oklch(0.811 0.111 255.8);
-  --chart-4: oklch(0.52 0.19 255.8);
-  --chart-5: oklch(0.439 0.16 255.8);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.717 0.175 255.8);
-  --sidebar-primary-foreground: oklch(0.1 0.02 255.8);
-  --sidebar-accent: oklch(0.25 0.04 255.8);
-  --sidebar-accent-foreground: oklch(0.717 0.175 255.8);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.717 0.175 255.8);
+  --background: #0b0b10;
+  --foreground: #e8e9ed;
+  --card: #1c1d26;
+  --card-foreground: #e8e9ed;
+  --popover: #1c1d26;
+  --popover-foreground: #e8e9ed;
+  --primary: oklch(0.673 0.182 276.935);
+  --primary-foreground: oklch(0.13 0.028 277.117);
+  --secondary: #262835;
+  --secondary-foreground: #e8e9ed;
+  --muted: #262835;
+  --muted-foreground: #8a8794;
+  --accent: oklch(0.28 0.05 277.117);
+  --accent-foreground: oklch(0.673 0.182 276.935);
+  --destructive: #e2564e;
+  --border: #2a2c38;
+  --input: #383a48;
+  --ring: oklch(0.673 0.182 276.935);
+  --chart-1: oklch(0.673 0.182 276.935);
+  --chart-2: oklch(0.585 0.233 277.117);
+  --chart-3: oklch(0.785 0.115 276.9);
+  --chart-4: oklch(0.5 0.2 277.117);
+  --chart-5: oklch(0.4 0.16 277.117);
+  --sidebar: #1c1d26;
+  --sidebar-foreground: #e8e9ed;
+  --sidebar-primary: oklch(0.673 0.182 276.935);
+  --sidebar-primary-foreground: oklch(0.13 0.028 277.117);
+  --sidebar-accent: oklch(0.28 0.05 277.117);
+  --sidebar-accent-foreground: oklch(0.673 0.182 276.935);
+  --sidebar-border: #2a2c38;
+  --sidebar-ring: oklch(0.673 0.182 276.935);
 
   /* WorkLog surface scale — dark */
-  --wl-bg: #13110f;
-  --wl-surface: #1c1a17;
-  --wl-surface-2: #242018;
-  --wl-border: #2e2b25;
-  --wl-border-2: #3a3630;
-  --wl-text: #f0ebe3;
-  --wl-text-muted: #7a7269;
-  --wl-text-dim: #4a4640;
+  --wl-bg: #0b0b10;
+  --wl-surface: #1c1d26;
+  --wl-surface-2: #262835;
+  --wl-border: #2a2c38;
+  --wl-border-2: #383a48;
+  --wl-text: #e8e9ed;
+  --wl-text-muted: #8a8794;
+  --wl-text-dim: #55535e;
 
-  /* WorkLog status — dark backgrounds */
-  --status-open-bg: #2a1608;
-  --status-progress-bg: #072a3d;
-  --status-awaiting-bg: #1e1533;
-  --status-resolved-bg: #052019;
-  --status-cancelled-bg: #1e1c18;
+  /* WorkLog status — dark
+     Reverte para os hex de marca: sobre fundo escuro eles já passam AA
+     sem escurecer. progress sobe para indigo-400 porque indigo-500 não
+     separa o suficiente do fundo — o mesmo salto que --primary faz. */
+  --status-open: #e8a33d;
+  --status-progress: #818cf8;
+  --status-awaiting: #38bdf8;
+  --status-resolved: #2fae7c;
+  --status-cancelled: #84818d;
+  --status-open-bg: #2e2210;
+  --status-progress-bg: #1b1d3a;
+  --status-awaiting-bg: #072a3d;
+  --status-resolved-bg: #0c2a1f;
+  --status-cancelled-bg: #1a1a20;
+
+  /* WorkLog priority — dark
+     A escala é uma hierarquia (crítico grita, baixo sussurra), então
+     low fica de propósito abaixo dos demais — mas acima do #55535e
+     do tema claro, que sobre fundo escuro ficava ilegível (2.22:1). */
+  --priority-critical: #e2564e;
+  --priority-high: #e8a33d;
+  --priority-medium: #8a8794;
+  --priority-low: #7a7784;
+
+  /* WorkLog semantic — dark */
+  --wl-danger: #e2564e;
+  --wl-danger-bg: #2c1414;
+  --wl-success: #2fae7c;
+  --wl-success-bg: #0c2a1f;
 }
 
 @keyframes slide-in-from-right {
