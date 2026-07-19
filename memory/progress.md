@@ -613,6 +613,13 @@ Assets do designer em `nova-branding/` (gitignored).
   primário, trama decorativa do `system-grid`, e `rgba(99,102,241,0.14)`
   em `perfil`/`user-grid`, que já é exatamente o indigo novo.
 
+- [x] Ajuste pós-entrega — diff de descrição em `ticket-activity.tsx`
+  saiu de `font-mono` 12px para a sans da interface a 13px. Descrição
+  é prosa, não código; o monospace destoava do painel. Evidência:
+  `.agent/visual/r7-fonte-diff-descricao.md`. Os `font-mono` restantes
+  (IDs em `ticket-table.tsx`, short codes em `system-grid.tsx`) são
+  corretos e ficaram.
+
 ## Slice R — concluída
 
 R1–R6 entregues. Marca migrada de "Mira + Sky" para indigo com base

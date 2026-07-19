@@ -95,7 +95,7 @@ function LogContent({ log }: { log: TicketLogResponse }) {
 
   if (fieldChanged === 'description' && (oldValue || newValue)) {
     return (
-      <div className="mt-2 space-y-1 text-[12px] font-mono">
+      <div className="mt-2 space-y-1 text-[13px]">
         {oldValue && (
           <div
             className="rounded px-2.5 py-1.5 leading-relaxed line-through"
