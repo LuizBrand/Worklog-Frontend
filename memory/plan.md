@@ -159,6 +159,97 @@ Approved long-form plan with full rationale lives at
                 4 → 5 → 6 → 7 → 8
 ```
 
+## Slice R — Rebranding (indigo / base fria / Space Grotesk)
+
+Especificação completa da marca em `memory/brand.md`. Atravessa toda a
+UI, por isso é sequenciada como fatia própria e não misturada com
+feature work (AGENTS.md §5).
+
+Ordem deliberada: os tokens vêm primeiro porque a maioria dos
+componentes já os consome — a fatia R1 sozinha migra a maior parte da UI
+sem tocar em componente nenhum. As fatias seguintes só limpam o que
+escapou dos tokens.
+
+### R1 — Tokens (`src/app/globals.css`)
+
+Um arquivo. Troca a escala `--wl-*` para a base fria e o hue OKLCH de
+255.8 → 277.117 em `primary`/`ring`/`accent`/`sidebar-*`/`chart-1..5`.
+Adiciona `--wl-danger` e `--wl-success` (+ mapeamento em `@theme inline`).
+`--radius` não muda.
+
+Ponto de decisão: revisar `/design` aqui. É a mudança de maior impacto
+visual e reverter custa um arquivo. Não seguir sem aprovação.
+
+### R2 — Fontes e metadata (`src/app/layout.tsx`)
+
+Adiciona Space Grotesk 600/700 via `next/font/google`, liga
+`--font-heading` a ela em `globals.css` (hoje é alias inerte de
+`--font-sans`). Inter e JetBrains Mono ficam.
+
+Favicons: copiar os 6 PNGs de `nova-branding/favicon/` para o repo
+(`src/app/icon.png` + `apple-icon.png`, convenção do Next 16) e remover
+`src/app/favicon.ico`. **Estes assets precisam sair do gitignore** —
+`nova-branding/` é ignorado e o build quebra se o ícone morar lá.
+
+### R3 — Logo (`src/components/worklog/logo.tsx`)
+
+Substitui o "W" desenhado em CSS pelo símbolo SVG (geometria em
+`memory/brand.md`), versão escura canônica. Wordmark em Space Grotesk,
+grafia "WorkLog".
+
+Consumidores a verificar: `shell/sidebar.tsx`, `shell/top-bar.tsx`,
+`(auth)/login/page.tsx`. A prop `withWordmark` e o contrato `size` devem
+sobreviver para não quebrar as três chamadas.
+
+### R4 — Status e prioridade (`src/lib/worklog-meta.ts`)
+
+`STATUS_META` e `PRIORITY_META` com as cores novas. Reavaliar
+`AVATAR_COLORS` (hoje são tons terrosos quentes — vão destoar da base
+fria).
+
+### R5 — Varredura dos hex hardcoded
+
+~30 ocorrências em `client-grid`, `client-detail`, `system-grid`,
+`system-detail`, `user-grid`, `ticket-detail`, `ticket-form`,
+`ticket-table`, `ticket-activity`, `status-pill`, `worklog/tag`,
+`usuarios/page`, `sistemas/page`, `clientes/page`, `perfil/page`.
+Trocar por `var(--wl-danger)` / `var(--wl-success)` / `var(--primary)`.
+
+Maior que o limite de ~5 arquivos do AGENTS.md §5, mas é substituição
+mecânica de valor por token. Quebrar em 3 levas por diretório
+(`clients`+`systems`, `users`+`tickets`, páginas) se ficar pesado.
+
+### Verificação por fatia
+
+`agent-md.toml` declara `typecheck` e `lint`, e `[visual] required =
+true` torna a evidência visual **bloqueante** para qualquer `.tsx`/`.css`
+tocado. Cada fatia precisa de:
+
+1. `pnpm exec tsc --noEmit` e `pnpm exec eslint .`
+2. Screenshot Playwright + nota estruturada em `.agent/visual/` com os 5
+   campos (Changed files, Route or URL, Viewport, Artifact, Observed
+   result), fresca em até 3600s
+3. `/design` nos dois temas (claro e escuro) — é o showcase que renderiza
+   todos os componentes de uma vez
+
+Rotas para conferir além do `/design`: `/login` (logo grande),
+`/dashboard` (donut e barras usam `chart-*`), `/tickets` (densidade de
+status), `/clientes` (ações destrutivas).
+
+Credenciais de dev em `memory/agents.md`.
+
+### Riscos
+
+- A base fria abandona o bege/marrom que é a assinatura atual do app.
+  Vai parecer produto diferente, não evolução. R1 é o ponto de não
+  retorno barato — decidir ali.
+- Contraste: `--wl-text-muted #8A8794` sobre `--wl-surface #1C1D26` fica
+  em ~4.6:1. Passa AA para texto normal, mas é apertado. Conferir os
+  usos em `text-[11px]`, que são muitos.
+- `AWAITING_DEV` e `MEDIUM` compartilham `#8A8794`, e `CANCELLED` e `LOW`
+  compartilham `#55535E`. Contextos diferentes, mas conferir se nunca
+  aparecem lado a lado.
+
 ## Deferred / Out of Scope
 
 - Password reset / forgot-password.

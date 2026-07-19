@@ -60,3 +60,52 @@ Spring Boot espera params flat: `title=x&page=0`.
 
 **Fix**: `paramsSerializer` customizado em `src/lib/api.ts` que achata objetos aninhados
 recursivamente e repete arrays como params múltiplos.
+
+## Hook de evidência visual exige dois-pontos nos campos
+
+`visual_evidence_ok` em `.claude/hooks/_lib.sh` valida a nota de
+evidência com `grep -Eiq 'changed files?:'`, `'(route|url):'`,
+`'viewport:'` e `'(observed|result):'` — **todos com dois-pontos**.
+
+Escrever os campos como títulos markdown (`**Changed files**` em linha
+própria, sem `:`) faz o Stop hook rejeitar a nota mesmo com todo o
+conteúdo correto, e a mensagem de erro não diz que o problema é a
+pontuação.
+
+**Fix**: usar `**Changed files:** valor` na mesma linha. A nota também
+precisa citar o *basename* de uma imagem fresca (< `freshness_seconds`,
+3600s) que exista no mesmo diretório.
+
+**Conferir antes de encerrar**:
+```bash
+source .claude/hooks/_lib.sh && visual_evidence_ok ".agent/visual" 3600 \
+  && echo PASS || echo FAIL
+```
+
+## Screenshot dos dois temas: storageKey é `wl-theme`
+
+`next-themes` está configurado com `storageKey="wl-theme"` e
+`defaultTheme="dark"` em `src/app/providers.tsx` — não a chave `theme`
+padrão. Um script Playwright que faça `localStorage.setItem('theme', ...)`
+captura dark nas duas passadas, silenciosamente, sem erro.
+
+Além disso, `playwright` está em `devDependencies` do projeto mas o
+canal `chrome` do MCP não está instalado (só `chromium` em
+`~/.cache/ms-playwright`). Scripts de captura precisam rodar a partir da
+raiz do projeto para resolver `require('playwright')`.
+
+## `cd` relativo em Bash persiste entre chamadas
+
+O diretório de trabalho do tool Bash **persiste entre invocações**. Uma
+sequência de `cd src/components/worklog && ...` seguida de
+`cd src/components/tickets && ...` falha na segunda: o segundo caminho é
+resolvido a partir de `src/components/worklog`.
+
+Pior: se a verificação estiver na mesma cadeia (`grep ... || echo
+"limpo"`), ela roda no diretório errado e reporta sucesso falso. Foi o
+que aconteceu na fatia R5 do rebranding — um lote inteiro de edições não
+foi aplicado e o grep confirmou "limpo".
+
+**Regra**: usar caminhos absolutos em edições em lote, e rodar a
+varredura de verificação a partir da raiz do projeto, imprimindo `pwd`
+junto do resultado.
