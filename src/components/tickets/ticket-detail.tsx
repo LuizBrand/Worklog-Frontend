@@ -252,7 +252,7 @@ export function TicketDetail({ publicId, onClose }: TicketDetailProps) {
                   <div className="py-4">
                     <SectionTitle>DESCRIÇÃO</SectionTitle>
                     <p
-                      className="text-[13px] leading-relaxed"
+                      className="text-[13px] leading-relaxed wrap-anywhere whitespace-pre-wrap"
                       style={{ color: 'var(--wl-text)' }}
                     >
                       {ticket.description}

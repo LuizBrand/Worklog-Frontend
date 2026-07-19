@@ -620,6 +620,17 @@ Assets do designer em `nova-branding/` (gitignored).
   (IDs em `ticket-table.tsx`, short codes em `system-grid.tsx`) são
   corretos e ficaram.
 
+- [x] Fix — texto longo sem espaços cortava no painel de detalhe.
+  Nenhum ponto que renderiza texto do usuário tinha regra de quebra: a
+  busca por `break-words`/`wrap-anywhere`/`overflowWrap` no codebase
+  não retornava nada. Adicionado `wrap-anywhere` em 7 pontos
+  (`ticket-activity`, `ticket-detail`, `timeline`) + `whitespace-pre-wrap`
+  na descrição e no corpo da nota, que preserva quebras digitadas.
+  Usado `wrap-anywhere` e não `break-words` porque dentro de flex só o
+  `anywhere` afeta o tamanho intrínseco.
+  Evidência: `.agent/visual/r8-quebra-texto-longo.md` — bug reproduzido
+  com nota de 144 chars e overflow medido via `scrollWidth`.
+
 ## Slice R — concluída
 
 R1–R6 entregues. Marca migrada de "Mira + Sky" para indigo com base

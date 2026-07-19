@@ -98,7 +98,7 @@ function LogContent({ log }: { log: TicketLogResponse }) {
       <div className="mt-2 space-y-1 text-[13px]">
         {oldValue && (
           <div
-            className="rounded px-2.5 py-1.5 leading-relaxed line-through"
+            className="rounded px-2.5 py-1.5 leading-relaxed line-through wrap-anywhere"
             style={{ background: 'color-mix(in oklab, var(--wl-danger) 8%, transparent)', color: 'var(--wl-danger)', borderLeft: '2px solid color-mix(in oklab, var(--wl-danger) 38%, transparent)' }}
           >
             − {oldValue}
@@ -106,7 +106,7 @@ function LogContent({ log }: { log: TicketLogResponse }) {
         )}
         {newValue && (
           <div
-            className="rounded px-2.5 py-1.5 leading-relaxed"
+            className="rounded px-2.5 py-1.5 leading-relaxed wrap-anywhere"
             style={{ background: 'color-mix(in oklab, var(--wl-success) 8%, transparent)', color: 'var(--wl-success)', borderLeft: '2px solid color-mix(in oklab, var(--wl-success) 38%, transparent)' }}
           >
             + {newValue}
@@ -132,7 +132,7 @@ function LogContent({ log }: { log: TicketLogResponse }) {
             Nota
           </span>
         </div>
-        <p className="text-[13px] leading-relaxed" style={{ color: 'var(--wl-text)' }}>
+        <p className="text-[13px] leading-relaxed wrap-anywhere whitespace-pre-wrap" style={{ color: 'var(--wl-text)' }}>
           {newValue}
         </p>
       </div>
@@ -142,7 +142,7 @@ function LogContent({ log }: { log: TicketLogResponse }) {
   if (newValue) {
     return (
       <p
-        className="mt-2 rounded px-2.5 py-1.5 text-[13px] leading-relaxed"
+        className="mt-2 rounded px-2.5 py-1.5 text-[13px] leading-relaxed wrap-anywhere"
         style={{
           background: 'var(--wl-surface-2)',
           color: 'var(--wl-text)',

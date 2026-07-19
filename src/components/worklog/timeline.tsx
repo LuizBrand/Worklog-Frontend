@@ -144,7 +144,7 @@ function TimelineBody({ entry }: { entry: TimelineEntryData }) {
     <div className="space-y-1 text-sm">
       {entry.from && (
         <div
-          className="rounded px-2 py-1 text-xs leading-relaxed line-through"
+          className="rounded px-2 py-1 text-xs leading-relaxed line-through wrap-anywhere"
           style={{
             background: 'color-mix(in oklab, var(--wl-danger) 12%, transparent)',
             borderLeft: '2px solid var(--priority-critical)',
@@ -155,7 +155,7 @@ function TimelineBody({ entry }: { entry: TimelineEntryData }) {
         </div>
       )}
       <div
-        className="rounded px-2 py-1 text-xs leading-relaxed"
+        className="rounded px-2 py-1 text-xs leading-relaxed wrap-anywhere"
         style={{
           background: 'color-mix(in oklab, var(--wl-success) 12%, transparent)',
           borderLeft: '2px solid var(--status-resolved)',
