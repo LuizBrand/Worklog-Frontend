@@ -393,7 +393,7 @@ function MenuItem({
     <button
       onClick={onClick}
       className="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-[13px] transition-colors hover:bg-[var(--wl-surface-2)]"
-      style={{ color: danger ? '#e53e3e' : 'var(--wl-text)' }}
+      style={{ color: danger ? 'var(--wl-danger)' : 'var(--wl-text)' }}
     >
       {icon}
       {label}

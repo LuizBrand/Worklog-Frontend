@@ -77,8 +77,8 @@ export function UserGrid({ users, loading, onCardClick, onToggleActive }: UserGr
                 aria-hidden="true"
                 className="absolute right-3 top-3 inline-block h-2 w-2 rounded-full"
                 style={{
-                  background: isActive ? '#4ade80' : 'var(--wl-border-2)',
-                  boxShadow: isActive ? '0 0 6px rgba(74, 222, 128, 0.6)' : 'none',
+                  background: isActive ? 'var(--wl-success)' : 'var(--wl-border-2)',
+                  boxShadow: isActive ? '0 0 6px color-mix(in oklab, var(--wl-success) 60%, transparent)' : 'none',
                 }}
               />
 
@@ -115,7 +115,7 @@ export function UserGrid({ users, loading, onCardClick, onToggleActive }: UserGr
                   className="cursor-pointer px-4 py-3 text-center text-[12px] font-medium transition-colors hover:bg-[var(--wl-surface-2)]"
                   style={{
                     borderTop: '1px solid var(--wl-border)',
-                    color: isActive ? '#e53e3e' : 'var(--primary)',
+                    color: isActive ? 'var(--wl-danger)' : 'var(--primary)',
                   }}
                 >
                   {isActive ? 'Desativar' : 'Ativar'}

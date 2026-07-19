@@ -135,7 +135,7 @@ export default function UsuariosPage() {
                 onClick={() => deactivateMut.mutate({ publicId: confirmTarget.publicId })}
                 disabled={deactivateMut.isPending}
                 className="cursor-pointer rounded-lg px-4 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50 hover:opacity-85"
-                style={{ background: '#ef4444', color: '#fff' }}
+                style={{ background: 'var(--wl-danger)', color: '#fff' }}
               >
                 Desativar
               </button>

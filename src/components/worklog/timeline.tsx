@@ -146,7 +146,7 @@ function TimelineBody({ entry }: { entry: TimelineEntryData }) {
         <div
           className="rounded px-2 py-1 text-xs leading-relaxed line-through"
           style={{
-            background: 'rgba(192, 68, 58, 0.12)',
+            background: 'color-mix(in oklab, var(--wl-danger) 12%, transparent)',
             borderLeft: '2px solid var(--priority-critical)',
             color: 'var(--wl-text-muted)',
           }}
@@ -157,7 +157,7 @@ function TimelineBody({ entry }: { entry: TimelineEntryData }) {
       <div
         className="rounded px-2 py-1 text-xs leading-relaxed"
         style={{
-          background: 'rgba(52, 211, 153, 0.12)',
+          background: 'color-mix(in oklab, var(--wl-success) 12%, transparent)',
           borderLeft: '2px solid var(--status-resolved)',
           color: 'var(--wl-text)',
         }}

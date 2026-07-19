@@ -135,7 +135,7 @@ export function SystemGrid({
                     type="button"
                     onClick={() => onToggleActive(s.publicId!, isActive, name)}
                     className="cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-opacity hover:opacity-80"
-                    style={{ color: isActive ? '#e53e3e' : 'var(--primary)' }}
+                    style={{ color: isActive ? 'var(--wl-danger)' : 'var(--primary)' }}
                   >
                     {isActive ? 'Desativar' : 'Ativar'}
                   </button>

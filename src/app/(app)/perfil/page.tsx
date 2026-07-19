@@ -41,7 +41,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 
 function FieldError({ msg }: { msg?: string }) {
   if (!msg) return null
-  return <p className="mt-1 text-[11px]" style={{ color: '#ef4444' }}>{msg}</p>
+  return <p className="mt-1 text-[11px]" style={{ color: 'var(--wl-danger)' }}>{msg}</p>
 }
 
 function PasswordInput({

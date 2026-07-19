@@ -337,7 +337,7 @@ export default function ClientesPage() {
                   onClick={confirmToggle}
                   disabled={deactivateMut.isPending || reactivateMut.isPending}
                   className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50"
-                  style={{ background: toggleTarget.active ? '#e53e3e' : 'var(--primary)' }}
+                  style={{ background: toggleTarget.active ? 'var(--wl-danger)' : 'var(--primary)' }}
                 >
                   {(deactivateMut.isPending || reactivateMut.isPending) && <Loader2 size={13} className="animate-spin" />}
                   {toggleTarget.active ? 'Desativar' : 'Reativar'}

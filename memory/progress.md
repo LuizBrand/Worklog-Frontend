@@ -596,7 +596,39 @@ Assets do designer em `nova-branding/` (gitignored).
 - [x] R4 — `AVATAR_COLORS` na paleta fria: 5 hues separados, todos
   >= 5:1 com texto branco. `STATUS_META`/`PRIORITY_META` não precisaram
   mudar — já liam os tokens de `globals.css`.
-- [ ] R5 — varredura dos ~30 hex hardcoded → tokens
+- [x] R5 — varredura dos hex hardcoded → tokens, 17 arquivos.
+  Varredura final não encontra hex de marca restante em `src/` (exceto
+  `logo.tsx`, onde o hex é a spec do símbolo).
+  Evidência: `.agent/visual/r5-tokens-hardcoded.md` — 10 capturas
+  autenticadas (`/login`, `/dashboard`, `/tickets`, `/clientes`,
+  `/usuarios`) nos dois temas, sem erro de página.
+
+  `Tag` mudou de implementação, não só de valor: concatenava sufixo
+  alpha no hex (`${color}18`), incompatível com `var(--token)`. Passou
+  a `color-mix(in oklab, ...)`. Prop `color` segue opcional,
+  call-sites inalterados. **Refactor-only, sem teste novo** (projeto
+  sem runner).
+
+  Mantidos de propósito: `rgba(0,0,0,...)` de scrim, `#fff` sobre botão
+  primário, trama decorativa do `system-grid`, e `rgba(99,102,241,0.14)`
+  em `perfil`/`user-grid`, que já é exatamente o indigo novo.
+
+## Slice R — concluída
+
+R1–R6 entregues. Marca migrada de "Mira + Sky" para indigo com base
+neutra fria, Space Grotesk em títulos, logo e favicon novos.
+
+Possíveis próximos passos (não iniciados):
+
+- [ ] Erro de hidratação pré-existente em `/design`: o label
+  `tema: {theme}` diverge entre SSR e cliente. Anterior ao rebranding.
+- [ ] `nova-branding/BRAND_GUIDE.md` diverge do implementado em três
+  pontos já decididos (vermelho adicionado, indigo em `IN_PROGRESS`,
+  `AWAITING_DEV` azul). `memory/brand.md` registra tudo.
+- [ ] Extrair a geometria do símbolo para um módulo compartilhado entre
+  `logo.tsx` e `scripts/generate-icons.mjs` — hoje está duplicada.
+- [ ] Revisar contraste em telas de densidade alta com dados reais
+  (a tabela de tickets tem muito `text-[11px]`).
 
 Cada fatia: `tsc --noEmit` + `eslint .` + evidência visual em
 `.agent/visual/` (bloqueante, `agent-md.toml [visual] required = true`).

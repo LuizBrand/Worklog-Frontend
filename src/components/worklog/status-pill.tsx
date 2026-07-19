@@ -10,8 +10,8 @@ export function StatusPill({ active, variant = 'text', className }: StatusPillPr
       <span
         className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${className ?? ''}`}
         style={{
-          background: active ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
-          color: active ? '#22c55e' : '#ef4444',
+          background: active ? 'color-mix(in oklab, var(--wl-success) 14%, transparent)' : 'color-mix(in oklab, var(--wl-danger) 14%, transparent)',
+          color: active ? 'var(--wl-success)' : 'var(--wl-danger)',
         }}
         title={active ? 'Ativo' : 'Inativo'}
       >
@@ -22,7 +22,7 @@ export function StatusPill({ active, variant = 'text', className }: StatusPillPr
   return (
     <span
       className={`inline-flex items-center text-[11px] font-medium ${className ?? ''}`}
-      style={{ color: active ? '#4ade80' : '#ef4444' }}
+      style={{ color: active ? 'var(--wl-success)' : 'var(--wl-danger)' }}
     >
       {active ? 'Ativo' : 'Inativo'}
     </span>

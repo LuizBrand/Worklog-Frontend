@@ -111,7 +111,7 @@ export function SystemDetail({ publicId, onClose }: SystemDetailProps) {
                         {c.enabled === false && (
                           <span
                             className="rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-                            style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444' }}
+                            style={{ background: 'color-mix(in oklab, var(--wl-danger) 11%, transparent)', color: 'var(--wl-danger)' }}
                           >
                             Inativo
                           </span>

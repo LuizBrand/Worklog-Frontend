@@ -78,9 +78,9 @@ export default function DesignPage() {
         <Section title="Tag">
           <div className="flex flex-wrap items-center gap-3">
             <Tag>ERP Financeiro</Tag>
-            <Tag color="#a78bfa">CRM</Tag>
-            <Tag color="#f97316">Logística</Tag>
-            <Tag color="#34d399">Portal</Tag>
+            <Tag color="var(--status-awaiting)">CRM</Tag>
+            <Tag color="var(--status-open)">Logística</Tag>
+            <Tag color="var(--status-resolved)">Portal</Tag>
           </div>
         </Section>
 

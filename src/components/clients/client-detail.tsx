@@ -135,7 +135,7 @@ export function ClientDetail({ publicId, onClose }: ClientDetailProps) {
                 <button
                   onClick={() => setConfirmAction('deactivate')}
                   className="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
-                  style={{ color: '#e53e3e' }}
+                  style={{ color: 'var(--wl-danger)' }}
                   aria-label="Desativar cliente"
                   title="Desativar"
                 >
@@ -276,7 +276,7 @@ function ConfirmDialog({
               onClick={onConfirm}
               disabled={loading}
               className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity disabled:opacity-50"
-              style={{ background: danger ? '#e53e3e' : 'var(--primary)', color: '#fff' }}
+              style={{ background: danger ? 'var(--wl-danger)' : 'var(--primary)', color: '#fff' }}
             >
               {loading && <Loader2 size={13} className="animate-spin" />}
               {confirmLabel}

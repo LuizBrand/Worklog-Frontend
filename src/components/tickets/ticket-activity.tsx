@@ -99,7 +99,7 @@ function LogContent({ log }: { log: TicketLogResponse }) {
         {oldValue && (
           <div
             className="rounded px-2.5 py-1.5 leading-relaxed line-through"
-            style={{ background: 'rgba(220,38,38,0.07)', color: '#ef4444', borderLeft: '2px solid #ef444460' }}
+            style={{ background: 'color-mix(in oklab, var(--wl-danger) 8%, transparent)', color: 'var(--wl-danger)', borderLeft: '2px solid color-mix(in oklab, var(--wl-danger) 38%, transparent)' }}
           >
             − {oldValue}
           </div>
@@ -107,7 +107,7 @@ function LogContent({ log }: { log: TicketLogResponse }) {
         {newValue && (
           <div
             className="rounded px-2.5 py-1.5 leading-relaxed"
-            style={{ background: 'rgba(34,197,94,0.07)', color: '#16a34a', borderLeft: '2px solid #16a34a60' }}
+            style={{ background: 'color-mix(in oklab, var(--wl-success) 8%, transparent)', color: 'var(--wl-success)', borderLeft: '2px solid color-mix(in oklab, var(--wl-success) 38%, transparent)' }}
           >
             + {newValue}
           </div>
@@ -121,14 +121,14 @@ function LogContent({ log }: { log: TicketLogResponse }) {
       <div
         className="mt-2 rounded-lg px-3 py-2.5"
         style={{
-          background: 'rgba(14,165,233,0.06)',
-          border: '1px solid rgba(14,165,233,0.2)',
-          borderLeft: '3px solid #0ea5e9',
+          background: 'color-mix(in oklab, var(--primary) 7%, transparent)',
+          border: '1px solid color-mix(in oklab, var(--primary) 20%, transparent)',
+          borderLeft: '3px solid var(--primary)',
         }}
       >
         <div className="mb-1.5 flex items-center gap-1.5">
-          <MessageSquare size={11} strokeWidth={2} style={{ color: '#0ea5e9' }} />
-          <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#0ea5e9' }}>
+          <MessageSquare size={11} strokeWidth={2} style={{ color: 'var(--primary)' }} />
+          <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--primary)' }}>
             Nota
           </span>
         </div>
