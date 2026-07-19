@@ -637,6 +637,33 @@ Assets do designer em `nova-branding/` (gitignored).
     identifica o usuário pela sessão). A tela já não o enviava, então
     não quebrou.
 
+- [x] 2026-07-19 — Criação de usuário pelo admin + troca de senha
+  revoga sessão:
+  - `src/components/users/user-form.tsx` (novo) — `UserCreateDialog`
+    via `useRegister` (POST /worklog/auth/register). Zod espelha as
+    regras do backend (nome 2–100, e-mail válido, senha 8+ com
+    maiúscula/minúscula/número). Erros por campo: 409 → e-mail em uso,
+    400 → mensagem do backend, 403 → toast e fecha. Usa
+    `meta: { silent: true }` para o handler global não empilhar um toast
+    genérico sobre o tratamento local.
+  - `src/app/(app)/usuarios/page.tsx` — botão "+ Usuário" (atalho `U`),
+    `MobileFab`, dialog. A página inteira já era admin-only.
+  - `src/app/(app)/perfil/page.tsx` — troca de senha agora desloga e
+    volta ao login, porque o backend revoga TODAS as sessões.
+    422 → erro no campo "senha atual"; 400 → erro no campo "nova senha".
+  - **Dois bugs próprios pegos na verificação**, ambos só visíveis
+    porque o teste afirmava a *mensagem* e não só o redirect:
+    `window.location.href` destruía o toast (trocado por
+    `router.replace`), e `qc.clear()` fazia o guard de `(app)/layout`
+    refazer `/users/me` com sessão revogada, disparando o `forceLogout`
+    do interceptor.
+  - Evidência: `.agent/visual/r9-criar-usuario-e-troca-senha.md` —
+    9 checks de ponta a ponta, todos passando. O teste não toca na senha
+    do admin: cria usuário descartável e troca a senha dele.
+  - **TDD-exemption**: UI sem test runner no projeto; verificado por
+    script Playwright de ponta a ponta.
+  - tsc ✓, lint ✓
+
 - [ ] `forceLogout` em `src/lib/api.ts:91` chama `notifySessionExpired()`
   e logo depois `window.location.href` — o reload destrói o toast antes
   de ser visto, então o aviso de sessão expirada provavelmente nunca
