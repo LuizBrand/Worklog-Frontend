@@ -582,9 +582,17 @@ Assets do designer em `nova-branding/` (gitignored).
   2. Tema claro usa tons escuros **saturados** (83–98%), não os hex de
      marca escurecidos por multiplicação de RGB — isso dessatura e suja
      (a âmbar caía para 47% de saturação).
-- [~] R2 — Space Grotesk carregada e `--font-heading` ligada a ela.
-  Faltam os favicons (R6).
-- [ ] R3 — `logo.tsx` com o símbolo SVG
+- [x] R2 — Space Grotesk carregada, `--font-heading` ligada a ela,
+  favicons instalados
+- [x] R3 — `logo.tsx` com o símbolo SVG, props `size`/`withWordmark`
+  preservadas (3 consumidores). Evidências:
+  `.agent/visual/r2-brand-logo-fonte-cores.md` e
+  `.agent/visual/r6-favicon-indigo.md`.
+
+  Favicons são **gerados**, não copiados: `scripts/generate-icons.mjs`
+  renderiza o símbolo no Chromium via Playwright. A geometria vive em
+  dois lugares — ao mudar o símbolo, editar `logo.tsx` **e** rodar o
+  script, senão logo e favicon divergem em silêncio.
 - [ ] R4 — `AVATAR_COLORS` na paleta fria
 - [ ] R5 — varredura dos ~30 hex hardcoded → tokens
 
