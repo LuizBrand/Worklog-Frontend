@@ -31,7 +31,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 /**
- * Cria um novo usuário com a role padrão USER. O email deve ser único no sistema.
+ * Cria um novo usuário com a role padrão USER. Requer autenticação como ADMIN. O email deve ser único no sistema.
  * @summary Registrar novo usuário
  */
 export const register = (
@@ -50,7 +50,7 @@ export const register = (
 
 
 
-export const getRegisterMutationOptions = <TError = ErrorType<ApiExceptionResponse>,
+export const getRegisterMutationOptions = <TError = ErrorType<ApiExceptionResponse | RegisterResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: BodyType<RegisterRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: BodyType<RegisterRequest>}, TContext> => {
 
@@ -79,12 +79,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type RegisterMutationResult = NonNullable<Awaited<ReturnType<typeof register>>>
     export type RegisterMutationBody = BodyType<RegisterRequest>
-    export type RegisterMutationError = ErrorType<ApiExceptionResponse>
+    export type RegisterMutationError = ErrorType<ApiExceptionResponse | RegisterResponse>
 
     /**
  * @summary Registrar novo usuário
  */
-export const useRegister = <TError = ErrorType<ApiExceptionResponse>,
+export const useRegister = <TError = ErrorType<ApiExceptionResponse | RegisterResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof register>>, TError,{data: BodyType<RegisterRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof register>>,

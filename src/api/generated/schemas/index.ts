@@ -32,6 +32,7 @@ export * from './sortObject';
 export * from './systemRequest';
 export * from './systemResponse';
 export * from './ticketFiltersParams';
+export * from './ticketFiltersParamsPriority';
 export * from './ticketFiltersParamsStatus';
 export * from './ticketFiltersParamsVisibility';
 export * from './ticketLogResponse';

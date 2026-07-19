@@ -101,7 +101,7 @@ export const useDeactiveUserByPublicId = <TError = ErrorType<void | ApiException
       return useMutation(getDeactiveUserByPublicIdMutationOptions(options), queryClient);
     }
     /**
- * Altera a senha do usuário autenticado e revoga o refresh token informado.
+ * Altera a senha do usuário autenticado e revoga TODAS as sessões ativas (refresh tokens) do usuário. Após o sucesso, o cliente deve fazer login novamente.
  * @summary Alterar a própria senha
  */
 export const changeMyPassword = (

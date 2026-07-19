@@ -15,6 +15,4 @@ export interface ChangePasswordRequest {
      * @pattern ^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$
      */
   newPassword?: string;
-  /** @minLength 1 */
-  refreshToken?: string;
 }

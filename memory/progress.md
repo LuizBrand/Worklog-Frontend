@@ -631,6 +631,26 @@ Assets do designer em `nova-branding/` (gitignored).
   Evidência: `.agent/visual/r8-quebra-texto-longo.md` — bug reproduzido
   com nota de 144 chars e overflow medido via `scrollWidth`.
 
+- [x] 2026-07-19 — Criação de usuários (ADMIN) + troca de senha revoga sessão:
+  - `pnpm api:sync` — spec ressincronizada. Mudança de contrato:
+    `ChangePasswordRequest` perdeu `refreshToken` (o backend agora
+    identifica o usuário pela sessão). A tela já não o enviava, então
+    não quebrou.
+
+- [ ] `forceLogout` em `src/lib/api.ts:91` chama `notifySessionExpired()`
+  e logo depois `window.location.href` — o reload destrói o toast antes
+  de ser visto, então o aviso de sessão expirada provavelmente nunca
+  aparece. Descoberto ao depurar a troca de senha. Pré-existente, não
+  corrigido aqui.
+
+- [ ] Usuários de teste `qa.teste.*@exemplo.com` criados pelo script de
+  verificação seguem no banco de dev. Desativar se o banco for
+  compartilhado.
+
+- [ ] `isAdmin` está duplicado em 6 arquivos
+  (`usuarios`, `sistemas`, `clientes`, `perfil`, `sidebar`,
+  `client-detail`). Candidato a um `useIsAdmin()`.
+
 ## Slice R — concluída
 
 R1–R6 entregues. Marca migrada de "Mira + Sky" para indigo com base

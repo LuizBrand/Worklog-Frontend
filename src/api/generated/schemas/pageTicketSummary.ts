@@ -16,9 +16,9 @@ export interface PageTicketSummary {
   content?: TicketSummary[];
   number?: number;
   pageable?: PageableObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   empty?: boolean;
 }

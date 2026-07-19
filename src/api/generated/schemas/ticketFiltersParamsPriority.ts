@@ -5,13 +5,13 @@
  * API para gerenciamento de tickets e interações de suporte ao cliente. Autenticação via cookie HttpOnly `worklog_access` emitido pelo endpoint `POST /worklog/auth/login` (o browser anexa o cookie automaticamente em chamadas subsequentes).
  * OpenAPI spec version: v1.0.0
  */
-import type { SortObject } from './sortObject';
 
-export interface PageableObject {
-  offset?: number;
-  paged?: boolean;
-  pageNumber?: number;
-  pageSize?: number;
-  sort?: SortObject;
-  unpaged?: boolean;
-}
+export type TicketFiltersParamsPriority = typeof TicketFiltersParamsPriority[keyof typeof TicketFiltersParamsPriority];
+
+
+export const TicketFiltersParamsPriority = {
+  CRITICAL: 'CRITICAL',
+  HIGH: 'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW: 'LOW',
+} as const;

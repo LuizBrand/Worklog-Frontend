@@ -175,7 +175,7 @@ export const useCreateTicket = <TError = ErrorType<ApiExceptionResponse | Ticket
       return useMutation(getCreateTicketMutationOptions(options), queryClient);
     }
     /**
- * Retorna uma página de tickets (resumo) com filtros opcionais por título, status, cliente, sistema, usuário, faixa de datas de criação e visibilidade. O parâmetro `visibility` (ATIVO/INATIVO/TODOS) só é honrado para usuários ADMIN; usuários comuns sempre veem apenas tickets ativos.
+ * Retorna uma página de tickets (resumo) com filtros opcionais por título, status, prioridade, cliente, sistema, usuário, faixa de datas de criação e visibilidade. O parâmetro `visibility` (ATIVO/INATIVO/TODOS) só é honrado para usuários ADMIN; usuários comuns sempre veem apenas tickets ativos.
  * @summary Listar tickets
  */
 export const findAllTickets = (

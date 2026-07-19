@@ -47,7 +47,7 @@ export const CreateTicketBody = zod.object({
 })
 
 /**
- * Retorna uma página de tickets (resumo) com filtros opcionais por título, status, cliente, sistema, usuário, faixa de datas de criação e visibilidade. O parâmetro `visibility` (ATIVO/INATIVO/TODOS) só é honrado para usuários ADMIN; usuários comuns sempre veem apenas tickets ativos.
+ * Retorna uma página de tickets (resumo) com filtros opcionais por título, status, prioridade, cliente, sistema, usuário, faixa de datas de criação e visibilidade. O parâmetro `visibility` (ATIVO/INATIVO/TODOS) só é honrado para usuários ADMIN; usuários comuns sempre veem apenas tickets ativos.
  * @summary Listar tickets
  */
 export const findAllTicketsQueryPageablePageMin = 0;
@@ -59,6 +59,7 @@ export const FindAllTicketsQueryParams = zod.object({
   "filters": zod.object({
   "title": zod.string().optional(),
   "status": zod.enum(['PENDING', 'AWAITING_CUSTOMER', 'AWAITING_DEVELOPMENT', 'COMPLETED', 'CANCELLED']).optional(),
+  "priority": zod.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).optional(),
   "clientId": zod.uuid().optional(),
   "systemId": zod.uuid().optional(),
   "userId": zod.uuid().optional(),

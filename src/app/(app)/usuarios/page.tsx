@@ -9,6 +9,8 @@ import { useFindAllUsers, useDeactiveUserByPublicId } from '@/api/generated/usu√
 import { useAuthStore } from '@/state/auth'
 import { invalidateUsers } from '@/api/invalidate'
 import { UserGrid } from '@/components/users/user-grid'
+import { UserCreateDialog } from '@/components/users/user-form'
+import { MobileFab } from '@/components/worklog'
 
 export default function UsuariosPage() {
   const qc = useQueryClient()
@@ -18,6 +20,7 @@ export default function UsuariosPage() {
   const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
 
   const [searchInput, setSearchInput] = useState('')
+  const [showCreate, setShowCreate] = useState(false)
   const [confirmTarget, setConfirmTarget] = useState<{ publicId: string; name: string; active: boolean } | null>(null)
 
   useEffect(() => {
@@ -25,6 +28,7 @@ export default function UsuariosPage() {
       const tag = (e.target as HTMLElement).tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       if (e.key === '/') { e.preventDefault(); searchRef.current?.focus() }
+      if (e.key === 'u' || e.key === 'U') { e.preventDefault(); setShowCreate(true) }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -89,6 +93,20 @@ export default function UsuariosPage() {
             style={{ color: 'var(--wl-text)' }}
           />
         </div>
+
+        <button
+          onClick={() => setShowCreate(true)}
+          className="hidden cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85 sm:flex"
+          style={{ background: 'var(--primary)', color: '#fff' }}
+        >
+          + Usu√°rio
+          <kbd
+            className="flex h-4 w-4 items-center justify-center rounded text-[10px] font-bold"
+            style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}
+          >
+            U
+          </kbd>
+        </button>
       </div>
 
       {/* Grid */}
@@ -104,6 +122,10 @@ export default function UsuariosPage() {
           setConfirmTarget({ publicId, name, active })
         }}
       />
+
+      <MobileFab onClick={() => setShowCreate(true)} />
+
+      {showCreate && <UserCreateDialog onClose={() => setShowCreate(false)} />}
 
       {/* Deactivate confirm overlay */}
       {confirmTarget && (

@@ -9,7 +9,7 @@ import * as zod from 'zod';
 
 
 /**
- * Cria um novo usuário com a role padrão USER. O email deve ser único no sistema.
+ * Cria um novo usuário com a role padrão USER. Requer autenticação como ADMIN. O email deve ser único no sistema.
  * @summary Registrar novo usuário
  */
 export const registerBodyNameMin = 2;

@@ -17,7 +17,7 @@ export const DeactiveUserByPublicIdParams = zod.object({
 })
 
 /**
- * Altera a senha do usuário autenticado e revoga o refresh token informado.
+ * Altera a senha do usuário autenticado e revoga TODAS as sessões ativas (refresh tokens) do usuário. Após o sucesso, o cliente deve fazer login novamente.
  * @summary Alterar a própria senha
  */
 
@@ -28,11 +28,9 @@ export const changeMyPasswordBodyNewPasswordMax = 2147483647;
 export const changeMyPasswordBodyNewPasswordRegExp = new RegExp('^(?=.\*[a-z])(?=.\*[A-Z])(?=.\*\\d).\*$');
 
 
-
 export const ChangeMyPasswordBody = zod.object({
   "currentPassword": zod.string().min(1).optional(),
-  "newPassword": zod.string().min(changeMyPasswordBodyNewPasswordMin).max(changeMyPasswordBodyNewPasswordMax).regex(changeMyPasswordBodyNewPasswordRegExp).optional(),
-  "refreshToken": zod.string().min(1).optional()
+  "newPassword": zod.string().min(changeMyPasswordBodyNewPasswordMin).max(changeMyPasswordBodyNewPasswordMax).regex(changeMyPasswordBodyNewPasswordRegExp).optional()
 })
 
 /**
