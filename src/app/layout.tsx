@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
@@ -14,6 +14,14 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-mono",
+});
+
+// Marca e títulos apenas — tem personalidade demais para corpo de texto
+// numa UI densa de tickets. Ver memory/brand.md.
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -34,6 +42,7 @@ export default function RootLayout({
         "h-full antialiased font-sans",
         inter.variable,
         jetbrainsMono.variable,
+        spaceGrotesk.variable,
       )}
     >
       <body className="min-h-full flex flex-col">

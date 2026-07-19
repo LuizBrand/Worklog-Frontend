@@ -573,7 +573,9 @@ Assets do designer em `nova-branding/` (gitignored).
 
 - [ ] R1 — tokens em `globals.css` (base fria + hue 277.117 + danger/
   success)
-- [ ] R2 — Space Grotesk ligada a `--font-heading`; favicons
+- [~] R2 — Space Grotesk carregada via `next/font/google` e exposta
+  como `--font-display`. Falta ligar `--font-heading` a ela (R1) e os
+  favicons (R6).
 - [ ] R3 — `logo.tsx` com o símbolo SVG
 - [ ] R4 — `AVATAR_COLORS` na paleta fria
 - [ ] R5 — varredura dos ~30 hex hardcoded → tokens
