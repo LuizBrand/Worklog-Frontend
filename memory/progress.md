@@ -593,7 +593,9 @@ Assets do designer em `nova-branding/` (gitignored).
   renderiza o símbolo no Chromium via Playwright. A geometria vive em
   dois lugares — ao mudar o símbolo, editar `logo.tsx` **e** rodar o
   script, senão logo e favicon divergem em silêncio.
-- [ ] R4 — `AVATAR_COLORS` na paleta fria
+- [x] R4 — `AVATAR_COLORS` na paleta fria: 5 hues separados, todos
+  >= 5:1 com texto branco. `STATUS_META`/`PRIORITY_META` não precisaram
+  mudar — já liam os tokens de `globals.css`.
 - [ ] R5 — varredura dos ~30 hex hardcoded → tokens
 
 Cada fatia: `tsc --noEmit` + `eslint .` + evidência visual em

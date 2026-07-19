@@ -84,12 +84,15 @@ export const PRIORITY_ORDER: TicketPriority[] = [
   'LOW',
 ]
 
+// Cinco hues bem separados, saturados o bastante para carregar texto
+// branco nos dois temas. Os tons terrosos anteriores (#c97a1a, #c0443a)
+// vinham da base quente e destoavam da paleta fria.
 const AVATAR_COLORS = [
-  '#3a6d99',
-  '#7a5faa',
-  '#c97a1a',
-  '#4a8c5c',
-  '#c0443a',
+  '#4f46e5',
+  '#0369a1',
+  '#047857',
+  '#b45309',
+  '#be3455',
 ] as const
 
 export function getInitials(name: string | null | undefined): string {
