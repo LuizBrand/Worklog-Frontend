@@ -566,6 +566,21 @@ changed but this file wasn't updated.
 - [ ] Configure `core.hooksPath = .githooks` so the pre-commit
   verification stack runs locally (currently inactive).
 
+## Slice R — Rebranding (indigo / base fria / Space Grotesk)
+
+Spec da marca: `memory/brand.md`. Plano: `memory/plan.md` § Slice R.
+Assets do designer em `nova-branding/` (gitignored).
+
+- [ ] R1 — tokens em `globals.css` (base fria + hue 277.117 + danger/
+  success)
+- [ ] R2 — Space Grotesk ligada a `--font-heading`; favicons
+- [ ] R3 — `logo.tsx` com o símbolo SVG
+- [ ] R4 — `AVATAR_COLORS` na paleta fria
+- [ ] R5 — varredura dos ~30 hex hardcoded → tokens
+
+Cada fatia: `tsc --noEmit` + `eslint .` + evidência visual em
+`.agent/visual/` (bloqueante, `agent-md.toml [visual] required = true`).
+
 ## Blocked
 
 <!--

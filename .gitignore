@@ -48,6 +48,7 @@ next-env.d.ts
 
 # design reference mockups (not project source)
 mockups/
+nova-branding/
 
 # claude code — per-user overrides and local credentials (never commit)
 .claude/settings.local.json
