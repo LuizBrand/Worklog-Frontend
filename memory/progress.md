@@ -8,6 +8,38 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+- [x] 2026-07-22 — fix — Bugs de navegação: logo/nome do sidebar sem link + sem botão "criar ticket" na tela inicial (desktop):
+  - Branch: `fix/sidebar-logo-link-e-botao-criar-ticket-home`.
+  - `src/components/shell/sidebar.tsx` — bloco da logo (linhas ~48–51) envolvido em
+    `<Link href="/dashboard">` (ambos os casos, `collapsed` e expandido); antes não
+    tinha `onClick` nem `Link`.
+  - `src/app/(app)/dashboard/page.tsx` — import `Link` de `next/link`; `StatsBar` agora
+    dentro de `<div className="flex flex-wrap items-center justify-between gap-3">`
+    junto de um novo botão `+ Novo ticket` (`hidden md:flex`, mesmo estilo do "+ Novo"
+    de `tickets/page.tsx`) que navega para `/tickets?create=1` (rota já tratada por
+    `tickets/page.tsx` para abrir o dialog de criação automaticamente). Mobile já tinha
+    cobertura via `<MobileFab href="/tickets?create=1" />` (`md:hidden`) — não duplicado.
+  - `tsc --noEmit` ✓ (sem erros). `pnpm lint` ✓ (só 5 warnings pré-existentes, nenhum
+    novo — 2 deles inclusive no próprio `dashboard/page.tsx`, já existiam antes do diff).
+  - `.claude/launch.json` (novo, untracked) — configuração `worklog-dev` (`pnpm dev`,
+    porta 3000) para o preview do Browser tool.
+  - **Verificado ponta-a-ponta com backend em :8080** (login `admin.teste@worklog.com`,
+    ADMIN): (1) `/tickets` → sidebar expandido → clique na logo → `href="/dashboard"`
+    confirmado e navegação real observada (conteúdo virou dashboard); (2) sidebar
+    colapsado (`Expandir menu` confirma o estado) → clique na logo colapsada →
+    mesmo redirect para `/dashboard`; (3) dashboard desktop → clique em "+ Novo ticket"
+    → navegou para `/tickets?create=1` → dialog "Novo ticket" abriu com o form completo
+    (Título/Descrição/Cliente/Sistema/Status/Prioridade/Responsável). Sem erros no
+    console em nenhum passo.
+  - **Sem PNG de evidência**: o screenshot do Browser tool falhou (“Browser pane is not
+    displayed”) neste ambiente; verificação foi feita via accessibility tree
+    (`read_page`) + `get_page_text` + `read_console_messages`, que confirmam
+    `href`/estado/navegação real, não uma captura de imagem. Reflete o gap real do
+    AGENTS.md §8 (evidência visual estruturada exige PNG fresco) — registrar aqui em
+    vez de fabricar artefato.
+  - Nada commitado ainda (mudanças só no working tree da branch) — aguardando ok do
+    usuário para commit.
+
 - [x] 2026-07-18 — Fix build Docker na VPS (`pnpm install --frozen-lockfile`
   exit 1): corepack usava pnpm default (9.x) no container, divergindo do
   lockfile 9.0 gerado por pnpm 10. Fixado a versão: `packageManager:

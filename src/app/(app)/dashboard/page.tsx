@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 import { useFindAllTickets } from '@/api/generated/tickets/tickets'
 import { TicketFiltersParamsStatus } from '@/api/generated/schemas'
 import { apiToUiStatus } from '@/lib/ticket-status'
@@ -107,7 +109,16 @@ export default function DashboardPage() {
 
   return (
     <main className="flex flex-col gap-4 p-4 md:p-6">
-      <StatsBar statusCounts={statusCounts} loading={countsLoading} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <StatsBar statusCounts={statusCounts} loading={countsLoading} />
+        <Link
+          href="/tickets?create=1"
+          className="hidden md:flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
+          style={{ background: 'var(--primary)', color: '#fff' }}
+        >
+          + Novo ticket
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_300px]">
         <TicketList

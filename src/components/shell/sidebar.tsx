@@ -45,8 +45,10 @@ export function Sidebar() {
           collapsed ? 'justify-center px-0' : 'justify-between px-3',
         )}
       >
-        {!collapsed && <Logo size={28} withWordmark />}
-        {collapsed && <Logo size={28} />}
+        <Link href="/dashboard" aria-label="Ir para a tela inicial">
+          {!collapsed && <Logo size={28} withWordmark />}
+          {collapsed && <Logo size={28} />}
+        </Link>
         {!collapsed && (
           <Button
             variant="ghost"
