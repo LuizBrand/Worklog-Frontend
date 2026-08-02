@@ -80,6 +80,19 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
   - `tsc --noEmit` limpo. `eslint` nos **5 warnings pré-existentes**, zero novos.
   - ⚠️ O banco de dev tem clientes anteriores à expansão com `documento` null na
     matriz — a coluna mostra `—`. É filial de legado, previsto no contrato, não bug.
+- [x] 2026-08-02 — fix — `state-enforcement.sh` travado por `.idea/`:
+  - O hook conta **untracked** como "fonte modificada". Como `.idea/` não estava no
+    `.gitignore` e nunca seria commitado, ele bloqueava todo Stop com "6 source files
+    modified" mesmo com o `progress.md` já commitado — sem saída possível a não ser
+    commitar lixo de IDE.
+  - `.gitignore` — adicionados `.idea/` e `.vscode/`.
+  - `.claude/hooks/state-enforcement.sh` — a lista de exclusão passou a cobrir
+    `.idea/`, `.vscode/`, `.fleet/`, `.zed/` e sufixos `.swp`/`.swo`/`~`, para que
+    droppings de editor não voltem a travar o hook em outra máquina.
+  - A força do guard não mudou: mudança de fonte real sem `progress.md` continua
+    bloqueando (verificado — com o `.gitignore` alterado e não commitado, o hook
+    acusou "1 source file").
+
 - [ ] Slice 3 — detalhe em `/clientes/[publicId]` (rota nova), cards, placeholder de
       contrato, tickets do cliente.
 - [ ] Slice 4 — criar/editar cliente completo + lookup de CNPJ + orquestração

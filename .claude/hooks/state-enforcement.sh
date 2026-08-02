@@ -30,9 +30,15 @@ MODIFIED_FILES=$(
 
 # Exclusions: tooling, docs, agent scratch state (.agent/), and the
 # directive-alias files that the installer copies from AGENT.md.
+#
+# IDE and editor droppings are excluded too. They are untracked, nobody
+# ever commits them, and without this the hook wedges: a stale .idea/
+# counts as "source changed" on every Stop, with no way to satisfy the
+# check short of committing junk.
 SOURCE_CHANGED=$(
   echo "$MODIFIED_FILES" \
-    | grep -vE '^(memory/|docs/|\.agent/|\.agent-md/|\.agents/|\.claude/|\.codex/|\.cursor/|\.githooks/|\.windsurf/|README\.md$|LICENSE$|AGENT\.md$|AGENTS\.md$|CLAUDE\.md$|agent-md\.toml(\.example)?$)' \
+    | grep -vE '^(memory/|docs/|\.agent/|\.agent-md/|\.agents/|\.claude/|\.codex/|\.cursor/|\.githooks/|\.windsurf/|\.idea/|\.vscode/|\.fleet/|\.zed/|README\.md$|LICENSE$|AGENT\.md$|AGENTS\.md$|CLAUDE\.md$|agent-md\.toml(\.example)?$)' \
+    | grep -vE '(\.swp|\.swo|~)$' \
     | grep -v '^$' \
     | grep -cvE '\.md$'
 )
