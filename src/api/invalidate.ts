@@ -20,6 +20,12 @@ export function invalidateClient(qc: QueryClient, publicId: string): Promise<voi
   return qc.invalidateQueries({ queryKey: [`/clients/${publicId}`] })
 }
 
+// Chave própria: o prefix-match do React Query compara elemento por elemento,
+// então `['/clients/{id}']` NÃO alcança `['/clients/{id}/branches']`.
+export function invalidateBranches(qc: QueryClient, clientPublicId: string): Promise<void> {
+  return qc.invalidateQueries({ queryKey: [`/clients/${clientPublicId}/branches`] })
+}
+
 export function invalidateSystems(qc: QueryClient): Promise<void> {
   return qc.invalidateQueries({ queryKey: ['/systems'] })
 }

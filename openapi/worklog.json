@@ -29,6 +29,10 @@
       "description": "Endpoints de registro, login, refresh token e logout (tokens via cookies HttpOnly)"
     },
     {
+      "name": "Filiais",
+      "description": "Filiais (unidades) de um cliente. A matriz nasce junto com o cliente"
+    },
+    {
       "name": "Usuários",
       "description": "Consulta e gerenciamento de usuários do sistema"
     },
@@ -495,6 +499,298 @@
         }
       }
     },
+    "/clients/{publicId}/branches": {
+      "get": {
+        "tags": [
+          "Filiais"
+        ],
+        "summary": "Listar filiais do cliente",
+        "description": "Retorna as filiais do cliente, incluindo a matriz. Sem o parâmetro `status`\ndevolve ativas e inativas, igual ao `GET /clients`.\nFunciona também para clientes desativados — só a criação exige cliente ativo.",
+        "operationId": "findBranchesByClient",
+        "parameters": [
+          {
+            "name": "publicId",
+            "in": "path",
+            "description": "ID público do cliente (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filtro de status: ATIVO, INATIVO ou TODOS (padrão: TODOS)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ATIVO",
+                "INATIVO",
+                "TODOS"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de filiais retornada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BranchResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BranchResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Filiais"
+        ],
+        "summary": "Cadastrar filial",
+        "description": "Cadastra uma nova filial no cliente. O `documento` é obrigatório e precisa ter\nchecksum válido para o tipo do **cliente persistido** (CPF para PF, CNPJ para PJ) —\no tipo não é lido do corpo.\n\n**Atenção ao status de erro:** documento com checksum inválido aqui responde\n**422**, enquanto o mesmo erro no `POST /clients` responde **400**. A diferença é\nintencional: no cadastro do cliente a validação é do Bean Validation (que conhece\no `tipo` enviado no corpo) e aqui é regra de serviço (que só pode consultar o tipo\njá persistido).\n\nRegras rejeitadas com 422: cliente inativo; cliente pessoa física (que tem apenas\na matriz); `isMatriz: true` (promover uma filial a matriz é feito pelo `PATCH`);\ndocumento ausente; documento com checksum inválido.",
+        "operationId": "createBranch",
+        "parameters": [
+          {
+            "name": "publicId",
+            "in": "path",
+            "description": "ID público do cliente (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Filial criada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Documento já cadastrado em outra filial",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de negócio violada",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/{publicId}/branches/{branchId}/deactivate": {
+      "post": {
+        "tags": [
+          "Filiais"
+        ],
+        "summary": "Inativar filial",
+        "description": "Inativa a filial (`enabled = false`). **Não é exclusão**: o registro permanece e\ncontinua aparecendo em `GET .../branches` sem filtro, ou com `status=INATIVO`.\n\n**Consequência importante:** o `documento` da filial inativa **continua ocupando a\nunicidade global**. Recadastrar aquele CNPJ em outro cliente devolve 409 enquanto\nesta filial existir.\n\nA **matriz não pode ser inativada** (422) — promova outra filial a matriz antes.\n\nRequer perfil ADMIN.",
+        "operationId": "deactivateBranch",
+        "parameters": [
+          {
+            "name": "publicId",
+            "in": "path",
+            "description": "ID público do cliente (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "ID público da filial (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Filial inativada com sucesso"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão (requer ADMIN)"
+          },
+          "404": {
+            "description": "Cliente ou filial não encontrada (inclui filial de outro cliente)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Tentativa de inativar a matriz, ou cliente inativo",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/{publicId}/branches/{branchId}/activate": {
+      "post": {
+        "tags": [
+          "Filiais"
+        ],
+        "summary": "Reativar filial",
+        "description": "Reativa uma filial inativa (`enabled = true`). Contrapartida de\n`POST .../deactivate`.\n\n**Idempotente:** reativar uma filial já ativa devolve 204 sem alterar nada.\n\n**Não há risco de conflito de documento:** a filial inativa nunca liberou a\nunicidade global, então ninguém pôde ter tomado aquele documento no intervalo.\n\nRejeitado com 422: cliente inativo; cliente **pessoa física** que já tenha uma\nfilial ativa (ele deve ter apenas a matriz).\n\nRequer perfil ADMIN.",
+        "operationId": "activateBranch",
+        "parameters": [
+          {
+            "name": "publicId",
+            "in": "path",
+            "description": "ID público do cliente (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "ID público da filial (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Filial reativada com sucesso"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão (requer ADMIN)"
+          },
+          "404": {
+            "description": "Cliente ou filial não encontrada (inclui filial de outro cliente)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Cliente inativo, ou pessoa física que já tem filial ativa",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/clients/": {
       "post": {
         "tags": [
@@ -800,7 +1096,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ClientRequest"
+                "$ref": "#/components/schemas/ClientUpdateRequest"
               }
             }
           },
@@ -839,6 +1135,110 @@
           },
           "404": {
             "description": "Cliente não encontrado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/{publicId}/branches/{branchId}": {
+      "patch": {
+        "tags": [
+          "Filiais"
+        ],
+        "summary": "Atualizar filial",
+        "description": "Atualiza parcialmente uma filial. Apenas os campos enviados são alterados (PATCH).\n\n**`contatos`**: ausente não altera nada; presente **substitui a lista inteira**.\n\n**`isMatriz: true`** promove esta filial a matriz e rebaixa a anterior na mesma\ntransação. **`isMatriz: false`** sobre a matriz atual é rejeitado com 422 — o\ncliente ficaria sem matriz; promova outra filial no lugar.\n\n**`enabled` não existe aqui**: inativar filial tem endpoint próprio\n(`POST .../deactivate`).\n\nReenviar o **próprio** documento sem alterá-lo é aceito e não devolve 409.\n\nRejeitado com 422: cliente inativo; documento com checksum inválido para o tipo do\ncliente; rebaixar a matriz; promover uma filial inativa; mais de um contato\nmarcado como `principal`.",
+        "operationId": "updateBranch",
+        "parameters": [
+          {
+            "name": "publicId",
+            "in": "path",
+            "description": "ID público do cliente (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "ID público da filial (UUID)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Filial atualizada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados de entrada inválidos",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cliente ou filial não encontrada (inclui filial de outro cliente)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Documento já cadastrado em outra filial",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Regra de negócio violada",
             "content": {
               "*/*": {
                 "schema": {
@@ -1266,6 +1666,90 @@
           }
         }
       }
+    },
+    "/clients/lookup": {
+      "get": {
+        "tags": [
+          "Clientes"
+        ],
+        "summary": "Consultar CNPJ na Receita Federal",
+        "description": "Consulta o CNPJ na CNPJá e devolve os dados já no formato do formulário de\ncadastro, prontos para o `POST /clients`. **Nada é persistido**: o usuário\nrevisa e corrige antes de salvar.\n\nO documento é validado localmente antes da consulta — CNPJ com checksum\ninválido devolve 400 sem gastar requisição no provedor, que limita a\n5 consultas por minuto por endereço IP.\n\n**A inscrição estadual volta sempre em branco** com o provedor público:\nverificado contra a API real, `open.cnpja.com` não devolve o bloco de\ninscrições. Segue preenchimento manual. (A seleção da IE da UF do\nendereço está implementada e passa a valer sozinha caso o backend seja\napontado para a API comercial, que devolve o bloco.)\n\nO regime tributário só é preenchido quando o provedor afirma: MEI ou\nSimples Nacional. Lucro Presumido e Lucro Real não existem no contrato e\nficam a cargo do usuário.\n\n`situacaoCadastral` e `situacaoAtiva` são o aviso da tela, não campos do\ncadastro: CNPJ suspenso, inapto ou baixado vem **preenchido do mesmo\njeito**, com `situacaoAtiva: false`, e quem decide se cadastra é o\natendente.\n\nA inscrição municipal não existe no contrato do provedor e volta sempre\nem branco. Nenhum contato vem marcado como principal: quem escolhe é o\nusuário.\n\nAs respostas bem-sucedidas ficam em cache no Redis por 24h\n(`worklog.cnpja.cache-ttl`), então repetir a consulta do mesmo CNPJ não\nconsome o limite do provedor. Erros nunca são cacheados.\n",
+        "operationId": "lookupByCnpj",
+        "parameters": [
+          {
+            "name": "documento",
+            "in": "query",
+            "description": "CNPJ do estabelecimento, com ou sem máscara",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "07526557011659"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta realizada com sucesso",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CnpjLookupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "CNPJ ausente ou inválido",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CnpjLookupResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CNPJ não registrado na Receita Federal",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de consultas do provedor atingido; tente novamente em instantes",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provedor de consulta indisponível; preencha o cadastro manualmente",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiExceptionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1611,25 +2095,252 @@
           }
         }
       },
+      "AddressRequest": {
+        "type": "object",
+        "properties": {
+          "cep": {
+            "type": "string",
+            "maxLength": 8,
+            "minLength": 0
+          },
+          "logradouro": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "numero": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 0
+          },
+          "complemento": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "bairro": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "cidade": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "uf": {
+            "type": "string",
+            "maxLength": 2,
+            "minLength": 0
+          }
+        }
+      },
+      "BranchRequest": {
+        "type": "object",
+        "properties": {
+          "documento": {
+            "type": "string"
+          },
+          "isMatriz": {
+            "type": "boolean"
+          },
+          "apelido": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 0
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 0
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressRequest"
+          },
+          "contatos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactRequest"
+            }
+          }
+        }
+      },
+      "ContactRequest": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "EMAIL",
+              "TELEFONE",
+              "CELULAR",
+              "WHATSAPP"
+            ]
+          },
+          "valor": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 0
+          },
+          "descricao": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "principal": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "tipo"
+        ]
+      },
+      "AddressResponse": {
+        "type": "object",
+        "properties": {
+          "cep": {
+            "type": "string"
+          },
+          "logradouro": {
+            "type": "string"
+          },
+          "numero": {
+            "type": "string"
+          },
+          "complemento": {
+            "type": "string"
+          },
+          "bairro": {
+            "type": "string"
+          },
+          "cidade": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string"
+          }
+        }
+      },
+      "BranchResponse": {
+        "type": "object",
+        "properties": {
+          "publicId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documento": {
+            "type": "string"
+          },
+          "isMatriz": {
+            "type": "boolean"
+          },
+          "apelido": {
+            "type": "string"
+          },
+          "inscricaoEstadual": {
+            "type": "string"
+          },
+          "inscricaoMunicipal": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressResponse"
+          },
+          "contatos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactResponse"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ContactResponse": {
+        "type": "object",
+        "properties": {
+          "publicId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "EMAIL",
+              "TELEFONE",
+              "CELULAR",
+              "WHATSAPP"
+            ]
+          },
+          "valor": {
+            "type": "string"
+          },
+          "descricao": {
+            "type": "string"
+          },
+          "principal": {
+            "type": "boolean"
+          }
+        }
+      },
       "ClientRequest": {
         "type": "object",
         "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ]
+          },
           "name": {
             "type": "string",
-            "minLength": 1
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "regimeTributario": {
+            "type": "string",
+            "enum": [
+              "SIMPLES_NACIONAL",
+              "LUCRO_PRESUMIDO",
+              "LUCRO_REAL",
+              "MEI",
+              "IMUNE",
+              "ISENTO"
+            ]
           },
           "systemsPublicIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          "branches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchRequest"
             },
             "minItems": 1
           },
           "enabled": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "tipo"
+        ]
       },
       "ClientResponse": {
         "type": "object",
@@ -1638,8 +2349,29 @@
             "type": "string",
             "format": "uuid"
           },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ]
+          },
           "name": {
             "type": "string"
+          },
+          "nomeFantasia": {
+            "type": "string"
+          },
+          "regimeTributario": {
+            "type": "string",
+            "enum": [
+              "SIMPLES_NACIONAL",
+              "LUCRO_PRESUMIDO",
+              "LUCRO_REAL",
+              "MEI",
+              "IMUNE",
+              "ISENTO"
+            ]
           },
           "enabled": {
             "type": "boolean"
@@ -1652,6 +2384,90 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SystemResponse"
+            }
+          },
+          "branches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchResponse"
+            }
+          }
+        }
+      },
+      "ClientUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "regimeTributario": {
+            "type": "string",
+            "enum": [
+              "SIMPLES_NACIONAL",
+              "LUCRO_PRESUMIDO",
+              "LUCRO_REAL",
+              "MEI",
+              "IMUNE",
+              "ISENTO"
+            ]
+          },
+          "systemsPublicIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BranchUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "documento": {
+            "type": "string"
+          },
+          "isMatriz": {
+            "type": "boolean"
+          },
+          "apelido": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 0
+          },
+          "inscricaoMunicipal": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 0
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressRequest"
+          },
+          "contatos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContactRequest"
             }
           }
         }
@@ -1851,18 +2667,18 @@
           "pageable": {
             "$ref": "#/components/schemas/PageableObject"
           },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
           "numberOfElements": {
             "type": "integer",
             "format": "int32"
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
           },
           "empty": {
             "type": "boolean"
@@ -1973,18 +2789,18 @@
           "pageable": {
             "$ref": "#/components/schemas/PageableObject"
           },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
           "numberOfElements": {
             "type": "integer",
             "format": "int32"
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
           },
           "empty": {
             "type": "boolean"
@@ -2010,6 +2826,57 @@
             "items": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          "documento": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ]
+          }
+        }
+      },
+      "CnpjLookupResponse": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "PJ",
+              "PF"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "nomeFantasia": {
+            "type": "string"
+          },
+          "regimeTributario": {
+            "type": "string",
+            "enum": [
+              "SIMPLES_NACIONAL",
+              "LUCRO_PRESUMIDO",
+              "LUCRO_REAL",
+              "MEI",
+              "IMUNE",
+              "ISENTO"
+            ]
+          },
+          "situacaoCadastral": {
+            "type": "string"
+          },
+          "situacaoAtiva": {
+            "type": "boolean"
+          },
+          "branches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchRequest"
             }
           }
         }

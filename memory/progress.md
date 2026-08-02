@@ -8,6 +8,101 @@ changed but this file wasn't updated.
 
 ## In Progress
 
+### Expansão do cadastro de clientes — branch `feat/client-registration-expansion`
+
+Plano completo: `docs/plans/expansao-cadastro-clientes.md`.
+Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
+
+- [x] 2026-07-29 — **Slice 1 — camada de API e contrato** (verde, 13/13 checks):
+  - `openapi/worklog.json` ← `docs/api/openapi.json` + `pnpm api:gen`. A spec nova é
+    superset limpo: 9 schemas novos, 3 alterados, zero removidos. Gerou
+    `src/api/generated/filiais/filiais.ts` (5 hooks) e `lookupByCnpj`.
+  - Confirmado que a inversão 200/401 do `GET /tickets` existe **idêntica nas duas
+    specs** — a troca não regride tickets, o cast em `PageTicketSummary` continua valendo.
+  - `src/api/clients-contract.ts` (novo) — o `docs/api/client-api.ts` sem
+    `CLIENT_ENDPOINTS`/`ADMIN_ONLY`/`buildClientListQuery` (Orval + paramsSerializer já
+    são donos de URL e query string) e sem o `ApiExceptionResponse` duplicado.
+    Ganhou `matrizDoCliente`, `contatoPrincipal`, `filiaisSemMatriz`.
+  - `src/lib/documento.ts` (novo) — checksum CPF/CNPJ incl. alfanumérico 2026,
+    formatadores, `looksLikeDocumento`. **49 asserções rodadas** contra CNPJs reais e
+    bases alfanuméricas com DV calculado de forma independente.
+  - `src/lib/field-errors.ts` (novo) — `branches[0].contatos[1].valor` → path RHF;
+    extração de documento de 409; detecção de conflito de nome vs documento.
+  - `src/lib/api-errors.ts` — `hasFieldErrors`, `isDisplayableMessage`.
+  - `src/api/invalidate.ts` — `invalidateBranches`; chave própria porque o prefix-match
+    do React Query **não** faz `['/clients/{id}']` alcançar `['/clients/{id}/branches']`.
+  - `src/components/clients/client-form.tsx` — ponte mínima para o create voltar a
+    funcionar: toggle `tipo` + documento da matriz com validação de checksum,
+    `systemsPublicIds` sem `min(1)`, mapeamento de `fieldErrors` no submit.
+    **Substituído no Slice 4** pelo formulário completo (lookup, nomeFantasia,
+    endereço, contatos, filiais).
+  - Evidência: `.agent/visual/slice1-api-contrato-clientes.md` (5 PNGs, dark + light
+    confirmados por asserção de `--wl-bg`, não por olho).
+  - `tsc --noEmit` limpo. `eslint` de volta aos **5 warnings pré-existentes** (usei
+    `useWatch` em vez de `watch()` para não adicionar um sexto).
+  - ⚠️ **Lixo no banco de dev**: 3 clientes `Verificacao Slice1 <timestamp>` criados
+    pelo script de verificação. Só há soft delete na API — limpar direto no banco se
+    incomodar.
+
+- [x] 2026-08-02 — **Slice 2 — listagem** (verde):
+  - `src/components/worklog/tipo-badge.tsx` (novo) — pill PJ (`--primary`) / PF
+    (`--status-open`); `dev-chip.tsx` (novo) — chip "Em desenvolvimento". Ambos
+    exportados no `index.ts`.
+  - `src/components/clients/client-table.tsx` (novo, desktop `md+`) — colunas CLIENTE
+    (nome + tipo + documento da matriz) · CONTATO · TICKETS (em andamento /
+    solicitados) · CONTRATO (`DevChip`) · RENOVAÇÃO (`—`) · chevron. **É a casa do
+    tipo `ClientStats`**, que ganhou `pending`/`inProgress` além de
+    `total`/`open`/`critical` — o grid e a página importam de lá.
+  - `src/components/clients/client-grid.tsx` — virou a versão mobile (`<md`), com badge
+    de tipo, contato principal e documento da matriz. **Morreu o hack
+    `(c as { email?: string }).email`.**
+  - `src/app/(app)/clientes/page.tsx` — filtros no servidor
+    (`filtersParams: { name | documento, status, tipo }`), busca única decidindo por
+    `looksLikeDocumento` + `useDebouncedValue(300)`, `FilterSelect` de tipo, contador
+    "N clientes cadastrados", `keepPreviousData` para o skeleton não piscar a cada tecla.
+  - **Re-slice deliberado:** o clique na linha continua abrindo o modal `?id=`. A rota
+    `/clientes/[publicId]` só nasce no Slice 3, e trocar o destino agora deixaria 404
+    entre os slices.
+  - **Toggle ativar/inativar migrou de `DELETE` para `PATCH { enabled }`** nos dois
+    sentidos (assunção 3 do plano; §8 do contrato recomenda um caminho só). Gate ADMIN
+    mantido. `useSoftDeleteClient` não é mais chamado por ninguém.
+  - Removidos `editId` + `ClientEditFetcher` da página — estado morto, nada chamava
+    `setEditId`.
+  - **Deviação do mockup registrada:** o contador "N clientes cadastrados" ficou inline
+    ao lado do título, não em segunda linha — o header da página é uma barra de 52px
+    alinhada com o sidebar (decisão de 2026-05-09).
+  - Verificado contra o backend real: `?tipo=PJ`, `?documento=44555666000181` (máscara
+    removida, 1 linha) e `?name=Verificacao` capturados na rede; CNPJ alfanumérico
+    `12ABC34501DE35` acha o cliente pela filial não-matriz; `formatTelefone` e o
+    fallback "primeiro contato" de `contatoPrincipal` exercitados por dado real.
+  - Evidência: `.agent/visual/slice2-listagem-clientes.md` (6 PNGs; dark/light por
+    asserção de `--wl-bg`; mobile confirma tabela oculta).
+  - `tsc --noEmit` limpo. `eslint` nos **5 warnings pré-existentes**, zero novos.
+  - ⚠️ O banco de dev tem clientes anteriores à expansão com `documento` null na
+    matriz — a coluna mostra `—`. É filial de legado, previsto no contrato, não bug.
+- [ ] Slice 3 — detalhe em `/clientes/[publicId]` (rota nova), cards, placeholder de
+      contrato, tickets do cliente.
+- [ ] Slice 4 — criar/editar cliente completo + lookup de CNPJ + orquestração
+      PATCH cliente / PATCH matriz / POST filiais.
+- [ ] Slice 5 — filiais: modal, criar, editar, transferir matriz, ativar/inativar.
+
+**Deferidos** (do plano §5): paginação client-side da listagem; documento no
+`ClientCombobox`; gap do backend de nome duplicado no PATCH.
+
+**TDD-check exemptions (slice 2 — listagem):** `tipo-badge.tsx`, `dev-chip.tsx` e
+`client-table.tsx` são UI pura sem lógica de negócio (a lógica de verdade —
+`contatoPrincipal`, `matrizDoCliente`, `looksLikeDocumento`, `formatDocumento` — vive em
+`clients-contract.ts` e `documento.ts`, do Slice 1). Sem test runner configurado;
+validados por tsc + eslint + verificação runtime com asserção de query string.
+
+**Nota sobre TDD:** o hook `tdd-check.sh` avisou em cada arquivo novo deste slice. O
+projeto não tem runner de teste (`agent-md.toml` deixa `test` intencionalmente vazio).
+`documento.ts` — o único código de lógica pura e de risco real — foi verificado por
+script executado (49 asserções). Vale propor um runner (`vitest`) antes do Slice 4,
+onde entram as regras de validação do formulário.
+
+---
+
 - [x] 2026-07-22 — fix — Bugs de navegação: logo/nome do sidebar sem link + sem botão "criar ticket" na tela inicial (desktop):
   - Branch: `fix/sidebar-logo-link-e-botao-criar-ticket-home`.
   - `src/components/shell/sidebar.tsx` — bloco da logo (linhas ~48–51) envolvido em
@@ -729,6 +824,22 @@ Possíveis próximos passos (não iniciados):
 
 Cada fatia: `tsc --noEmit` + `eslint .` + evidência visual em
 `.agent/visual/` (bloqueante, `agent-md.toml [visual] required = true`).
+
+## Documentação
+
+- [x] `design-system.md` (raiz) — spec de design para colar em sessões
+  de mockup do Claude Design. Extraído do código, não do `brand.md`:
+  tokens de `globals.css`, primitivos shadcn (registry denso: `Button`
+  `h-7`, `Input` `h-7`), os 16 componentes de `components/worklog/`,
+  medidas do shell (sidebar 200/52, header 52, tab bar 82, FAB 56),
+  inventário dos 45 ícones lucide em uso, durações de animação, e 12
+  regras para mockup. Só documentação — nenhum código tocado, sem
+  verificação de build necessária.
+
+- [ ] `memory/brand.md` diverge de `globals.css` na prioridade do tema
+  claro: `CRITICAL` `#D3443C` vs `#DC2626` implementado, `HIGH`
+  `#9B6D29` vs `#B45309`. O `design-system.md` documenta os valores do
+  CSS, que são os que renderizam. Reconciliar o `brand.md`.
 
 ## Blocked
 

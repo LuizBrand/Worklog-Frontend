@@ -42,3 +42,16 @@ export function apiErrorToMessage(err: unknown, fallback?: string): string {
 export function notifySessionExpired() {
   toast.error('Sua sessão expirou. Faça login novamente.', { id: 'session-expired' })
 }
+
+// `fieldErrors` só vem em 400 de Bean Validation. Presente = erro por campo,
+// ausente = erro global em toast (CONTRATO-CLIENTES.md §1).
+export function hasFieldErrors(err: unknown): boolean {
+  const fieldErrors = getApiErrorBody(err)?.fieldErrors
+  return !!fieldErrors && Object.keys(fieldErrors).length > 0
+}
+
+// Mensagens de 400/422/429/503 são regras de negócio em pt-BR e podem ir direto
+// para a tela. As de 404/409 são em inglês e contêm IDs — use texto próprio.
+export function isDisplayableMessage(status: number | undefined): boolean {
+  return status === 400 || status === 422 || status === 429 || status === 503
+}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod/v3'
 import { X, Loader2 } from 'lucide-react'
@@ -11,17 +11,40 @@ import { toast } from 'sonner'
 import { useSaveClient, useUpdateClient, useFindClientByPublicId } from '@/api/generated/clientes/clientes'
 import { useFindAllSystems } from '@/api/generated/sistemas/sistemas'
 import { invalidateClients, invalidateClient } from '@/api/invalidate'
-import type { ClientResponse } from '@/api/generated/schemas'
+import { CLIENT_TYPE_LABEL, ClientType, MAX_LENGTH } from '@/api/clients-contract'
+import type { ClientRequest } from '@/api/clients-contract'
+import { isValidDocumento, stripDocumento } from '@/lib/documento'
+import { applyApiFieldErrors } from '@/lib/field-errors'
+import { apiErrorToMessage } from '@/lib/api-errors'
+import type { ClientRequest as GeneratedClientRequest, ClientResponse } from '@/api/generated/schemas'
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
+// `systemsPublicIds` deixou de ser obrigatório na expansão do cadastro: o
+// cliente pode ser criado antes de se saber quais produtos usa.
 const clientSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatório'),
-  systemsPublicIds: z.array(z.string()).min(1, 'Selecione ao menos um sistema'),
+  name: z.string().min(1, 'Nome obrigatório').max(MAX_LENGTH.clientName),
+  systemsPublicIds: z.array(z.string()),
   enabled: z.boolean().optional(),
 })
 
 type ClientValues = z.infer<typeof clientSchema>
+
+// O create exige `tipo` e a matriz. `tipo` vem primeiro porque decide se o
+// documento é CPF ou CNPJ. Cobertura completa do cadastro (lookup de CNPJ,
+// nomeFantasia, endereço, contatos, filiais) entra no Slice 4 do plano em
+// docs/plans/expansao-cadastro-clientes.md.
+const createSchema = clientSchema
+  .extend({
+    tipo: z.enum(['PJ', 'PF']),
+    documento: z.string().min(1, 'Documento obrigatório'),
+  })
+  .refine((v) => isValidDocumento(v.documento, v.tipo), {
+    path: ['documento'],
+    message: 'Documento inválido',
+  })
+
+type CreateValues = z.infer<typeof createSchema>
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
 
@@ -117,10 +140,15 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
   const qc = useQueryClient()
   const systemsQ = useFindAllSystems()
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ClientValues>({
-    resolver: zodResolver(clientSchema),
-    defaultValues: { name: '', systemsPublicIds: [] },
+  const { register, handleSubmit, control, setValue, setError, formState: { errors } } = useForm<CreateValues>({
+    resolver: zodResolver(createSchema),
+    defaultValues: { tipo: ClientType.PJ, name: '', documento: '', systemsPublicIds: [] },
   })
+
+  // useWatch em vez de watch(): watch() não é memoizável e o React Compiler
+  // desiste de otimizar o componente inteiro.
+  const tipo = useWatch({ control, name: 'tipo' })
+  const isPj = tipo === ClientType.PJ
 
   const createMut = useSaveClient({
     mutation: {
@@ -129,11 +157,32 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
         toast.success('Cliente criado com sucesso')
         onClose()
       },
+      onError: (err) => {
+        // 400 traz fieldErrors com caminho aninhado (branches[0].documento);
+        // o resto é regra de negócio e vai em toast.
+        if (!applyApiFieldErrors(err, setError)) {
+          toast.error(apiErrorToMessage(err, 'Não foi possível criar o cliente'))
+        }
+      },
     },
   })
 
-  function onSubmit(values: ClientValues) {
-    createMut.mutate({ data: { name: values.name, systemsPublicIds: values.systemsPublicIds } })
+  function onSubmit(values: CreateValues) {
+    // `enabled` não vai: o backend ignora no create e o cliente nasce ativo.
+    const payload: ClientRequest = {
+      tipo: values.tipo,
+      name: values.name,
+      systemsPublicIds: values.systemsPublicIds,
+      branches: [
+        {
+          documento: stripDocumento(values.documento),
+          isMatriz: true,
+        },
+      ],
+    }
+    // O tipo gerado pelo Orval afrouxa obrigatoriedades que a API exige;
+    // clients-contract.ts é a fonte da verdade (ver §1.2 do plano).
+    createMut.mutate({ data: payload as GeneratedClientRequest })
   }
 
   return (
@@ -141,17 +190,53 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
       <Backdrop onClose={onClose} />
       <DialogCard title="Novo cliente" onClose={onClose}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <FormField label="Nome *" error={errors.name?.message}>
+          <FormField label="Tipo *" error={errors.tipo?.message}>
+            <div className="flex gap-2">
+              {([ClientType.PJ, ClientType.PF] as const).map((t) => {
+                const active = tipo === t
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => {
+                      setValue('tipo', t)
+                      setValue('documento', '')
+                    }}
+                    className="flex-1 cursor-pointer rounded-lg px-3 py-2 text-[13px] font-semibold transition-colors"
+                    style={{
+                      background: active ? 'var(--primary)' : 'var(--wl-surface-2)',
+                      border: `1px solid ${active ? 'var(--primary)' : 'var(--wl-border)'}`,
+                      color: active ? '#fff' : 'var(--wl-text-muted)',
+                    }}
+                  >
+                    {CLIENT_TYPE_LABEL[t]}
+                  </button>
+                )
+              })}
+            </div>
+          </FormField>
+
+          <FormField label={isPj ? 'Razão social *' : 'Nome completo *'} error={errors.name?.message}>
             <input
               {...register('name')}
-              placeholder="Nome do cliente"
+              placeholder={isPj ? 'Nome da empresa' : 'Nome do cliente'}
               className={inputCls}
               style={inputStyle}
               autoFocus
             />
           </FormField>
 
-          <FormField label="Sistemas *" error={errors.systemsPublicIds?.message}>
+          <FormField label={isPj ? 'CNPJ *' : 'CPF *'} error={errors.documento?.message}>
+            <input
+              {...register('documento')}
+              placeholder={isPj ? '00.000.000/0000-00' : '000.000.000-00'}
+              className={inputCls}
+              style={inputStyle}
+              inputMode={isPj ? 'text' : 'numeric'}
+            />
+          </FormField>
+
+          <FormField label="Sistemas" error={errors.systemsPublicIds?.message}>
             <SystemsCheckboxList register={register} systems={systemsQ.data ?? []} loading={systemsQ.isLoading} />
           </FormField>
 
@@ -239,7 +324,7 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
             />
           </FormField>
 
-          <FormField label="Sistemas *" error={errors.systemsPublicIds?.message}>
+          <FormField label="Sistemas" error={errors.systemsPublicIds?.message}>
             <SystemsCheckboxList register={register} systems={systemsQ.data ?? []} loading={systemsQ.isLoading} />
           </FormField>
 
@@ -294,15 +379,17 @@ export function ClientEditFetcher({ publicId, onClose }: ClientEditFetcherProps)
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
-import type { UseFormRegister } from 'react-hook-form'
+import type { Path, UseFormRegister } from 'react-hook-form'
 import type { SystemResponse } from '@/api/generated/schemas'
 
-function SystemsCheckboxList({
+// Genérico porque create e edit têm schemas diferentes, mas os dois carregam
+// `systemsPublicIds`.
+function SystemsCheckboxList<T extends { systemsPublicIds: string[] }>({
   register,
   systems,
   loading,
 }: {
-  register: UseFormRegister<ClientValues>
+  register: UseFormRegister<T>
   systems: SystemResponse[]
   loading: boolean
 }) {
@@ -333,7 +420,7 @@ function SystemsCheckboxList({
           <input
             type="checkbox"
             value={s.publicId ?? ''}
-            {...register('systemsPublicIds')}
+            {...register('systemsPublicIds' as Path<T>)}
             className="cursor-pointer accent-[var(--primary)]"
           />
           <span className="text-[13px]" style={{ color: 'var(--wl-text)' }}>

@@ -5,12 +5,11 @@
  * API para gerenciamento de tickets e interações de suporte ao cliente. Autenticação via cookie HttpOnly `worklog_access` emitido pelo endpoint `POST /worklog/auth/login` (o browser anexa o cookie automaticamente em chamadas subsequentes).
  * OpenAPI spec version: v1.0.0
  */
-import type { BranchRequest } from './branchRequest';
-import type { ClientRequestRegimeTributario } from './clientRequestRegimeTributario';
-import type { ClientRequestTipo } from './clientRequestTipo';
+import type { ClientUpdateRequestRegimeTributario } from './clientUpdateRequestRegimeTributario';
+import type { ClientUpdateRequestTipo } from './clientUpdateRequestTipo';
 
-export interface ClientRequest {
-  tipo: ClientRequestTipo;
+export interface ClientUpdateRequest {
+  tipo?: ClientUpdateRequestTipo;
   /**
      * @minLength 0
      * @maxLength 100
@@ -21,9 +20,7 @@ export interface ClientRequest {
      * @maxLength 100
      */
   nomeFantasia?: string;
-  regimeTributario?: ClientRequestRegimeTributario;
+  regimeTributario?: ClientUpdateRequestRegimeTributario;
   systemsPublicIds?: string[];
-  /** @minItems 1 */
-  branches?: BranchRequest[];
   enabled?: boolean;
 }

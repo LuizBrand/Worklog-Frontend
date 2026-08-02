@@ -1,11 +1,8 @@
-import { EmptyState, EntityCard, StatCell, StatusPill, WlAvatar } from '@/components/worklog'
-import type { ClientResponse } from '@/api/generated/schemas'
-
-export interface ClientStats {
-  total: number
-  open: number
-  critical: number
-}
+import { EmptyState, EntityCard, StatCell, StatusPill, TipoBadge, WlAvatar } from '@/components/worklog'
+import { contatoPrincipal, matrizDoCliente } from '@/api/clients-contract'
+import type { ClientResponse } from '@/api/clients-contract'
+import { formatDocumento } from '@/lib/documento'
+import { contatoLabel, EMPTY_CLIENT_STATS, type ClientStats } from './client-table'
 
 export interface ClientGridProps {
   clients: ClientResponse[]
@@ -15,8 +12,6 @@ export interface ClientGridProps {
   onViewTickets?: (publicId: string) => void
   onToggleActive?: (publicId: string, active: boolean, name: string) => void
 }
-
-const EMPTY_STATS: ClientStats = { total: 0, open: 0, critical: 0 }
 
 export function ClientGrid({
   clients,
@@ -29,8 +24,8 @@ export function ClientGrid({
   if (loading) {
     return (
       <div className="scroll-hide flex-1 overflow-y-auto p-4 sm:p-5">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {Array.from({ length: 6 }).map((_, i) => (
             <ClientCardSkeleton key={i} />
           ))}
         </div>
@@ -48,32 +43,37 @@ export function ClientGrid({
 
   return (
     <div className="scroll-hide flex-1 overflow-y-auto p-4 sm:p-5">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {clients.map((c) => {
-          const isActive = c.enabled !== false
-          const stats = statsByClient[c.publicId ?? ''] ?? EMPTY_STATS
-          const name = c.name ?? '—'
-          // client.email is a pending backend field; renders `—` placeholder
-          // so the line keeps its slot until the backend exposes the value.
-          const email = (c as { email?: string }).email ?? '—'
+          const matriz = matrizDoCliente(c)
+          const stats = statsByClient[c.publicId] ?? EMPTY_CLIENT_STATS
           return (
             <EntityCard
               key={c.publicId}
-              inactive={!isActive}
-              onClick={c.publicId ? () => onCardClick?.(c.publicId!) : undefined}
+              inactive={!c.enabled}
+              onClick={() => onCardClick?.(c.publicId)}
             >
               {/* Header */}
               <div className="flex items-start gap-3 px-4 pb-3 pt-4">
-                <WlAvatar name={name} size={40} className="shrink-0 rounded-md" />
+                <WlAvatar name={c.name} size={40} className="shrink-0 rounded-md" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-semibold leading-tight" style={{ color: 'var(--wl-text)' }}>
-                    {name}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate text-[13px] font-semibold leading-tight" style={{ color: 'var(--wl-text)' }}>
+                      {c.name}
+                    </p>
+                    <TipoBadge tipo={c.tipo} className="shrink-0" />
+                  </div>
                   <p className="truncate text-[11px] leading-tight" style={{ color: 'var(--wl-text-muted)' }}>
-                    {email}
+                    {contatoLabel(contatoPrincipal(matriz))}
+                  </p>
+                  <p
+                    className="truncate text-[11px] tabular-nums leading-tight"
+                    style={{ color: 'var(--wl-text-dim)' }}
+                  >
+                    {formatDocumento(matriz?.documento)}
                   </p>
                 </div>
-                <StatusPill active={isActive} className="shrink-0" />
+                <StatusPill active={c.enabled} className="shrink-0" />
               </div>
 
               {/* Inset separator */}
@@ -96,7 +96,7 @@ export function ClientGrid({
               >
                 <button
                   type="button"
-                  onClick={() => c.publicId && onViewTickets?.(c.publicId)}
+                  onClick={() => onViewTickets?.(c.publicId)}
                   className="flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors hover:bg-[var(--wl-surface-2)]"
                   style={{
                     background: 'transparent',
@@ -106,14 +106,14 @@ export function ClientGrid({
                 >
                   Ver tickets
                 </button>
-                {onToggleActive && c.publicId && (
+                {onToggleActive && (
                   <button
                     type="button"
-                    onClick={() => onToggleActive(c.publicId!, isActive, name)}
+                    onClick={() => onToggleActive(c.publicId, c.enabled, c.name)}
                     className="cursor-pointer rounded-md px-3 py-1.5 text-[12px] font-medium transition-opacity hover:opacity-80"
-                    style={{ color: isActive ? 'var(--wl-danger)' : 'var(--primary)' }}
+                    style={{ color: c.enabled ? 'var(--wl-danger)' : 'var(--primary)' }}
                   >
-                    {isActive ? 'Desativar' : 'Ativar'}
+                    {c.enabled ? 'Desativar' : 'Ativar'}
                   </button>
                 )}
               </div>
@@ -136,6 +136,7 @@ function ClientCardSkeleton() {
         <div className="flex-1 space-y-1.5">
           <div className="h-3.5 w-3/4 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
           <div className="h-3 w-2/3 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
+          <div className="h-3 w-1/2 animate-pulse rounded" style={{ background: 'var(--wl-surface-2)' }} />
         </div>
       </div>
       <div className="mx-4 border-t" style={{ borderColor: 'var(--wl-border-2)' }} />

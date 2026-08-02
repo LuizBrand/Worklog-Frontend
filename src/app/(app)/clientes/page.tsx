@@ -4,30 +4,47 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, Loader2, Filter } from 'lucide-react'
 import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQueryClient } from '@tanstack/react-query'
 
-import {
-  useFindAllClients,
-  useSoftDeleteClient,
-  useUpdateClient,
-} from '@/api/generated/clientes/clientes'
+import { useFindAllClients, useUpdateClient } from '@/api/generated/clientes/clientes'
 import { useFindAllTickets } from '@/api/generated/tickets/tickets'
-import { ClientGrid, type ClientStats } from '@/components/clients/client-grid'
+import { ClientGrid } from '@/components/clients/client-grid'
+import { ClientTable, type ClientStats } from '@/components/clients/client-table'
 import { ClientDetail } from '@/components/clients/client-detail'
-import { ClientCreateDialog, ClientEditFetcher } from '@/components/clients/client-form'
+import { ClientCreateDialog } from '@/components/clients/client-form'
 import { FilterSelect, MobileFab } from '@/components/worklog'
 import { invalidateClients, invalidateClient } from '@/api/invalidate'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { looksLikeDocumento, stripDocumento } from '@/lib/documento'
 import { useAuthStore } from '@/state/auth'
-import type { ClientResponse, PageTicketSummary, TicketSummary } from '@/api/generated/schemas'
+import type { ClientResponse } from '@/api/clients-contract'
+import type {
+  ClientFiltersParams,
+  ClientFiltersParamsStatus,
+  ClientFiltersParamsTipo,
+  PageTicketSummary,
+  TicketSummary,
+} from '@/api/generated/schemas'
 
 const STATUS_OPTIONS = [
-  { label: 'Todos',    value: ''       },
-  { label: 'Ativos',   value: 'ATIVO'  },
+  { label: 'Todos',    value: ''        },
+  { label: 'Ativos',   value: 'ATIVO'   },
   { label: 'Inativos', value: 'INATIVO' },
+]
+
+const TIPO_OPTIONS = [
+  { label: 'PJ e PF',        value: ''   },
+  { label: 'Pessoa Jurídica', value: 'PJ' },
+  { label: 'Pessoa Física',   value: 'PF' },
 ]
 
 const OPEN_STATUSES = new Set<TicketSummary['status']>([
   'PENDING',
+  'AWAITING_CUSTOMER',
+  'AWAITING_DEVELOPMENT',
+])
+
+const IN_PROGRESS_STATUSES = new Set<TicketSummary['status']>([
   'AWAITING_CUSTOMER',
   'AWAITING_DEVELOPMENT',
 ])
@@ -42,30 +59,20 @@ export default function ClientesPage() {
 
   const selectedId = params.get('id') ?? ''
   const [searchInput, setSearchInput] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'ATIVO' | 'INATIVO' | ''>('')
+  const [statusFilter, setStatusFilter] = useState<ClientFiltersParamsStatus | ''>('')
+  const [tipoFilter, setTipoFilter] = useState<ClientFiltersParamsTipo | ''>('')
   const [showCreate, setShowCreate] = useState(false)
-  const [editId, setEditId] = useState<string | null>(null)
   const [toggleTarget, setToggleTarget] = useState<{ publicId: string; name: string; active: boolean } | null>(null)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
 
-  const deactivateMut = useSoftDeleteClient({
+  // Um caminho só para ativar e inativar (§8 do contrato recomenda o PATCH e
+  // não expor o DELETE; reativar só existe pelo PATCH de qualquer forma).
+  const toggleMut = useUpdateClient({
     mutation: {
-      onSuccess: () => {
-        if (toggleTarget) invalidateClient(qc, toggleTarget.publicId)
+      onSuccess: (_data, vars) => {
+        invalidateClient(qc, vars.publicId)
         invalidateClients(qc)
-        toast.success('Cliente desativado')
-        setToggleTarget(null)
-      },
-      onError: () => setToggleTarget(null),
-    },
-  })
-
-  const reactivateMut = useUpdateClient({
-    mutation: {
-      onSuccess: () => {
-        if (toggleTarget) invalidateClient(qc, toggleTarget.publicId)
-        invalidateClients(qc)
-        toast.success('Cliente reativado')
+        toast.success(toggleTarget?.active ? 'Cliente desativado' : 'Cliente reativado')
         setToggleTarget(null)
       },
       onError: () => setToggleTarget(null),
@@ -112,9 +119,29 @@ export default function ClientesPage() {
     router.replace(`/clientes?${next.toString()}`)
   }
 
-  // Fetch all clients (no pagination on this endpoint)
-  const clientsQ = useFindAllClients({ filtersParams: {} })
-  const allClients: ClientResponse[] = clientsQ.data ?? []
+  // Busca única: documento casa por igualdade exata contra qualquer filial,
+  // nome é LIKE parcial. `looksLikeDocumento` decide em qual filtro o texto vai.
+  const search = useDebouncedValue(searchInput.trim(), 300)
+  const filtersParams = useMemo<ClientFiltersParams>(() => {
+    const f: ClientFiltersParams = {}
+    if (search) {
+      if (looksLikeDocumento(search)) f.documento = stripDocumento(search)
+      else f.name = search
+    }
+    if (statusFilter) f.status = statusFilter
+    if (tipoFilter) f.tipo = tipoFilter
+    return f
+  }, [search, statusFilter, tipoFilter])
+
+  // Sem paginação neste endpoint. `keepPreviousData` evita o skeleton piscar a
+  // cada tecla enquanto o filtro novo carrega.
+  const clientsQ = useFindAllClients(
+    { filtersParams },
+    { query: { placeholderData: keepPreviousData } },
+  )
+  // Fronteira do Orval: o gerado marca todo campo sem @NotNull como opcional.
+  // `src/api/clients-contract.ts` é a obrigatoriedade real.
+  const clients = (clientsQ.data ?? []) as unknown as ClientResponse[]
 
   // Fetch a large page of tickets and aggregate stats client-side.
   // No dedicated aggregation endpoint exists; acceptable while volume is low.
@@ -130,26 +157,20 @@ export default function ClientesPage() {
     for (const t of rows) {
       const cid = t.client?.publicId
       if (!cid) continue
-      const bucket = out[cid] ?? { total: 0, open: 0, critical: 0 }
+      const bucket = out[cid] ?? { total: 0, open: 0, critical: 0, pending: 0, inProgress: 0 }
       bucket.total += 1
       if (OPEN_STATUSES.has(t.status)) {
         bucket.open += 1
         if (t.priority === 'CRITICAL') bucket.critical += 1
       }
+      if (t.status === 'PENDING') bucket.pending += 1
+      if (IN_PROGRESS_STATUSES.has(t.status)) bucket.inProgress += 1
       out[cid] = bucket
     }
     return out
   }, [ticketsQ.data])
 
-  // Client-side filtering
-  const filtered = allClients.filter((c) => {
-    const matchesName = !searchInput || (c.name ?? '').toLowerCase().includes(searchInput.toLowerCase())
-    const matchesStatus =
-      !statusFilter ||
-      (statusFilter === 'ATIVO' && c.enabled !== false) ||
-      (statusFilter === 'INATIVO' && c.enabled === false)
-    return matchesName && matchesStatus
-  })
+  const hasFilter = Boolean(statusFilter || tipoFilter)
 
   function onToggleActive(publicId: string, active: boolean, name: string) {
     if (!isAdmin) return
@@ -158,12 +179,7 @@ export default function ClientesPage() {
 
   function confirmToggle() {
     if (!toggleTarget) return
-    if (toggleTarget.active) {
-      deactivateMut.mutate({ publicId: toggleTarget.publicId })
-    } else {
-      // Reactivate via PATCH; backend has no dedicated reactivate endpoint
-      reactivateMut.mutate({ publicId: toggleTarget.publicId, data: { enabled: true } })
-    }
+    toggleMut.mutate({ publicId: toggleTarget.publicId, data: { enabled: !toggleTarget.active } })
   }
 
   return (
@@ -176,25 +192,39 @@ export default function ClientesPage() {
         <h1 className="text-[18px] font-semibold" style={{ color: 'var(--wl-text)' }}>
           Clientes
         </h1>
+        {!clientsQ.isLoading && (
+          <span className="text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>
+            {clients.length} {clients.length === 1 ? 'cliente cadastrado' : 'clientes cadastrados'}
+          </span>
+        )}
 
         <div className="flex-1" />
 
         <div
           className="flex items-center gap-2 rounded-lg px-3 py-1.5"
-          style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', minWidth: 220 }}
+          style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', minWidth: 280 }}
         >
           <Search size={14} style={{ color: 'var(--wl-text-muted)', flexShrink: 0 }} />
           <input
             ref={searchRef}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Buscar... ( / )"
+            placeholder="Buscar por nome, CNPJ ou CPF ( / )"
             className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--wl-text-muted)]"
             style={{ color: 'var(--wl-text)' }}
           />
         </div>
 
-        <FilterSelect value={statusFilter} onChange={(v) => setStatusFilter(v as typeof statusFilter)} options={STATUS_OPTIONS} />
+        <FilterSelect
+          value={tipoFilter}
+          onChange={(v) => setTipoFilter(v as typeof tipoFilter)}
+          options={TIPO_OPTIONS}
+        />
+        <FilterSelect
+          value={statusFilter}
+          onChange={(v) => setStatusFilter(v as typeof statusFilter)}
+          options={STATUS_OPTIONS}
+        />
 
         <button
           onClick={() => setShowCreate(true)}
@@ -232,7 +262,7 @@ export default function ClientesPage() {
             ref={searchRef}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Buscar..."
+            placeholder="Nome, CNPJ ou CPF"
             className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-[var(--wl-text-muted)] min-w-0"
             style={{ color: 'var(--wl-text)' }}
           />
@@ -242,11 +272,11 @@ export default function ClientesPage() {
         <button
           onClick={() => setMobileFilterOpen((v) => !v)}
           className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-[var(--wl-surface-2)]"
-          style={{ color: statusFilter ? 'var(--primary)' : 'var(--wl-text-muted)' }}
+          style={{ color: hasFilter ? 'var(--primary)' : 'var(--wl-text-muted)' }}
           aria-label="Filtros"
         >
           <Filter size={18} />
-          {statusFilter && (
+          {hasFilter && (
             <span
               className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full"
               style={{ background: 'var(--primary)' }}
@@ -255,50 +285,62 @@ export default function ClientesPage() {
         </button>
       </div>
 
-      {/* ── Mobile filter panel (status) ── */}
+      {/* ── Mobile filter panel ── */}
       {mobileFilterOpen && (
         <div
-          className="md:hidden flex gap-2 px-4 py-3"
+          className="md:hidden flex flex-col gap-2 px-4 py-3"
           style={{ borderBottom: '1px solid var(--wl-border)' }}
         >
-          {STATUS_OPTIONS.map((opt) => {
-            const active = statusFilter === opt.value
-            return (
-              <button
+          <div className="flex gap-2">
+            {STATUS_OPTIONS.map((opt) => (
+              <FilterChip
                 key={opt.value}
-                onClick={() => { setStatusFilter(opt.value as typeof statusFilter); setMobileFilterOpen(false) }}
-                className="flex shrink-0 cursor-pointer items-center rounded-full px-3 py-1.5 text-[12px] font-medium whitespace-nowrap transition-colors"
-                style={{
-                  border: `1px solid ${active ? 'var(--primary)' : 'var(--wl-border)'}`,
-                  background: active ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'var(--wl-surface-2)',
-                  color: active ? 'var(--primary)' : 'var(--wl-text-muted)',
-                }}
-              >
-                {opt.label}
-              </button>
-            )
-          })}
+                label={opt.label}
+                active={statusFilter === opt.value}
+                onClick={() => setStatusFilter(opt.value as typeof statusFilter)}
+              />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {TIPO_OPTIONS.map((opt) => (
+              <FilterChip
+                key={opt.value}
+                label={opt.label}
+                active={tipoFilter === opt.value}
+                onClick={() => setTipoFilter(opt.value as typeof tipoFilter)}
+              />
+            ))}
+          </div>
         </div>
       )}
 
-      {/* ── Grid ── */}
-      <ClientGrid
-        clients={filtered}
-        statsByClient={statsByClient}
-        loading={clientsQ.isLoading}
-        onCardClick={openDetail}
-        onViewTickets={(publicId) => router.push(`/tickets?clientId=${publicId}`)}
-        onToggleActive={isAdmin ? onToggleActive : undefined}
-      />
+      {/* ── Tabela (desktop) ── */}
+      <div className="hidden md:flex md:flex-1 md:min-h-0 md:flex-col">
+        <ClientTable
+          clients={clients}
+          statsByClient={statsByClient}
+          loading={clientsQ.isLoading}
+          onRowClick={openDetail}
+        />
+      </div>
 
-      {/* ── Detail panel ── */}
+      {/* ── Cards (mobile) ── */}
+      <div className="flex flex-1 min-h-0 flex-col md:hidden">
+        <ClientGrid
+          clients={clients}
+          statsByClient={statsByClient}
+          loading={clientsQ.isLoading}
+          onCardClick={openDetail}
+          onViewTickets={(publicId) => router.push(`/tickets?clientId=${publicId}`)}
+          onToggleActive={isAdmin ? onToggleActive : undefined}
+        />
+      </div>
+
+      {/* ── Detail panel (aposentado no Slice 3, junto da rota /clientes/[publicId]) ── */}
       {selectedId && <ClientDetail publicId={selectedId} onClose={closeDetail} />}
 
       {/* ── Create dialog ── */}
       {showCreate && <ClientCreateDialog onClose={() => setShowCreate(false)} />}
-
-      {/* ── Edit from row menu (legacy entry) ── */}
-      {editId && <ClientEditFetcher publicId={editId} onClose={() => setEditId(null)} />}
 
       {/* ── Mobile FAB ── */}
       <MobileFab onClick={() => setShowCreate(true)} />
@@ -309,7 +351,7 @@ export default function ClientesPage() {
           <div
             className="fixed inset-0 z-[60]"
             style={{ background: 'rgba(0,0,0,0.45)' }}
-            onClick={() => !deactivateMut.isPending && !reactivateMut.isPending && setToggleTarget(null)}
+            onClick={() => !toggleMut.isPending && setToggleTarget(null)}
           />
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" style={{ pointerEvents: 'none' }}>
             <div
@@ -327,7 +369,7 @@ export default function ClientesPage() {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setToggleTarget(null)}
-                  disabled={deactivateMut.isPending || reactivateMut.isPending}
+                  disabled={toggleMut.isPending}
                   className="cursor-pointer rounded-lg px-3 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70 disabled:opacity-50"
                   style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
                 >
@@ -335,11 +377,11 @@ export default function ClientesPage() {
                 </button>
                 <button
                   onClick={confirmToggle}
-                  disabled={deactivateMut.isPending || reactivateMut.isPending}
+                  disabled={toggleMut.isPending}
                   className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50"
                   style={{ background: toggleTarget.active ? 'var(--wl-danger)' : 'var(--primary)' }}
                 >
-                  {(deactivateMut.isPending || reactivateMut.isPending) && <Loader2 size={13} className="animate-spin" />}
+                  {toggleMut.isPending && <Loader2 size={13} className="animate-spin" />}
                   {toggleTarget.active ? 'Desativar' : 'Reativar'}
                 </button>
               </div>
@@ -348,5 +390,21 @@ export default function ClientesPage() {
         </>
       )}
     </div>
+  )
+}
+
+function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex shrink-0 cursor-pointer items-center rounded-full px-3 py-1.5 text-[12px] font-medium whitespace-nowrap transition-colors"
+      style={{
+        border: `1px solid ${active ? 'var(--primary)' : 'var(--wl-border)'}`,
+        background: active ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'var(--wl-surface-2)',
+        color: active ? 'var(--primary)' : 'var(--wl-text-muted)',
+      }}
+    >
+      {label}
+    </button>
   )
 }

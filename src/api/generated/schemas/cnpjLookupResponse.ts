@@ -6,24 +6,15 @@
  * OpenAPI spec version: v1.0.0
  */
 import type { BranchRequest } from './branchRequest';
-import type { ClientRequestRegimeTributario } from './clientRequestRegimeTributario';
-import type { ClientRequestTipo } from './clientRequestTipo';
+import type { CnpjLookupResponseRegimeTributario } from './cnpjLookupResponseRegimeTributario';
+import type { CnpjLookupResponseTipo } from './cnpjLookupResponseTipo';
 
-export interface ClientRequest {
-  tipo: ClientRequestTipo;
-  /**
-     * @minLength 0
-     * @maxLength 100
-     */
+export interface CnpjLookupResponse {
+  tipo?: CnpjLookupResponseTipo;
   name?: string;
-  /**
-     * @minLength 0
-     * @maxLength 100
-     */
   nomeFantasia?: string;
-  regimeTributario?: ClientRequestRegimeTributario;
-  systemsPublicIds?: string[];
-  /** @minItems 1 */
+  regimeTributario?: CnpjLookupResponseRegimeTributario;
+  situacaoCadastral?: string;
+  situacaoAtiva?: boolean;
   branches?: BranchRequest[];
-  enabled?: boolean;
 }

@@ -28,7 +28,10 @@ import type {
   ApiExceptionResponse,
   ClientRequest,
   ClientResponse,
-  FindAllClientsParams
+  ClientUpdateRequest,
+  CnpjLookupResponse,
+  FindAllClientsParams,
+  LookupByCnpjParams
 } from '../schemas';
 
 import { customInstance } from '../../mutator';
@@ -264,7 +267,7 @@ export const useSoftDeleteClient = <TError = ErrorType<void | ApiExceptionRespon
  */
 export const updateClient = (
     publicId: string,
-    clientRequest: BodyType<ClientRequest>,
+    clientUpdateRequest: BodyType<ClientUpdateRequest>,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
 
@@ -272,7 +275,7 @@ export const updateClient = (
       return customInstance<ClientResponse>(
       {url: `/clients/${publicId}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
-      data: clientRequest, signal
+      data: clientUpdateRequest, signal
     },
       options);
     }
@@ -280,8 +283,8 @@ export const updateClient = (
 
 
 export const getUpdateClientMutationOptions = <TError = ErrorType<ApiExceptionResponse | ClientResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClient>>, TError,{publicId: string;data: BodyType<ClientRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateClient>>, TError,{publicId: string;data: BodyType<ClientRequest>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClient>>, TError,{publicId: string;data: BodyType<ClientUpdateRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateClient>>, TError,{publicId: string;data: BodyType<ClientUpdateRequest>}, TContext> => {
 
 const mutationKey = ['updateClient'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -293,7 +296,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateClient>>, {publicId: string;data: BodyType<ClientRequest>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateClient>>, {publicId: string;data: BodyType<ClientUpdateRequest>}> = (props) => {
           const {publicId,data} = props ?? {};
 
           return  updateClient(publicId,data,requestOptions)
@@ -307,18 +310,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateClientMutationResult = NonNullable<Awaited<ReturnType<typeof updateClient>>>
-    export type UpdateClientMutationBody = BodyType<ClientRequest>
+    export type UpdateClientMutationBody = BodyType<ClientUpdateRequest>
     export type UpdateClientMutationError = ErrorType<ApiExceptionResponse | ClientResponse>
 
     /**
  * @summary Atualizar cliente
  */
 export const useUpdateClient = <TError = ErrorType<ApiExceptionResponse | ClientResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClient>>, TError,{publicId: string;data: BodyType<ClientRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClient>>, TError,{publicId: string;data: BodyType<ClientUpdateRequest>}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateClient>>,
         TError,
-        {publicId: string;data: BodyType<ClientRequest>},
+        {publicId: string;data: BodyType<ClientUpdateRequest>},
         TContext
       > => {
       return useMutation(getUpdateClientMutationOptions(options), queryClient);
@@ -406,6 +409,130 @@ export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClien
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getFindAllClientsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+/**
+ * Consulta o CNPJ na CNPJá e devolve os dados já no formato do formulário de
+cadastro, prontos para o `POST /clients`. **Nada é persistido**: o usuário
+revisa e corrige antes de salvar.
+
+O documento é validado localmente antes da consulta — CNPJ com checksum
+inválido devolve 400 sem gastar requisição no provedor, que limita a
+5 consultas por minuto por endereço IP.
+
+**A inscrição estadual volta sempre em branco** com o provedor público:
+verificado contra a API real, `open.cnpja.com` não devolve o bloco de
+inscrições. Segue preenchimento manual. (A seleção da IE da UF do
+endereço está implementada e passa a valer sozinha caso o backend seja
+apontado para a API comercial, que devolve o bloco.)
+
+O regime tributário só é preenchido quando o provedor afirma: MEI ou
+Simples Nacional. Lucro Presumido e Lucro Real não existem no contrato e
+ficam a cargo do usuário.
+
+`situacaoCadastral` e `situacaoAtiva` são o aviso da tela, não campos do
+cadastro: CNPJ suspenso, inapto ou baixado vem **preenchido do mesmo
+jeito**, com `situacaoAtiva: false`, e quem decide se cadastra é o
+atendente.
+
+A inscrição municipal não existe no contrato do provedor e volta sempre
+em branco. Nenhum contato vem marcado como principal: quem escolhe é o
+usuário.
+
+As respostas bem-sucedidas ficam em cache no Redis por 24h
+(`worklog.cnpja.cache-ttl`), então repetir a consulta do mesmo CNPJ não
+consome o limite do provedor. Erros nunca são cacheados.
+
+ * @summary Consultar CNPJ na Receita Federal
+ */
+export const lookupByCnpj = (
+    params: LookupByCnpjParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+
+
+      return customInstance<CnpjLookupResponse>(
+      {url: `/clients/lookup`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getLookupByCnpjQueryKey = (params?: LookupByCnpjParams,) => {
+    return [
+    `/clients/lookup`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getLookupByCnpjQueryOptions = <TData = Awaited<ReturnType<typeof lookupByCnpj>>, TError = ErrorType<ApiExceptionResponse | CnpjLookupResponse>>(params: LookupByCnpjParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lookupByCnpj>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLookupByCnpjQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof lookupByCnpj>>> = ({ signal }) => lookupByCnpj(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof lookupByCnpj>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type LookupByCnpjQueryResult = NonNullable<Awaited<ReturnType<typeof lookupByCnpj>>>
+export type LookupByCnpjQueryError = ErrorType<ApiExceptionResponse | CnpjLookupResponse>
+
+
+export function useLookupByCnpj<TData = Awaited<ReturnType<typeof lookupByCnpj>>, TError = ErrorType<ApiExceptionResponse | CnpjLookupResponse>>(
+ params: LookupByCnpjParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof lookupByCnpj>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof lookupByCnpj>>,
+          TError,
+          Awaited<ReturnType<typeof lookupByCnpj>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useLookupByCnpj<TData = Awaited<ReturnType<typeof lookupByCnpj>>, TError = ErrorType<ApiExceptionResponse | CnpjLookupResponse>>(
+ params: LookupByCnpjParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lookupByCnpj>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof lookupByCnpj>>,
+          TError,
+          Awaited<ReturnType<typeof lookupByCnpj>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useLookupByCnpj<TData = Awaited<ReturnType<typeof lookupByCnpj>>, TError = ErrorType<ApiExceptionResponse | CnpjLookupResponse>>(
+ params: LookupByCnpjParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lookupByCnpj>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Consultar CNPJ na Receita Federal
+ */
+
+export function useLookupByCnpj<TData = Awaited<ReturnType<typeof lookupByCnpj>>, TError = ErrorType<ApiExceptionResponse | CnpjLookupResponse>>(
+ params: LookupByCnpjParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lookupByCnpj>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getLookupByCnpjQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

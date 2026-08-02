@@ -12,13 +12,79 @@ import * as zod from 'zod';
  * Cria um novo cliente associado a um ou mais sistemas. O nome deve ser único.
  * @summary Criar cliente
  */
+export const saveClientBodyNameMin = 0;
+export const saveClientBodyNameMax = 100;
+
+export const saveClientBodyNomeFantasiaMin = 0;
+export const saveClientBodyNomeFantasiaMax = 100;
+
+export const saveClientBodyBranchesItemApelidoMin = 0;
+export const saveClientBodyBranchesItemApelidoMax = 100;
+
+export const saveClientBodyBranchesItemInscricaoEstadualMin = 0;
+export const saveClientBodyBranchesItemInscricaoEstadualMax = 20;
+
+export const saveClientBodyBranchesItemInscricaoMunicipalMin = 0;
+export const saveClientBodyBranchesItemInscricaoMunicipalMax = 20;
+
+export const saveClientBodyBranchesItemAddressCepMin = 0;
+export const saveClientBodyBranchesItemAddressCepMax = 8;
+
+export const saveClientBodyBranchesItemAddressLogradouroMin = 0;
+export const saveClientBodyBranchesItemAddressLogradouroMax = 150;
+
+export const saveClientBodyBranchesItemAddressNumeroMin = 0;
+export const saveClientBodyBranchesItemAddressNumeroMax = 20;
+
+export const saveClientBodyBranchesItemAddressComplementoMin = 0;
+export const saveClientBodyBranchesItemAddressComplementoMax = 100;
+
+export const saveClientBodyBranchesItemAddressBairroMin = 0;
+export const saveClientBodyBranchesItemAddressBairroMax = 100;
+
+export const saveClientBodyBranchesItemAddressCidadeMin = 0;
+export const saveClientBodyBranchesItemAddressCidadeMax = 100;
+
+export const saveClientBodyBranchesItemAddressUfMin = 0;
+export const saveClientBodyBranchesItemAddressUfMax = 2;
+
+export const saveClientBodyBranchesItemContatosItemValorMin = 0;
+export const saveClientBodyBranchesItemContatosItemValorMax = 150;
+
+export const saveClientBodyBranchesItemContatosItemDescricaoMin = 0;
+export const saveClientBodyBranchesItemContatosItemDescricaoMax = 100;
 
 
 
 
 export const SaveClientBody = zod.object({
-  "name": zod.string().min(1).optional(),
-  "systemsPublicIds": zod.array(zod.uuid()).min(1).optional(),
+  "tipo": zod.enum(['PJ', 'PF']),
+  "name": zod.string().min(saveClientBodyNameMin).max(saveClientBodyNameMax).optional(),
+  "nomeFantasia": zod.string().min(saveClientBodyNomeFantasiaMin).max(saveClientBodyNomeFantasiaMax).optional(),
+  "regimeTributario": zod.enum(['SIMPLES_NACIONAL', 'LUCRO_PRESUMIDO', 'LUCRO_REAL', 'MEI', 'IMUNE', 'ISENTO']).optional(),
+  "systemsPublicIds": zod.array(zod.uuid()).optional(),
+  "branches": zod.array(zod.object({
+  "documento": zod.string().optional(),
+  "isMatriz": zod.boolean().optional(),
+  "apelido": zod.string().min(saveClientBodyBranchesItemApelidoMin).max(saveClientBodyBranchesItemApelidoMax).optional(),
+  "inscricaoEstadual": zod.string().min(saveClientBodyBranchesItemInscricaoEstadualMin).max(saveClientBodyBranchesItemInscricaoEstadualMax).optional(),
+  "inscricaoMunicipal": zod.string().min(saveClientBodyBranchesItemInscricaoMunicipalMin).max(saveClientBodyBranchesItemInscricaoMunicipalMax).optional(),
+  "address": zod.object({
+  "cep": zod.string().min(saveClientBodyBranchesItemAddressCepMin).max(saveClientBodyBranchesItemAddressCepMax).optional(),
+  "logradouro": zod.string().min(saveClientBodyBranchesItemAddressLogradouroMin).max(saveClientBodyBranchesItemAddressLogradouroMax).optional(),
+  "numero": zod.string().min(saveClientBodyBranchesItemAddressNumeroMin).max(saveClientBodyBranchesItemAddressNumeroMax).optional(),
+  "complemento": zod.string().min(saveClientBodyBranchesItemAddressComplementoMin).max(saveClientBodyBranchesItemAddressComplementoMax).optional(),
+  "bairro": zod.string().min(saveClientBodyBranchesItemAddressBairroMin).max(saveClientBodyBranchesItemAddressBairroMax).optional(),
+  "cidade": zod.string().min(saveClientBodyBranchesItemAddressCidadeMin).max(saveClientBodyBranchesItemAddressCidadeMax).optional(),
+  "uf": zod.string().min(saveClientBodyBranchesItemAddressUfMin).max(saveClientBodyBranchesItemAddressUfMax).optional()
+}).optional(),
+  "contatos": zod.array(zod.object({
+  "tipo": zod.enum(['EMAIL', 'TELEFONE', 'CELULAR', 'WHATSAPP']),
+  "valor": zod.string().min(saveClientBodyBranchesItemContatosItemValorMin).max(saveClientBodyBranchesItemContatosItemValorMax).optional(),
+  "descricao": zod.string().min(saveClientBodyBranchesItemContatosItemDescricaoMin).max(saveClientBodyBranchesItemContatosItemDescricaoMax).optional(),
+  "principal": zod.boolean().optional()
+})).optional()
+})).min(1).optional(),
   "enabled": zod.boolean().optional()
 })
 
@@ -46,13 +112,20 @@ export const UpdateClientParams = zod.object({
   "publicId": zod.uuid().describe('ID público do cliente (UUID)')
 })
 
+export const updateClientBodyNameMin = 0;
+export const updateClientBodyNameMax = 100;
 
+export const updateClientBodyNomeFantasiaMin = 0;
+export const updateClientBodyNomeFantasiaMax = 100;
 
 
 
 export const UpdateClientBody = zod.object({
-  "name": zod.string().min(1).optional(),
-  "systemsPublicIds": zod.array(zod.uuid()).min(1).optional(),
+  "tipo": zod.enum(['PJ', 'PF']).optional(),
+  "name": zod.string().min(updateClientBodyNameMin).max(updateClientBodyNameMax).optional(),
+  "nomeFantasia": zod.string().min(updateClientBodyNomeFantasiaMin).max(updateClientBodyNomeFantasiaMax).optional(),
+  "regimeTributario": zod.enum(['SIMPLES_NACIONAL', 'LUCRO_PRESUMIDO', 'LUCRO_REAL', 'MEI', 'IMUNE', 'ISENTO']).optional(),
+  "systemsPublicIds": zod.array(zod.uuid()).optional(),
   "enabled": zod.boolean().optional()
 })
 
@@ -64,7 +137,47 @@ export const FindAllClientsQueryParams = zod.object({
   "filtersParams": zod.object({
   "name": zod.string().optional(),
   "status": zod.enum(['ATIVO', 'INATIVO', 'TODOS']).optional(),
-  "systems": zod.array(zod.uuid()).optional()
+  "systems": zod.array(zod.uuid()).optional(),
+  "documento": zod.string().optional(),
+  "tipo": zod.enum(['PJ', 'PF']).optional()
 })
+})
+
+/**
+ * Consulta o CNPJ na CNPJá e devolve os dados já no formato do formulário de
+cadastro, prontos para o `POST /clients`. **Nada é persistido**: o usuário
+revisa e corrige antes de salvar.
+
+O documento é validado localmente antes da consulta — CNPJ com checksum
+inválido devolve 400 sem gastar requisição no provedor, que limita a
+5 consultas por minuto por endereço IP.
+
+**A inscrição estadual volta sempre em branco** com o provedor público:
+verificado contra a API real, `open.cnpja.com` não devolve o bloco de
+inscrições. Segue preenchimento manual. (A seleção da IE da UF do
+endereço está implementada e passa a valer sozinha caso o backend seja
+apontado para a API comercial, que devolve o bloco.)
+
+O regime tributário só é preenchido quando o provedor afirma: MEI ou
+Simples Nacional. Lucro Presumido e Lucro Real não existem no contrato e
+ficam a cargo do usuário.
+
+`situacaoCadastral` e `situacaoAtiva` são o aviso da tela, não campos do
+cadastro: CNPJ suspenso, inapto ou baixado vem **preenchido do mesmo
+jeito**, com `situacaoAtiva: false`, e quem decide se cadastra é o
+atendente.
+
+A inscrição municipal não existe no contrato do provedor e volta sempre
+em branco. Nenhum contato vem marcado como principal: quem escolhe é o
+usuário.
+
+As respostas bem-sucedidas ficam em cache no Redis por 24h
+(`worklog.cnpja.cache-ttl`), então repetir a consulta do mesmo CNPJ não
+consome o limite do provedor. Erros nunca são cacheados.
+
+ * @summary Consultar CNPJ na Receita Federal
+ */
+export const LookupByCnpjQueryParams = zod.object({
+  "documento": zod.string().describe('CNPJ do estabelecimento, com ou sem máscara')
 })
 
