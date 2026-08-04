@@ -109,3 +109,14 @@ foi aplicado e o grep confirmou "limpo".
 **Regra**: usar caminhos absolutos em edições em lote, e rodar a
 varredura de verificação a partir da raiz do projeto, imprimindo `pwd`
 junto do resultado.
+
+## `t.status as TicketStatus` é cast falso (2026-08-04, Slice 3)
+
+A API fala `PENDING` / `AWAITING_CUSTOMER` / `AWAITING_DEVELOPMENT` / `COMPLETED` /
+`CANCELLED`. A UI fala `OPEN` / `IN_PROGRESS` / `AWAITING_DEV` / `RESOLVED` /
+`CANCELLED`, e é por esse vocabulário que `STATUS_META` é indexado. Castar o status da
+API para `TicketStatus` compila e explode em runtime com
+`Cannot read properties of undefined (reading 'background')` dentro do `StatusChip`,
+derrubando a página inteira. **Sempre passar por `apiToUiStatus` de
+`src/lib/ticket-status.ts`.** O `tsc` não protege: o cast silencia justamente a
+checagem que pegaria isso.

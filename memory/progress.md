@@ -93,8 +93,56 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     bloqueando (verificado — com o `.gitignore` alterado e não commitado, o hook
     acusou "1 source file").
 
-- [ ] Slice 3 — detalhe em `/clientes/[publicId]` (rota nova), cards, placeholder de
-      contrato, tickets do cliente.
+- [x] 2026-08-04 — **Slice 3 — detalhe em `/clientes/[publicId]`** (verde, verificado
+      contra o backend real):
+  - `src/app/(app)/clientes/[publicId]/page.tsx` (novo) — Client Component com
+    `use(params)`; no Next 16 `params` é **Promise** (confirmado em
+    `node_modules/next/dist/docs/.../dynamic-routes.md`). Dono do estado de edição,
+    do toggle `PATCH { enabled }` (gate ADMIN) e do 404 (`EmptyState` + voltar).
+  - `client-detail-header.tsx` (novo) — `‹ Voltar para clientes`, nome, `TipoBadge`,
+    `StatusPill`, documento da matriz e o botão Desativar/Reativar (admin-only).
+  - `client-data-card.tsx` (novo) — "DADOS DA EMPRESA" (PJ) / "DADOS PESSOAIS" (PF).
+    PF não mostra IE, regime nem o rodapé de filiais (§9 do contrato). Rodapé
+    `Ver filiais (N)` / `+ Filiais` com N = `filiaisSemMatriz`, **desabilitado até o
+    Slice 5** — sem handler, o botão fica disabled em vez de virar clique morto.
+    **É a casa de `formatEndereco`** (mesmo padrão de `contatoLabel` em
+    `client-table.tsx`), que o Slice 5 vai reusar na lista de filiais.
+  - `client-systems-card.tsx`, `client-contract-placeholder.tsx` (novos) — sistemas
+    em chips; contrato é placeholder puro, zero chamada de API.
+  - `client-tickets-card.tsx` (novo) — `clientId` é filtro **de servidor**; as abas
+    (Em andamento / Solicitados / Todos) separam status **em memória**, porque o
+    endpoint aceita um `status` só e "em andamento" são dois
+    (`AWAITING_CUSTOMER` + `AWAITING_DEVELOPMENT`). Clique → `/tickets?id={publicId}`.
+  - `src/components/worklog/confirm-dialog.tsx` (novo, exportado no `index.ts`) —
+    extraído antes de escrever a terceira cópia. `clientes/page.tsx` passou a usá-lo.
+  - `clientes/page.tsx` — clique de linha/card agora é `router.push('/clientes/{id}')`.
+    Saíram `selectedId`, `closeDetail`, o `setParam`/`useSearchParams` (só existiam
+    para o `?id=`) e o handler de Escape do modal.
+  - **`client-detail.tsx` deletado** (o modal aposentado), depois de `grep` confirmar
+    zero referências.
+  - **Desvio do mockup registrado:** o card de contrato não tem "+ Novo contrato"
+    nem "+ Vincular serviço" — botão que não faz nada é pior que ausência declarada;
+    o card diz "Módulo de contratos em desenvolvimento".
+  - **Campo a mais do que o plano lista:** "Nome fantasia" aparece no card de PJ
+    quando não é null. Existe na API, o lookup do Slice 4 preenche, e sem isso o dado
+    ficaria invisível na UI.
+  - 🐞 **Bug achado pela verificação runtime** (o `tsc` não pegava, o cast silenciava):
+    `client-tickets-card.tsx` fazia `t.status as TicketStatus`. A API fala
+    `PENDING`/`AWAITING_CUSTOMER`/`COMPLETED`; `STATUS_META` é indexado pelo
+    vocabulário da UI (`OPEN`/`IN_PROGRESS`/`RESOLVED`). Dava
+    `Cannot read properties of undefined (reading 'background')` no `StatusChip` e
+    **derrubava a página inteira**. Corrigido com `apiToUiStatus` de
+    `src/lib/ticket-status.ts` — o mapa que o resto do app já usa.
+  - **Toggle `PATCH { enabled }` fechado com clique real** — a lacuna que vinha do
+    Slice 2. `{"enabled":false}` e `{"enabled":true}` capturados na rede, header
+    indo de ATIVO/Desativar para INATIVO/Reativar e voltando (estado do banco
+    restaurado).
+  - `tsc --noEmit` limpo. `eslint` nos **5 warnings pré-existentes**, zero novos.
+  - Evidência: `.agent/visual/slice3-detalhe-cliente.md` (8 PNGs; PJ com e sem filial,
+    PF, 404, confirmação do toggle, mobile 390px sem scroll horizontal; dark/light por
+    asserção de `--wl-bg`).
+  - ⚠️ **Não verificado**: lista de tickets com dado real — nenhum cliente do banco de
+    dev tem ticket, as abas foram exercitadas vazias.
 - [ ] Slice 4 — criar/editar cliente completo + lookup de CNPJ + orquestração
       PATCH cliente / PATCH matriz / POST filiais.
 - [ ] Slice 5 — filiais: modal, criar, editar, transferir matriz, ativar/inativar.
@@ -107,6 +155,12 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
 `contatoPrincipal`, `matrizDoCliente`, `looksLikeDocumento`, `formatDocumento` — vive em
 `clients-contract.ts` e `documento.ts`, do Slice 1). Sem test runner configurado;
 validados por tsc + eslint + verificação runtime com asserção de query string.
+
+**TDD-check exemptions (slice 3 — detalhe):** `client-detail-header.tsx`,
+`client-data-card.tsx`, `client-systems-card.tsx`, `client-contract-placeholder.tsx`,
+`client-tickets-card.tsx` e `confirm-dialog.tsx` são UI pura. A única função com lógica
+é `formatEndereco` (montagem de string a partir de `AddressResponse`) — candidata a
+teste unitário assim que o runner do Slice 4 existir (pergunta em aberto 2 do handoff).
 
 **Nota sobre TDD:** o hook `tdd-check.sh` avisou em cada arquivo novo deste slice. O
 projeto não tem runner de teste (`agent-md.toml` deixa `test` intencionalmente vazio).

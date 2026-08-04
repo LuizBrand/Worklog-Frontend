@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, Loader2, Filter } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Search, Filter } from 'lucide-react'
 import { toast } from 'sonner'
 import { keepPreviousData, useQueryClient } from '@tanstack/react-query'
 
@@ -10,9 +10,8 @@ import { useFindAllClients, useUpdateClient } from '@/api/generated/clientes/cli
 import { useFindAllTickets } from '@/api/generated/tickets/tickets'
 import { ClientGrid } from '@/components/clients/client-grid'
 import { ClientTable, type ClientStats } from '@/components/clients/client-table'
-import { ClientDetail } from '@/components/clients/client-detail'
 import { ClientCreateDialog } from '@/components/clients/client-form'
-import { FilterSelect, MobileFab } from '@/components/worklog'
+import { ConfirmDialog, FilterSelect, MobileFab } from '@/components/worklog'
 import { invalidateClients, invalidateClient } from '@/api/invalidate'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { looksLikeDocumento, stripDocumento } from '@/lib/documento'
@@ -51,13 +50,11 @@ const IN_PROGRESS_STATUSES = new Set<TicketSummary['status']>([
 
 export default function ClientesPage() {
   const router = useRouter()
-  const params = useSearchParams()
   const qc = useQueryClient()
   const currentUser = useAuthStore((s) => s.user)
   const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const selectedId = params.get('id') ?? ''
   const [searchInput, setSearchInput] = useState('')
   const [statusFilter, setStatusFilter] = useState<ClientFiltersParamsStatus | ''>('')
   const [tipoFilter, setTipoFilter] = useState<ClientFiltersParamsTipo | ''>('')
@@ -91,32 +88,8 @@ export default function ClientesPage() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  // Escape closes detail panel
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && selectedId) closeDetail()
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId])
-
-  const setParam = useCallback(
-    (key: string, value: string) => {
-      const next = new URLSearchParams(params.toString())
-      if (value) next.set(key, value)
-      else next.delete(key)
-      router.replace(`/clientes?${next.toString()}`)
-    },
-    [params, router],
-  )
-
-  function openDetail(publicId: string) { setParam('id', publicId) }
-
-  function closeDetail() {
-    const next = new URLSearchParams(params.toString())
-    next.delete('id')
-    router.replace(`/clientes?${next.toString()}`)
+  function openDetail(publicId: string) {
+    router.push(`/clientes/${publicId}`)
   }
 
   // Busca única: documento casa por igualdade exata contra qualquer filial,
@@ -336,9 +309,6 @@ export default function ClientesPage() {
         />
       </div>
 
-      {/* ── Detail panel (aposentado no Slice 3, junto da rota /clientes/[publicId]) ── */}
-      {selectedId && <ClientDetail publicId={selectedId} onClose={closeDetail} />}
-
       {/* ── Create dialog ── */}
       {showCreate && <ClientCreateDialog onClose={() => setShowCreate(false)} />}
 
@@ -347,47 +317,19 @@ export default function ClientesPage() {
 
       {/* ── Confirm deactivate/activate ── */}
       {toggleTarget && (
-        <>
-          <div
-            className="fixed inset-0 z-[60]"
-            style={{ background: 'rgba(0,0,0,0.45)' }}
-            onClick={() => !toggleMut.isPending && setToggleTarget(null)}
-          />
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" style={{ pointerEvents: 'none' }}>
-            <div
-              className="w-full max-w-sm rounded-xl p-5 shadow-2xl"
-              style={{ background: 'var(--wl-surface)', border: '1px solid var(--wl-border)', pointerEvents: 'auto' }}
-            >
-              <h3 className="mb-1 text-[14px] font-semibold" style={{ color: 'var(--wl-text)' }}>
-                {toggleTarget.active ? 'Desativar cliente?' : 'Reativar cliente?'}
-              </h3>
-              <p className="mb-4 text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>
-                {toggleTarget.active
-                  ? <>O cliente &quot;{toggleTarget.name}&quot; será marcado como inativo.</>
-                  : <>O cliente &quot;{toggleTarget.name}&quot; voltará a ser ativo.</>}
-              </p>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => setToggleTarget(null)}
-                  disabled={toggleMut.isPending}
-                  className="cursor-pointer rounded-lg px-3 py-1.5 text-[13px] font-medium transition-opacity hover:opacity-70 disabled:opacity-50"
-                  style={{ background: 'var(--wl-surface-2)', color: 'var(--wl-text-muted)', border: '1px solid var(--wl-border)' }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={confirmToggle}
-                  disabled={toggleMut.isPending}
-                  className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50"
-                  style={{ background: toggleTarget.active ? 'var(--wl-danger)' : 'var(--primary)' }}
-                >
-                  {toggleMut.isPending && <Loader2 size={13} className="animate-spin" />}
-                  {toggleTarget.active ? 'Desativar' : 'Reativar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
+        <ConfirmDialog
+          title={toggleTarget.active ? 'Desativar cliente?' : 'Reativar cliente?'}
+          message={
+            toggleTarget.active
+              ? `O cliente "${toggleTarget.name}" será marcado como inativo.`
+              : `O cliente "${toggleTarget.name}" voltará a ser ativo.`
+          }
+          confirmLabel={toggleTarget.active ? 'Desativar' : 'Reativar'}
+          danger={toggleTarget.active}
+          loading={toggleMut.isPending}
+          onCancel={() => setToggleTarget(null)}
+          onConfirm={confirmToggle}
+        />
       )}
     </div>
   )
