@@ -213,7 +213,41 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
 `client-form-fields.tsx`, `branch-fields.tsx`, `client-create-dialog.tsx` e
 `client-edit-dialog.tsx` são UI. Toda a lógica que valia teste saiu para
 `client-schema.ts` e `client-save.ts`, que **têm** teste e foram escritos primeiro.
-- [ ] Slice 5 — filiais: modal, criar, editar, transferir matriz, ativar/inativar.
+- [x] 2026-08-04 — **Slice 5 — filiais** (verde, verificado contra o backend real):
+  - `branches-dialog.tsx` (novo) — lista com matriz primeiro e badge MATRIZ, filial
+    inativa esmaecida, ações por filial gatilhadas pelos helpers de
+    `clients-contract.ts` (`canPromoteToMatriz`, `canDeactivateBranch`,
+    `canActivateBranch`, `canCreateBranch`) + gate `isAdmin` para ativar/inativar.
+  - **Reuso do Slice 4 em vez de formulário novo:** os rascunhos entram no mesmo
+    array `branches` do `clientFormSchema`, sem `publicId` — que é exatamente como
+    `filiaisNovas` os reconhece. De brinde vem a validação de documento repetido
+    contra as filiais que já existem.
+  - `CriarFilialError` carrega o que já foi criado quando a sequência de POSTs falha
+    no meio; o erro fica **inline no rascunho que falhou** (o POST de filial devolve
+    422 com mensagem solta, sem `fieldErrors`, então `setError` não serve) e os
+    rascunhos não salvos permanecem no formulário.
+  - `branch-edit-dialog.tsx` (novo) — um `PATCH` só. Carrega o cliente inteiro no
+    formulário mesmo editando uma filial: é o que mantém "exatamente uma matriz" e
+    "documento não repetido" válidos enquanto só um índice é renderizado. Sem
+    "Regime tributário" (assunção 6 do plano).
+  - `[publicId]/page.tsx` — dona das mutations de promover (`PATCH { isMatriz: true }`)
+    e ativar/inativar (endpoints próprios), com `ConfirmDialog` em cada uma. Promover
+    invalida filiais **e** cliente, porque duas linhas mudam (§9.4).
+  - `client-data-card.tsx` — "Ver filiais (N)" deixou de ser botão desabilitado.
+  - Evidência: `.agent/visual/slice5-filiais.md` (7 PNGs; POST sem `isMatriz`, PATCH
+    de promoção, `/deactivate`, `/activate` e PATCH de edição capturados na rede).
+  - `tsc` limpo, `eslint` nos 5 warnings pré-existentes, 75 testes passando.
+  - ⚠️ **Estado do banco de dev**: `Verificacao Slice1 75840302` (c56f3ce3) ficou com
+    várias filiais `Filial Verificacao` e **a matriz trocada** — a restauração do
+    script promoveu a primeira filial da lista, não a matriz original.
+    `Verificacao Slice1 75756293` (d0fd195b) ganhou uma filial de uma execução
+    interrompida.
+  - ⚠️ **Não verificado**: erro parcial no cadastro de várias filiais de uma vez.
+
+**TDD-check exemptions (slice 5 — filiais):** `branches-dialog.tsx` e
+`branch-edit-dialog.tsx` são UI. A lógica que valia teste (`filiaisNovas`,
+`toBranchUpdateRequest`, regras do schema) já está coberta em `client-save.test.ts` e
+`client-schema.test.ts`, escritos no Slice 4.
 
 **Deferidos** (do plano §5): paginação client-side da listagem; documento no
 `ClientCombobox`; gap do backend de nome duplicado no PATCH.
