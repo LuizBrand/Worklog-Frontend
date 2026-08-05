@@ -14,7 +14,7 @@ import { ClientDataCard } from '@/components/clients/client-data-card'
 import { ClientSystemsCard } from '@/components/clients/client-systems-card'
 import { ClientContractPlaceholder } from '@/components/clients/client-contract-placeholder'
 import { ClientTicketsCard } from '@/components/clients/client-tickets-card'
-import { ClientEditDialog } from '@/components/clients/client-form'
+import { ClientEditDialog } from '@/components/clients/client-edit-dialog'
 import { ConfirmDialog, EmptyState } from '@/components/worklog'
 import { useAuthStore } from '@/state/auth'
 import type { ClientResponse } from '@/api/clients-contract'
@@ -100,9 +100,7 @@ export default function ClienteDetalhePage({
         onTicketClick={(ticketId) => router.push(`/tickets?id=${ticketId}`)}
       />
 
-      {showEdit && clientQ.data && (
-        <ClientEditDialog client={clientQ.data} onClose={() => setShowEdit(false)} />
-      )}
+      {showEdit && <ClientEditDialog client={client} onClose={() => setShowEdit(false)} />}
 
       {confirmToggle && (
         <ConfirmDialog

@@ -10,7 +10,7 @@ import { useFindAllClients, useUpdateClient } from '@/api/generated/clientes/cli
 import { useFindAllTickets } from '@/api/generated/tickets/tickets'
 import { ClientGrid } from '@/components/clients/client-grid'
 import { ClientTable, type ClientStats } from '@/components/clients/client-table'
-import { ClientCreateDialog } from '@/components/clients/client-form'
+import { ClientCreateDialog } from '@/components/clients/client-create-dialog'
 import { ConfirmDialog, FilterSelect, MobileFab } from '@/components/worklog'
 import { invalidateClients, invalidateClient } from '@/api/invalidate'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'

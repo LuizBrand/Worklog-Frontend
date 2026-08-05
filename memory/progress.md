@@ -143,8 +143,76 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     asserção de `--wl-bg`).
   - ⚠️ **Não verificado**: lista de tickets com dado real — nenhum cliente do banco de
     dev tem ticket, as abas foram exercitadas vazias.
-- [ ] Slice 4 — criar/editar cliente completo + lookup de CNPJ + orquestração
-      PATCH cliente / PATCH matriz / POST filiais.
+- [x] 2026-08-04 — **Runner de teste (vitest)** — pergunta em aberto 2 do handoff,
+      fechada pelo usuário antes do Slice 4:
+  - **Uma dependência só** (`vitest`), ambiente node, `src/**/*.test.ts`. O guia do
+    Next instala 6 pacotes (`jsdom`, `@testing-library/*`, `@vitejs/plugin-react`)
+    para testar componente — aqui isso duplicaria a verificação visual, que é o que
+    já cobre UI. Escopo e porquê registrados em `memory/verify.md`.
+  - `vitest.config.mts` (`.mts`, não `.ts`: com `.ts` o loader nativo do Vite avisa
+    sobre ESM em arquivo tratado como CJS). Alias `@` resolvido à mão, sem
+    `vite-tsconfig-paths`.
+  - `package.json` — scripts `test` (`vitest run`) e `test:watch`.
+  - `agent-md.toml [verify] test = "pnpm test"` — o Stop hook e o `pre-commit`
+    passam a rodar a suíte automaticamente.
+  - **36 testes, 4 arquivos, ~0,5 s**: `ticket-status.test.ts` (regressão do bug do
+    Slice 3), `documento.test.ts` (checksums com CNPJ alfanumérico, formatadores,
+    `looksLikeDocumento`), `field-errors.test.ts`, `endereco.test.ts`.
+  - `formatEndereco` saiu de `client-data-card.tsx` para `src/lib/endereco.ts` —
+    deixá-la num `.tsx` obrigaria a puxar React para um teste de string. O
+    argumento de precedência (`contatoLabel` em `client-table.tsx`) perde para
+    testabilidade.
+  - 🐞 **Achado ao escrever o teste:** `getApiErrorBody`/`getApiErrorStatus` usam
+    `err instanceof AxiosError`. Objeto com o mesmo formato é ignorado **em
+    silêncio** — meu primeiro mock caiu nisso. Tem teste explícito registrando a
+    armadilha para o próximo mock.
+
+- [x] 2026-08-04 — **Slice 4 — criar/editar cliente** (verde, verificado contra o
+      backend real):
+  - **Primeiro slice feito em TDD de verdade**: `client-schema.test.ts` e
+    `client-save.test.ts` escritos antes, vermelho confirmado, depois a
+    implementação. 39 testes novos (75 no total).
+  - `client-schema.ts` (novo) — zod v3 com as regras que o backend cobra e o `tsc`
+    não vê: checksum por tipo, **exatamente uma** matriz, documento não repetido no
+    payload, ≤1 contato principal por filial, limites de `MAX_LENGTH`, PF sem filial.
+    Mais os construtores de payload (`toClientRequest`, `toBranchRequest`).
+  - `client-save.ts` (novo) — carga (`clientToFormValues`) e diff
+    (`toClientUpdateRequest`, `toBranchUpdateRequest`, `filiaisNovas`). `contatos` e
+    `address` vão **completos** quando qualquer parte muda (§9.3); `isMatriz` nunca
+    sai do PATCH nem do POST.
+  - `client-form-shell.tsx`, `client-form-fields.tsx`, `branch-fields.tsx`,
+    `client-create-dialog.tsx`, `client-edit-dialog.tsx` (novos).
+    **`client-form.tsx` deletado.**
+  - Salvar na edição é sequência não-atômica (cliente → matriz → filiais novas).
+    `SaveParcialError` carrega o que já passou, e o toast de erro diz exatamente
+    isso. O rodapé do formulário avisa que não é transação.
+  - **Duas decisões de escopo:** contatos e endereço ficam em "Mais detalhes"
+    (compacto por padrão, como o mockup); filiais adicionais **não** entram no
+    formulário — `filiaisNovas` existe e tem teste, mas a UI que a alimenta é do
+    Slice 5, para o erro parcial não virar algo impossível de explicar.
+  - 🐞 **Dois bugs achados pela verificação runtime:**
+    1. **Consulta duplicada à Receita.** O clique na lupa dispara o `blur` do input
+       antes do clique, então o mesmo CNPJ ia 2× a um endpoint de **5 consultas/min
+       por IP compartilhadas pela equipe**. Dedupe por documento consultado
+       (`useRef`), liberado no erro para permitir retry.
+    2. **Input do contato com 26px.** `w-full` do `inputCls` vence `w-28` na mesma
+       string de classes — mesma especificidade, ordem do CSS decide. Cada controle
+       ganhou wrapper com largura própria; a linha empilha abaixo de `sm`. Medido
+       antes (235/26/235) e depois (112/231/128 desktop, 274 empilhado no mobile).
+  - Evidência: `.agent/visual/slice4-form-cliente.md` (5 PNGs; payloads de POST e da
+    sequência de PATCH capturados na rede; lookup real devolveu "BANCO DO BRASIL SA").
+  - `tsc` limpo, `eslint` nos 5 warnings pré-existentes, **75 testes passando**.
+  - ⚠️ **Lixo no banco de dev**: 2 clientes de teste — `Slice4 Teste …`
+    (38092010001068) e um nomeado `BANCO DO BRASIL SA` (89231429000101), que ficou
+    com esse nome porque o lookup stubado preencheu a razão social por cima. Só há
+    soft delete na API.
+  - ⚠️ **Não verificado**: erro parcial da sequência de salvamento (exigiria forçar
+    falha na 2ª chamada) e troca PJ→PF com 2+ filiais ativas (o banco não tem o caso).
+
+**TDD-check exemptions (slice 4 — formulário):** `client-form-shell.tsx`,
+`client-form-fields.tsx`, `branch-fields.tsx`, `client-create-dialog.tsx` e
+`client-edit-dialog.tsx` são UI. Toda a lógica que valia teste saiu para
+`client-schema.ts` e `client-save.ts`, que **têm** teste e foram escritos primeiro.
 - [ ] Slice 5 — filiais: modal, criar, editar, transferir matriz, ativar/inativar.
 
 **Deferidos** (do plano §5): paginação client-side da listagem; documento no

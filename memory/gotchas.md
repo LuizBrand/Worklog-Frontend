@@ -120,3 +120,28 @@ API para `TicketStatus` compila e explode em runtime com
 derrubando a página inteira. **Sempre passar por `apiToUiStatus` de
 `src/lib/ticket-status.ts`.** O `tsc` não protege: o cast silencia justamente a
 checagem que pegaria isso.
+
+## Mock de erro de API tem que ser `AxiosError` de verdade (2026-08-04)
+
+`getApiErrorBody` e `getApiErrorStatus` (`src/lib/api-errors.ts`) checam
+`err instanceof AxiosError`. Um objeto `{ response: { status, data } }` com o formato
+certo é ignorado **em silêncio** — o teste falha dizendo `expected false to be true`, sem
+pista de que o problema é o mock. Em teste, montar com `new AxiosError(...)` e atribuir
+`err.response`. Há um caso em `src/lib/field-errors.test.ts` que trava essa armadilha.
+
+## `w-full` do `inputCls` vence largura na mesma string (2026-08-04, Slice 4)
+
+`className={`${inputCls} w-28`}` **não** deixa o campo com 112px: as duas classes têm a
+mesma especificidade e quem ganha é a ordem no CSS gerado, que é o `w-full`. Num flex
+row isso esmaga o irmão `flex-1` — o input do valor do contato ficou com **26px** e a
+descrição o sobrepôs. Corrigir com wrapper de largura própria (`<div className="sm:w-28
+sm:shrink-0">`) e deixar o input com `w-full` dentro. Medir com `boundingBox()` em vez
+de julgar por screenshot.
+
+## Clique em botão dentro de campo dispara o `blur` do campo (2026-08-04, Slice 4)
+
+A lupa de consulta de CNPJ vive dentro do input. O `mousedown` do botão tira o foco do
+input **antes** do clique, então `onBlur` + `onClick` disparam os dois e a mesma consulta
+sai duas vezes. Em endpoint com rate limit (o lookup é 5/min por IP, compartilhado pela
+equipe) isso é quota queimada. Guardar o último valor consultado num `useRef` e sair
+cedo; limpar no erro para o retry continuar possível.

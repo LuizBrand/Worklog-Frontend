@@ -10,8 +10,9 @@ import {
   filiaisSemMatriz,
   matrizDoCliente,
 } from '@/api/clients-contract'
-import type { AddressResponse, ClientResponse } from '@/api/clients-contract'
-import { formatCep, formatDocumento } from '@/lib/documento'
+import type { ClientResponse } from '@/api/clients-contract'
+import { formatDocumento } from '@/lib/documento'
+import { formatEndereco } from '@/lib/endereco'
 import { contatoLabel } from './client-table'
 
 export interface ClientDataCardProps {
@@ -94,19 +95,6 @@ export function ClientDataCard({ client, onEdit, onVerFiliais }: ClientDataCardP
 }
 
 // ── Internos ──────────────────────────────────────────────────────────────────
-
-/** `Av. Paulista, 1200 - São Paulo/SP`. Vazio vira `null` para o campo cair no travessão. */
-export function formatEndereco(address: AddressResponse | null): string | null {
-  if (!address) return null
-
-  const rua = [address.logradouro, address.numero].filter(Boolean).join(', ')
-  const cidade = [address.cidade, address.uf].filter(Boolean).join('/')
-  const linha = [rua, address.bairro, cidade].filter(Boolean).join(' - ')
-  const cep = formatCep(address.cep)
-
-  if (!linha) return cep || null
-  return cep ? `${linha} · ${cep}` : linha
-}
 
 function Field({
   label,

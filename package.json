@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "api:fetch": "curl -fsSL ${NEXT_PUBLIC_API_URL:-http://localhost:8080}/v3/api-docs -o openapi/worklog.json && node scripts/sanitize-openapi.mjs openapi/worklog.json",
     "api:gen": "orval --config ./orval.config.ts",
     "api:sync": "pnpm api:fetch && pnpm api:gen"
@@ -44,7 +46,8 @@
     "playwright": "^1.59.1",
     "shadcn": "^4.5.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
