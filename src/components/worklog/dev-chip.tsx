@@ -11,7 +11,9 @@ export function DevChip({ label = 'Em desenvolvimento', className }: DevChipProp
       style={{
         background: 'var(--wl-surface-2)',
         border: '1px solid var(--wl-border)',
-        color: 'var(--wl-text-dim)',
+        // `--wl-text-dim` sumia dentro da tabela, que já é `--wl-surface`:
+        // o chip virava um borrão. Continua discreto, mas legível.
+        color: 'var(--wl-text-muted)',
       }}
     >
       {label}

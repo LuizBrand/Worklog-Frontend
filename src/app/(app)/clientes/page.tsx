@@ -11,12 +11,13 @@ import { useFindAllTickets } from '@/api/generated/tickets/tickets'
 import { ClientGrid } from '@/components/clients/client-grid'
 import { ClientTable, type ClientStats } from '@/components/clients/client-table'
 import { ClientCreateDialog } from '@/components/clients/client-create-dialog'
-import { ConfirmDialog, FilterSelect, MobileFab } from '@/components/worklog'
+import { ConfirmDialog, FilterSelect, MobileFab, Pagination } from '@/components/worklog'
 import { invalidateClients, invalidateClient } from '@/api/invalidate'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { looksLikeDocumento, stripDocumento } from '@/lib/documento'
 import { useAuthStore } from '@/state/auth'
-import type { ClientResponse } from '@/api/clients-contract'
+import { CLIENT_PAGE_SIZE, CLIENT_SORT_PADRAO } from '@/api/clients-contract'
+import type { ClientResponse, Page } from '@/api/clients-contract'
 import type {
   ClientFiltersParams,
   ClientFiltersParamsStatus,
@@ -61,6 +62,23 @@ export default function ClientesPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [toggleTarget, setToggleTarget] = useState<{ publicId: string; name: string; active: boolean } | null>(null)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  const [page, setPage] = useState(0)
+
+  // Todo filtro volta para a primeira página: senão a página 3 de um filtro
+  // vira "nenhum resultado" no filtro seguinte. Feito no setter, e não num
+  // efeito, para não disparar render em cascata.
+  function mudarBusca(v: string) {
+    setSearchInput(v)
+    setPage(0)
+  }
+  function mudarStatus(v: ClientFiltersParamsStatus | '') {
+    setStatusFilter(v)
+    setPage(0)
+  }
+  function mudarTipo(v: ClientFiltersParamsTipo | '') {
+    setTipoFilter(v)
+    setPage(0)
+  }
 
   // Um caminho só para ativar e inativar (§8 do contrato recomenda o PATCH e
   // não expor o DELETE; reativar só existe pelo PATCH de qualquer forma).
@@ -106,15 +124,28 @@ export default function ClientesPage() {
     return f
   }, [search, statusFilter, tipoFilter])
 
-  // Sem paginação neste endpoint. `keepPreviousData` evita o skeleton piscar a
-  // cada tecla enquanto o filtro novo carrega.
+  // Paginação é opt-in e muda o formato da resposta (§6 do contrato): sem
+  // `page`/`size` volta array cru. Mandamos `page` sempre, então é sempre
+  // `Page<ClientResponse>` — e `sort` só tem efeito acompanhado de `page`.
+  // `keepPreviousData` evita o skeleton piscar a cada tecla e a cada troca de
+  // página.
   const clientsQ = useFindAllClients(
-    { filtersParams },
+    {
+      filtersParams,
+      // `pageable` é só o formato que o Orval dá ao grupo: o `paramsSerializer`
+      // de `src/lib/api.ts` achata objetos aninhados, então isto vai para a
+      // query string como `page=0&size=12&sort=name,asc` — soltos, que é como o
+      // backend os lê. Nenhuma chave `pageable` chega ao servidor.
+      pageable: { page, size: CLIENT_PAGE_SIZE, sort: [CLIENT_SORT_PADRAO] },
+    },
     { query: { placeholderData: keepPreviousData } },
   )
-  // Fronteira do Orval: o gerado marca todo campo sem @NotNull como opcional.
-  // `src/api/clients-contract.ts` é a obrigatoriedade real.
-  const clients = (clientsQ.data ?? []) as unknown as ClientResponse[]
+
+  // Fronteira do Orval: o gerado tipa `ClientResponse[]` porque o springdoc não
+  // expressa retorno duplo (array OU Page). Com `page` na query, é Page.
+  const pagina = clientsQ.data as unknown as Page<ClientResponse> | undefined
+  const clients = pagina?.content ?? []
+  const totalClientes = pagina?.totalElements ?? 0
 
   // Fetch a large page of tickets and aggregate stats client-side.
   // No dedicated aggregation endpoint exists; acceptable while volume is low.
@@ -157,61 +188,67 @@ export default function ClientesPage() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* ── Desktop header ── */}
-      <div
-        className="hidden md:flex h-[52px] shrink-0 items-center gap-3 px-6"
-        style={{ borderBottom: '1px solid var(--wl-border)' }}
-      >
-        <h1 className="text-[18px] font-semibold" style={{ color: 'var(--wl-text)' }}>
-          Clientes
-        </h1>
-        {!clientsQ.isLoading && (
-          <span className="text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>
-            {clients.length} {clients.length === 1 ? 'cliente cadastrado' : 'clientes cadastrados'}
-          </span>
-        )}
+      {/*
+        Header de duas linhas, como o mockup — o título grande com o contador
+        embaixo. Abre mão do alinhamento com a barra de 52px do sidebar
+        (decisão de 2026-05-09), a pedido do usuário em 2026-08-04.
+      */}
+      <div className="hidden shrink-0 items-start gap-3 px-6 pb-4 pt-5 md:flex">
+        <div className="min-w-0">
+          <h1 className="text-[22px] font-bold leading-tight" style={{ color: 'var(--wl-text)' }}>
+            Clientes
+          </h1>
+          {!clientsQ.isLoading && (
+            <p className="text-[12px]" style={{ color: 'var(--wl-text-muted)' }}>
+              {totalClientes} {totalClientes === 1 ? 'cliente cadastrado' : 'clientes cadastrados'}
+            </p>
+          )}
+        </div>
 
         <div className="flex-1" />
 
-        <div
-          className="flex items-center gap-2 rounded-lg px-3 py-1.5"
-          style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', minWidth: 280 }}
-        >
-          <Search size={14} style={{ color: 'var(--wl-text-muted)', flexShrink: 0 }} />
-          <input
-            ref={searchRef}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Buscar por nome, CNPJ ou CPF ( / )"
-            className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--wl-text-muted)]"
-            style={{ color: 'var(--wl-text)' }}
-          />
-        </div>
-
-        <FilterSelect
-          value={tipoFilter}
-          onChange={(v) => setTipoFilter(v as typeof tipoFilter)}
-          options={TIPO_OPTIONS}
-        />
-        <FilterSelect
-          value={statusFilter}
-          onChange={(v) => setStatusFilter(v as typeof statusFilter)}
-          options={STATUS_OPTIONS}
-        />
-
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
-          style={{ background: 'var(--primary)', color: '#fff' }}
-        >
-          + Cliente
-          <kbd
-            className="flex h-4 w-4 items-center justify-center rounded text-[10px] font-bold"
-            style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}
+        {/* Alinhado com a primeira linha do título, não com o bloco inteiro. */}
+        <div className="flex items-center gap-2 pt-0.5">
+          <div
+            className="flex items-center gap-2 rounded-lg px-3 py-1.5"
+            style={{ background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', minWidth: 280 }}
           >
-            C
-          </kbd>
-        </button>
+            <Search size={14} style={{ color: 'var(--wl-text-muted)', flexShrink: 0 }} />
+            <input
+              ref={searchRef}
+              value={searchInput}
+              onChange={(e) => mudarBusca(e.target.value)}
+              placeholder="Buscar por nome, CNPJ ou CPF ( / )"
+              className="flex-1 bg-transparent text-[13px] outline-none placeholder:text-[var(--wl-text-muted)]"
+              style={{ color: 'var(--wl-text)' }}
+            />
+          </div>
+
+          <FilterSelect
+            value={tipoFilter}
+            onChange={(v) => mudarTipo(v as typeof tipoFilter)}
+            options={TIPO_OPTIONS}
+          />
+          <FilterSelect
+            value={statusFilter}
+            onChange={(v) => mudarStatus(v as typeof statusFilter)}
+            options={STATUS_OPTIONS}
+          />
+
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] font-semibold transition-opacity hover:opacity-85"
+            style={{ background: 'var(--primary)', color: '#fff' }}
+          >
+            + Cliente
+            <kbd
+              className="flex h-4 w-4 items-center justify-center rounded text-[10px] font-bold"
+              style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}
+            >
+              C
+            </kbd>
+          </button>
+        </div>
       </div>
 
       {/* ── Mobile header ── */}
@@ -234,7 +271,7 @@ export default function ClientesPage() {
           <input
             ref={searchRef}
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => mudarBusca(e.target.value)}
             placeholder="Nome, CNPJ ou CPF"
             className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-[var(--wl-text-muted)] min-w-0"
             style={{ color: 'var(--wl-text)' }}
@@ -270,7 +307,7 @@ export default function ClientesPage() {
                 key={opt.value}
                 label={opt.label}
                 active={statusFilter === opt.value}
-                onClick={() => setStatusFilter(opt.value as typeof statusFilter)}
+                onClick={() => mudarStatus(opt.value as typeof statusFilter)}
               />
             ))}
           </div>
@@ -280,7 +317,7 @@ export default function ClientesPage() {
                 key={opt.value}
                 label={opt.label}
                 active={tipoFilter === opt.value}
-                onClick={() => setTipoFilter(opt.value as typeof tipoFilter)}
+                onClick={() => mudarTipo(opt.value as typeof tipoFilter)}
               />
             ))}
           </div>
@@ -288,13 +325,24 @@ export default function ClientesPage() {
       )}
 
       {/* ── Tabela (desktop) ── */}
-      <div className="hidden md:flex md:flex-1 md:min-h-0 md:flex-col">
+      {/* Sem `pt`: o header já fecha com `pb-4`. */}
+      <div className="scroll-hide hidden flex-1 min-h-0 overflow-y-auto px-6 pb-4 md:block">
         <ClientTable
           clients={clients}
           statsByClient={statsByClient}
           loading={clientsQ.isLoading}
           onRowClick={openDetail}
         />
+        {pagina && (
+          <Pagination
+            page={pagina.number}
+            totalPages={pagina.totalPages}
+            totalElements={pagina.totalElements}
+            numberOfElements={pagina.numberOfElements}
+            size={pagina.size}
+            onChange={setPage}
+          />
+        )}
       </div>
 
       {/* ── Cards (mobile) ── */}
@@ -307,6 +355,17 @@ export default function ClientesPage() {
           onViewTickets={(publicId) => router.push(`/tickets?clientId=${publicId}`)}
           onToggleActive={isAdmin ? onToggleActive : undefined}
         />
+        {pagina && (
+          <Pagination
+            page={pagina.number}
+            totalPages={pagina.totalPages}
+            totalElements={pagina.totalElements}
+            numberOfElements={pagina.numberOfElements}
+            size={pagina.size}
+            onChange={setPage}
+            className="shrink-0"
+          />
+        )}
       </div>
 
       {/* ── Create dialog ── */}

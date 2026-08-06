@@ -542,7 +542,7 @@ export interface paths {
         };
         /**
          * Listar clientes
-         * @description Retorna todos os clientes com suporte a filtros por nome, status (ATIVO/INATIVO/TODOS) e sistemas associados.
+         * @description Retorna os clientes com suporte a filtros por nome, status (ATIVO/INATIVO/TODOS), tipo, documento e sistemas associados. A paginação é opcional: sem `page` e sem `size` a resposta é um array de `ClientResponse`; informando qualquer um dos dois, a resposta vira um `Page` (`content`, `totalElements`, `totalPages`, `number`, `size`). Padrões da versão paginada: 12 itens por página ordenados por `name` ascendente.
          */
         get: operations["findAllClients"];
         put?: never;
@@ -2235,6 +2235,11 @@ export interface operations {
         parameters: {
             query: {
                 filtersParams: components["schemas"]["ClientFiltersParams"];
+                pageable: components["schemas"]["Pageable"];
+                /** @description Índice da página (base 0). Presente = resposta paginada. */
+                page?: number;
+                /** @description Itens por página (padrão 12). Presente = resposta paginada. */
+                size?: number;
             };
             header?: never;
             path?: never;
@@ -2242,7 +2247,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Lista de clientes retornada com sucesso */
+            /** @description Lista (ou página) de clientes retornada com sucesso */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2257,7 +2262,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ClientResponse"][];
+                    "*/*": Record<string, never>;
                 };
             };
         };

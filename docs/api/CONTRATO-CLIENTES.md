@@ -200,7 +200,7 @@ o front já conhece as roles do usuário logado pela sessão.
 ## 6. Tela: Listagem de clientes
 
 ```
-GET /clients?name=&status=&tipo=&documento=&systems=
+GET /clients?name=&status=&tipo=&documento=&systems=&page=&size=&sort=
 ```
 
 | Param | Tipo | Comportamento |
@@ -210,10 +210,46 @@ GET /clients?name=&status=&tipo=&documento=&systems=
 | `tipo` | `PJ \| PF` | **Novo.** Igualdade exata. |
 | `documento` | string | **Novo.** Aceita com máscara (normaliza). Igualdade exata contra **qualquer filial** do cliente — inclusive não-matriz. |
 | `systems` | UUID[] | Repetido (`systems=a&systems=b`) ou separado por vírgula. |
+| `page` | int | **Novo.** Índice da página, base 0. |
+| `size` | int | **Novo.** Itens por página. Padrão `12`. |
+| `sort` | string | **Novo.** Formato Spring: `name,asc` (padrão) ou `createdAt,desc`. Ignorado sem `page`/`size`. |
 
-Todos combináveis (`AND`). Resposta é lista simples, **sem paginação**.
+Todos os filtros são combináveis (`AND`).
 
-Resposta (`ClientResponse[]`):
+### Paginação é opcional — e ela muda o formato da resposta
+
+Compatibilidade preservada de propósito: **sem `page` e sem `size` a resposta continua
+sendo o array simples de sempre.** Basta enviar um dos dois para receber o envelope
+`Page` do Spring.
+
+| Requisição | Corpo da resposta |
+|---|---|
+| `GET /clients?name=acme` | `ClientResponse[]` — array cru, tudo que casa com o filtro |
+| `GET /clients?name=acme&page=0` | `Page<ClientResponse>` — 12 itens, ordenados por `name` |
+| `GET /clients?size=50` | `Page<ClientResponse>` — página 0 com 50 itens |
+
+Envelope quando paginado:
+
+```json
+{
+  "content": [ /* ClientResponse[], mesmo objeto de sempre */ ],
+  "totalElements": 137,
+  "totalPages": 12,
+  "number": 0,
+  "size": 12,
+  "numberOfElements": 12,
+  "first": true,
+  "last": false,
+  "empty": false
+}
+```
+
+Os itens de `content` são o **`ClientResponse` completo** — com `branches`, `contatos`
+e `systems`, nada de payload reduzido. `totalElements` conta os clientes que casam com
+o filtro, não as linhas do join: filtrar por `documento` de uma filial devolve o cliente
+uma vez só.
+
+Resposta sem paginação (`ClientResponse[]`):
 
 ```json
 [{

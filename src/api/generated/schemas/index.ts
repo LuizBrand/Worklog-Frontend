@@ -34,6 +34,7 @@ export * from './contactRequest';
 export * from './contactRequestTipo';
 export * from './contactResponse';
 export * from './contactResponseTipo';
+export * from './findAllClients401';
 export * from './findAllClientsParams';
 export * from './findAllTicketsParams';
 export * from './findBranchesByClientParams';

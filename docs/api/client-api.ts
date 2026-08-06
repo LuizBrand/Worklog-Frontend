@@ -199,6 +199,38 @@ export interface ClientFiltersParams {
   /** Aceita com máscara. Igualdade exata contra qualquer filial do cliente. */
   documento?: string;
   systems?: string[];
+  /**
+   * Índice da página, base 0. Enviar `page` OU `size` muda o formato da
+   * resposta de `ClientResponse[]` para `Page<ClientResponse>`.
+   */
+  page?: number;
+  /** Itens por página. Padrão 12. Mesmo efeito de `page` sobre a resposta. */
+  size?: number;
+  /**
+   * Ordenação, formato Spring: "name,asc" ou "createdAt,desc". Padrão
+   * "name,asc". Só tem efeito junto com `page` ou `size`.
+   */
+  sort?: string;
+}
+
+/**
+ * Envelope de página do Spring Data, usado por GET /clients quando `page` ou
+ * `size` estão presentes na query string.
+ */
+export interface Page<T> {
+  content: T[];
+  /** Total de registros que casam com o filtro, ignorando a paginação. */
+  totalElements: number;
+  totalPages: number;
+  /** Índice da página atual, base 0. */
+  number: number;
+  /** Tamanho da página pedido. */
+  size: number;
+  /** Quantidade de itens nesta página — menor que `size` na última. */
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
 
 // ---------------------------------------------------------------------------

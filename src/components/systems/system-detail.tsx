@@ -26,7 +26,9 @@ export function SystemDetail({ publicId, onClose }: SystemDetailProps) {
   const system = systemQ.data
 
   // Fetch all clients and filter client-side to find those using this system
-  const clientsQ = useFindAllClients({ filtersParams: {} })
+  // `pageable` vazio: sem `page`/`size` a resposta continua sendo o array cru
+  // de sempre (§6 do contrato). Só a listagem de clientes pagina.
+  const clientsQ = useFindAllClients({ filtersParams: {}, pageable: {} })
   const relatedClients = (clientsQ.data ?? []).filter(
     (c) => c.systems?.some((s) => s.publicId === publicId)
   )

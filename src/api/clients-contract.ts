@@ -195,7 +195,53 @@ export interface ClientFiltersParams {
   /** Aceita com máscara. Igualdade exata contra qualquer filial do cliente. */
   documento?: string
   systems?: string[]
+  /**
+   * Índice da página, base 0. Enviar `page` OU `size` muda o formato da
+   * resposta de `ClientResponse[]` para `Page<ClientResponse>`.
+   */
+  page?: number
+  /** Itens por página. Padrão 12. Mesmo efeito de `page` sobre a resposta. */
+  size?: number
+  /**
+   * Ordenação, formato Spring: "name,asc" ou "createdAt,desc". Padrão
+   * "name,asc". **Ignorado sem `page`/`size`** — `?sort=name,desc` sozinho cai
+   * no caminho do array e não ordena.
+   */
+  sort?: string
 }
+
+/**
+ * Envelope do Spring Data, devolvido por GET /clients quando `page` ou `size`
+ * estão na query string.
+ *
+ * O springdoc não consegue expressar o retorno duplo (array OU Page), então o
+ * gerado tipa sempre `ClientResponse[]` — o cast fica na fronteira, como nos
+ * outros pontos deste módulo.
+ */
+export interface Page<T> {
+  content: T[]
+  /** Total que casa com o filtro, ignorando a paginação. Conta clientes, não linhas de join. */
+  totalElements: number
+  totalPages: number
+  /** Índice da página atual, base 0. */
+  number: number
+  /** Tamanho pedido. */
+  size: number
+  /** Itens nesta página — menor que `size` na última. */
+  numberOfElements: number
+  first: boolean
+  last: boolean
+  empty: boolean
+}
+
+/**
+ * Itens por página da listagem. **Escolha da UI**, não o padrão do backend
+ * (que é 12): 11 é o que cabe sem apertar a tela.
+ */
+export const CLIENT_PAGE_SIZE = 11
+
+/** Padrão do backend quando a resposta é paginada. */
+export const CLIENT_SORT_PADRAO = 'name,asc'
 
 // ── Responses ─────────────────────────────────────────────────────────────────
 

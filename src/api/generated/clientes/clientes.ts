@@ -30,6 +30,7 @@ import type {
   ClientResponse,
   ClientUpdateRequest,
   CnpjLookupResponse,
+  FindAllClients401,
   FindAllClientsParams,
   LookupByCnpjParams
 } from '../schemas';
@@ -327,7 +328,7 @@ export const useUpdateClient = <TError = ErrorType<ApiExceptionResponse | Client
       return useMutation(getUpdateClientMutationOptions(options), queryClient);
     }
     /**
- * Retorna todos os clientes com suporte a filtros por nome, status (ATIVO/INATIVO/TODOS) e sistemas associados.
+ * Retorna os clientes com suporte a filtros por nome, status (ATIVO/INATIVO/TODOS), tipo, documento e sistemas associados. A paginação é opcional: sem `page` e sem `size` a resposta é um array de `ClientResponse`; informando qualquer um dos dois, a resposta vira um `Page` (`content`, `totalElements`, `totalPages`, `number`, `size`). Padrões da versão paginada: 12 itens por página ordenados por `name` ascendente.
  * @summary Listar clientes
  */
 export const findAllClients = (
@@ -353,7 +354,7 @@ export const getFindAllClientsQueryKey = (params?: FindAllClientsParams,) => {
     }
 
 
-export const getFindAllClientsQueryOptions = <TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<ClientResponse[]>>(params: FindAllClientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof findAllClients>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getFindAllClientsQueryOptions = <TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<FindAllClients401>>(params: FindAllClientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof findAllClients>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -372,10 +373,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type FindAllClientsQueryResult = NonNullable<Awaited<ReturnType<typeof findAllClients>>>
-export type FindAllClientsQueryError = ErrorType<ClientResponse[]>
+export type FindAllClientsQueryError = ErrorType<FindAllClients401>
 
 
-export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<ClientResponse[]>>(
+export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<FindAllClients401>>(
  params: FindAllClientsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof findAllClients>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof findAllClients>>,
@@ -385,7 +386,7 @@ export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClien
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<ClientResponse[]>>(
+export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<FindAllClients401>>(
  params: FindAllClientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof findAllClients>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof findAllClients>>,
@@ -395,7 +396,7 @@ export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClien
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<ClientResponse[]>>(
+export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<FindAllClients401>>(
  params: FindAllClientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof findAllClients>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -403,7 +404,7 @@ export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClien
  * @summary Listar clientes
  */
 
-export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<ClientResponse[]>>(
+export function useFindAllClients<TData = Awaited<ReturnType<typeof findAllClients>>, TError = ErrorType<FindAllClients401>>(
  params: FindAllClientsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof findAllClients>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

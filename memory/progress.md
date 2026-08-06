@@ -249,7 +249,53 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
 `toBranchUpdateRequest`, regras do schema) já está coberta em `client-save.test.ts` e
 `client-schema.test.ts`, escritos no Slice 4.
 
-**Deferidos** (do plano §5): paginação client-side da listagem; documento no
+- [x] 2026-08-04 — **Listagem paginada** (contrato atualizado no mesmo dia; sai dos
+      deferidos):
+  - `openapi/worklog.json` ← `docs/api/openapi.json` + `pnpm api:gen`. O diff é só o
+    `GET /clients`: ganhou `pageable` (obrigatório), `page` e `size`. Zero schema novo.
+  - **A paginação é opt-in e muda o formato da resposta** (§6): sem `page`/`size` volta
+    `ClientResponse[]`; com qualquer um dos dois volta `Page<ClientResponse>`. As
+    outras 4 telas que consultam `/clients` receberam `pageable: {}` e continuam no
+    array cru — nenhuma foi refatorada.
+  - **`pageable` do tipo gerado não vira chave na URL.** O `paramsSerializer` de
+    `src/lib/api.ts` achata objetos aninhados, então
+    `pageable: { page, size, sort: ['name,asc'] }` sai como
+    `?page=0&size=12&sort=name,asc` — soltos, como o backend lê. Verificado por
+    asserção sobre as URLs capturadas.
+  - `clients-contract.ts` — `Page<T>`, `page`/`size`/`sort` em `ClientFiltersParams`,
+    `CLIENT_PAGE_SIZE` (12) e `CLIENT_SORT_PADRAO` (`name,asc`).
+  - `src/lib/pagination.ts` + **9 testes** — `paginasVisiveis` (janela com reticências)
+    validada por invariantes em varredura, não por casos soltos.
+  - `components/worklog/pagination.tsx` — barra `‹ 1 2 ›` + "1–12 de 15", como o mockup.
+  - `client-table.tsx` — tabela dentro de card com borda e cantos arredondados, linhas
+    mais altas: o formato do mockup.
+  - **Reset de página no setter do filtro, não em `useEffect`** — a regra
+    `react-hooks/set-state-in-effect` barra `setState` síncrono em efeito, e com razão:
+    causaria render em cascata.
+  - `dev-chip.tsx` — de `--wl-text-dim` para `--wl-text-muted`: dentro do card da
+    tabela o chip ficava ilegível.
+  - Evidência: `.agent/visual/listagem-paginada.md` (4 PNGs; query string, envelope e
+    contagem de linhas capturados na rede).
+  - ⚠️ **Não verificado**: ordenação por outra coluna (a UI só usa o padrão) e a
+    armadilha de `sort` sem `page`, já que o código sempre manda `page`.
+  - **Header e altura de linha ajustados a pedido do usuário** (mesmo dia):
+    - O header da listagem virou o bloco de duas linhas do mockup ("Clientes" 22px
+      com o contador abaixo). **Isso reverte a decisão de 2026-05-09** de alinhar
+      todo header à barra de 52px do sidebar — foi pedido explicitamente. As outras
+      telas continuam com a barra de 52px.
+    - Linhas da tabela de `py-4` para `py-3`: 76,5px → **68,5px**, medido.
+    - `CLIENT_PAGE_SIZE` de 12 para **11**, a pedido. É escolha da UI, não o
+      padrão do backend (12) — o comentário da constante diz isso.
+    - ⚠️ **Medido e não corrigido**: com 11 linhas a barra de paginação fica
+      **abaixo da dobra** em viewport de 900px (tabela termina em y=877, a seta
+      de próxima página em y=926, o texto "1–11 de 15" por volta de y=950). A
+      lista parece completa e o controle só aparece rolando. Faltam ~50px:
+      ou linha em `py-2.5` (~64px), ou 10 por página. Ambas são escolha do
+      usuário, então ficou aguardando decisão.
+    - Evidência: `.agent/visual/header-listagem-mockup.md` (3 PNGs; posição do
+      contador e alinhamento da busca verificados por `boundingBox`).
+
+**Deferidos** (do plano §5): ~~paginação client-side da listagem~~ (feita, server-side); documento no
 `ClientCombobox`; gap do backend de nome duplicado no PATCH.
 
 **TDD-check exemptions (slice 2 — listagem):** `tipo-badge.tsx`, `dev-chip.tsx` e

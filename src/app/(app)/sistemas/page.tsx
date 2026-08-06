@@ -99,7 +99,9 @@ export default function SistemasPage() {
   }
 
   const systemsQ = useFindAllSystems()
-  const clientsQ = useFindAllClients({ filtersParams: {} })
+  // `pageable` vazio de propósito: sem `page`/`size` a resposta continua sendo
+  // o array cru de sempre (§6 do contrato). Esta tela não pagina clientes.
+  const clientsQ = useFindAllClients({ filtersParams: {}, pageable: {} })
   const ticketsQ = useFindAllTickets({
     filters: {},
     pageable: { page: 0, size: 500, sort: ['updatedAt,desc'] },

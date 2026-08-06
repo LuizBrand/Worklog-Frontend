@@ -1625,7 +1625,7 @@
                     "Clientes"
                 ],
                 "summary": "Listar clientes",
-                "description": "Retorna todos os clientes com suporte a filtros por nome, status (ATIVO/INATIVO/TODOS) e sistemas associados.",
+                "description": "Retorna os clientes com suporte a filtros por nome, status (ATIVO/INATIVO/TODOS), tipo, documento e sistemas associados. A pagina\u00e7\u00e3o \u00e9 opcional: sem `page` e sem `size` a resposta \u00e9 um array de `ClientResponse`; informando qualquer um dos dois, a resposta vira um `Page` (`content`, `totalElements`, `totalPages`, `number`, `size`). Padr\u00f5es da vers\u00e3o paginada: 12 itens por p\u00e1gina ordenados por `name` ascendente.",
                 "operationId": "findAllClients",
                 "parameters": [
                     {
@@ -1635,11 +1635,39 @@
                         "schema": {
                             "$ref": "#/components/schemas/ClientFiltersParams"
                         }
+                    },
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/Pageable"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "\u00cdndice da p\u00e1gina (base 0). Presente = resposta paginada.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "description": "Itens por p\u00e1gina (padr\u00e3o 12). Presente = resposta paginada.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Lista de clientes retornada com sucesso",
+                        "description": "Lista (ou p\u00e1gina) de clientes retornada com sucesso",
                         "content": {
                             "*/*": {
                                 "schema": {
@@ -1656,10 +1684,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/ClientResponse"
-                                    }
+                                    "type": "object"
                                 }
                             }
                         }

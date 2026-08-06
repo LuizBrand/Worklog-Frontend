@@ -145,3 +145,24 @@ input **antes** do clique, então `onBlur` + `onClick` disparam os dois e a mesm
 sai duas vezes. Em endpoint com rate limit (o lookup é 5/min por IP, compartilhado pela
 equipe) isso é quota queimada. Guardar o último valor consultado num `useRef` e sair
 cedo; limpar no erro para o retry continuar possível.
+
+## Paginação de `GET /clients` é opt-in e troca o tipo da resposta (2026-08-04)
+
+Sem `page` e sem `size`, o endpoint devolve `ClientResponse[]`. Com qualquer um dos
+dois, devolve `Page<ClientResponse>`. O springdoc não expressa retorno duplo, então o
+Orval tipa **sempre** array — o cast fica na fronteira. Consequência prática: adicionar
+paginação numa tela **não** exige mexer nas outras que consultam o mesmo endpoint.
+
+Duas armadilhas do gerado:
+- `pageable` aparece como **obrigatório**. Não é um objeto que deva ir para o servidor:
+  o `paramsSerializer` de `src/lib/api.ts` achata objetos aninhados, então
+  `pageable: { page, size, sort: ['name,asc'] }` vira `?page=0&size=12&sort=name,asc`.
+  Nenhuma chave `pageable` chega ao backend — verificado na rede.
+- `sort` sozinho é **ignorado**: `?sort=name,desc` sem `page`/`size` cai no caminho do
+  array e não ordena.
+
+## `setState` dentro de `useEffect` é erro de lint, não warning (2026-08-04)
+
+Resetar a página ao trocar de filtro com `useEffect(() => setPage(0), [filtro])` é
+barrado por `react-hooks/set-state-in-effect` — e a regra está certa, isso dispara
+render em cascata. Fazer no próprio handler que muda o filtro.

@@ -148,7 +148,9 @@ export default function TicketsPage() {
     pageable: { page, size: 20, sort: ['updatedAt,desc'] },
   })
 
-  const clientsQ = useFindAllClients({ filtersParams: {} })
+  // `pageable` vazio: sem `page`/`size` a resposta continua sendo o array cru
+  // de sempre (§6 do contrato). Só a listagem de clientes pagina.
+  const clientsQ = useFindAllClients({ filtersParams: {}, pageable: {} })
 
   // Cast: OpenAPI spec has 200/401 schemas swapped — see memory/gotchas.md
   const page_data = ticketsQ.data as PageTicketSummary | undefined

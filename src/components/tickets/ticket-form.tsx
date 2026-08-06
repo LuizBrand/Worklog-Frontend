@@ -155,7 +155,9 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
   const currentUser = useAuthStore((s) => s.user)
   const isAdmin = currentUser?.roles?.some((r) => r.role === 'ADMIN') ?? false
 
-  const clientsQ = useFindAllClients({ filtersParams: {} })
+  // `pageable` vazio: sem `page`/`size` a resposta continua sendo o array cru
+  // de sempre (§6 do contrato). Só a listagem de clientes pagina.
+  const clientsQ = useFindAllClients({ filtersParams: {}, pageable: {} })
   const systemsQ = useFindAllSystems()
   const usersQ = useFindAllUsers({ query: { enabled: isAdmin } })
 

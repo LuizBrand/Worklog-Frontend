@@ -6,7 +6,17 @@
  * OpenAPI spec version: v1.0.0
  */
 import type { ClientFiltersParams } from './clientFiltersParams';
+import type { Pageable } from './pageable';
 
 export type FindAllClientsParams = {
 filtersParams: ClientFiltersParams;
+pageable: Pageable;
+/**
+ * Índice da página (base 0). Presente = resposta paginada.
+ */
+page?: number;
+/**
+ * Itens por página (padrão 12). Presente = resposta paginada.
+ */
+size?: number;
 };
