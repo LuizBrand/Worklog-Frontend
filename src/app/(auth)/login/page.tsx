@@ -20,12 +20,9 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>
 
 const inputCls =
-  'h-9 w-full rounded-md border px-3 py-1 text-sm outline-none transition-colors focus:ring-2 focus:ring-ring/30 focus:border-ring'
-const inputStyle = {
-  background: 'var(--wl-surface-2)',
-  border: '1px solid var(--wl-border)',
-  color: 'var(--wl-text)',
-}
+  'h-9 w-full rounded-md border px-3 py-1 text-sm outline-none transition-colors ' +
+  'bg-transparent border-[var(--wl-border)] text-[var(--wl-text)] ' +
+  'placeholder:text-[var(--wl-text-dim)] focus:border-[var(--primary)]'
 
 function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
   return (
@@ -92,7 +89,6 @@ export default function LoginPage() {
             autoComplete="email"
             autoFocus
             className={inputCls}
-            style={inputStyle}
             {...loginRegister('email')}
           />
           <FieldError msg={loginErrors.email?.message} />
@@ -106,7 +102,6 @@ export default function LoginPage() {
             placeholder="••••••••"
             autoComplete="current-password"
             className={inputCls}
-            style={inputStyle}
             {...loginRegister('password')}
           />
           <FieldError msg={loginErrors.password?.message} />

@@ -32,12 +32,9 @@ const userSchema = z.object({
 type UserValues = z.infer<typeof userSchema>
 
 const inputCls =
-  'w-full rounded-lg px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-[var(--wl-text-dim)] focus:ring-1 focus:ring-[var(--primary)]'
-const inputStyle = {
-  background: 'var(--wl-surface-2)',
-  border: '1px solid var(--wl-border)',
-  color: 'var(--wl-text)',
-}
+  'w-full rounded-lg border px-3 py-2 text-[13px] outline-none transition-colors ' +
+  'bg-transparent border-[var(--wl-border)] text-[var(--wl-text)] ' +
+  'placeholder:text-[var(--wl-text-dim)] focus:border-[var(--primary)]'
 
 function FormField({ label, error, children }: {
   label: string
@@ -153,7 +150,6 @@ export function UserCreateDialog({ onClose }: UserCreateDialogProps) {
                 <input
                   {...register('name')}
                   className={inputCls}
-                  style={inputStyle}
                   placeholder="João da Silva"
                   autoComplete="off"
                   autoFocus
@@ -165,7 +161,6 @@ export function UserCreateDialog({ onClose }: UserCreateDialogProps) {
                   {...register('email')}
                   type="email"
                   className={inputCls}
-                  style={inputStyle}
                   placeholder="joao@empresa.com"
                   autoComplete="off"
                 />
@@ -177,7 +172,6 @@ export function UserCreateDialog({ onClose }: UserCreateDialogProps) {
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     className={`${inputCls} pr-10`}
-                    style={inputStyle}
                     placeholder="Mínimo 8 caracteres"
                     autoComplete="new-password"
                   />

@@ -336,6 +336,21 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
       seria campo que não salva).
     - Evidência: `.agent/visual/form-filial-toggle-endereco.md` (5 PNGs; deslize da
       pastilha medido por `transform`, campos por `aria-label`, payload conferido).
+    - **Campos sem preenchimento próprio, em todo o projeto** (pedido do usuário): o
+      campo herda o fundo do container e o contraste vem da borda — `--wl-border` em
+      repouso, `--primary` no foco. A borda saiu do `style` inline para classe, senão
+      o `focus:` nunca venceria (inline ganha de classe). `inputStyle` **não existe
+      mais em lugar nenhum**: tickets, usuários, sistemas, perfil e login tinham
+      cópias locais, todas substituídas.
+      - `<select>` é exceção: mantém fundo explícito, senão a lista de opções nativa
+        fica ilegível em parte dos navegadores.
+      - 🐞 A primeira versão do `selectCls` era `` `${inputCls} bg-…` `` e saiu
+        transparente — **a mesma armadilha de classes concorrentes** que colapsou o
+        campo de contato para 26px (já no `gotchas.md`). Reescrito por extenso.
+      - `eslint` caiu de 5 para **4 warnings**: um dos antigos era um `selectCls`
+        morto no `ticket-form.tsx`.
+      - Evidência: `.agent/visual/campos-fundo-borda.md` (3 PNGs; fundo e borda por
+        `getComputedStyle`, em dark e light, nos quatro formulários).
 
 **Deferidos** (do plano §5): ~~paginação client-side da listagem~~ (feita, server-side); documento no
 `ClientCombobox`; gap do backend de nome duplicado no PATCH.

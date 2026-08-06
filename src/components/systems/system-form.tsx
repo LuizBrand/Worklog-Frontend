@@ -64,8 +64,10 @@ function DialogCard({ children, onClose, title }: { children: React.ReactNode; o
   )
 }
 
-const inputCls = 'w-full rounded-lg px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-[var(--wl-text-dim)] focus:ring-1 focus:ring-[var(--primary)]'
-const inputStyle = { background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', color: 'var(--wl-text)' }
+const inputCls =
+  'w-full rounded-lg border px-3 py-2 text-[13px] outline-none transition-colors ' +
+  'bg-transparent border-[var(--wl-border)] text-[var(--wl-text)] ' +
+  'placeholder:text-[var(--wl-text-dim)] focus:border-[var(--primary)]'
 
 // ── Create ────────────────────────────────────────────────────────────────────
 
@@ -92,7 +94,7 @@ export function SystemCreateDialog({ onClose }: { onClose: () => void }) {
             <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--wl-text-muted)' }}>
               Nome *
             </label>
-            <input {...register('name')} placeholder="Nome do sistema" className={inputCls} style={inputStyle} autoFocus />
+            <input {...register('name')} placeholder="Nome do sistema" className={inputCls} autoFocus />
             {errors.name && <p className="text-[11px]" style={{ color: 'var(--status-open)' }}>{errors.name.message}</p>}
           </div>
 
@@ -145,7 +147,7 @@ export function SystemEditDialog({ system, onClose }: { system: SystemResponse; 
             <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--wl-text-muted)' }}>
               Nome *
             </label>
-            <input {...register('name')} className={inputCls} style={inputStyle} autoFocus />
+            <input {...register('name')} className={inputCls} autoFocus />
             {errors.name && <p className="text-[11px]" style={{ color: 'var(--status-open)' }}>{errors.name.message}</p>}
           </div>
 

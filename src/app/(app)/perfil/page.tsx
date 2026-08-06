@@ -32,8 +32,10 @@ const pwSchema = z
 
 type PwValues = z.infer<typeof pwSchema>
 
-const inputCls = 'w-full rounded-lg px-3 py-2.5 text-[13px] outline-none transition-colors focus:ring-1 focus:ring-[var(--primary)]'
-const inputStyle = { background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', color: 'var(--wl-text)' }
+const inputCls =
+  'w-full rounded-lg border px-3 py-2.5 text-[13px] outline-none transition-colors ' +
+  'bg-transparent border-[var(--wl-border)] text-[var(--wl-text)] ' +
+  'placeholder:text-[var(--wl-text-dim)] focus:border-[var(--primary)]'
 const readonlyStyle = { background: 'var(--wl-surface-2)', border: '1px solid var(--wl-border)', color: 'var(--wl-text-muted)', opacity: 0.7 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -68,7 +70,6 @@ function PasswordInput({
         type={show ? 'text' : 'password'}
         placeholder={placeholder}
         className={`${inputCls} ${showToggle ? 'pr-10' : ''}`}
-        style={inputStyle}
         autoComplete={autoComplete}
       />
       {showToggle && (

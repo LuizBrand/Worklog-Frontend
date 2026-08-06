@@ -136,13 +136,10 @@ function FormField({ label, error, children }: {
   )
 }
 
-const inputCls = 'w-full rounded-lg px-3 py-2 text-[13px] outline-none transition-colors placeholder:text-[var(--wl-text-dim)] focus:ring-1 focus:ring-[var(--primary)]'
-const selectCls = `${inputCls} cursor-pointer`
-const inputStyle = {
-  background: 'var(--wl-surface-2)',
-  border: '1px solid var(--wl-border)',
-  color: 'var(--wl-text)',
-}
+const inputCls =
+  'w-full rounded-lg border px-3 py-2 text-[13px] outline-none transition-colors ' +
+  'bg-transparent border-[var(--wl-border)] text-[var(--wl-text)] ' +
+  'placeholder:text-[var(--wl-text-dim)] focus:border-[var(--primary)]'
 
 // ── Create dialog ─────────────────────────────────────────────────────────────
 
@@ -204,7 +201,6 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
               {...register('title')}
               placeholder="Descreva o problema brevemente"
               className={inputCls}
-              style={inputStyle}
               autoFocus
             />
           </FormField>
@@ -215,7 +211,6 @@ export function TicketCreateDialog({ onClose }: TicketCreateDialogProps) {
               placeholder="Detalhes adicionais (opcional)"
               rows={3}
               className={`${inputCls} resize-none`}
-              style={inputStyle}
             />
           </FormField>
 
@@ -370,7 +365,6 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
             <input
               {...register('title')}
               className={inputCls}
-              style={inputStyle}
               autoFocus
             />
           </FormField>
@@ -380,7 +374,6 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
               {...register('description')}
               rows={3}
               className={`${inputCls} resize-none`}
-              style={inputStyle}
             />
           </FormField>
 
@@ -390,7 +383,6 @@ export function TicketEditDialog({ ticket, onClose }: TicketEditDialogProps) {
               rows={2}
               placeholder="Resolução ou observação (opcional)"
               className={`${inputCls} resize-none`}
-              style={inputStyle}
             />
           </FormField>
 
