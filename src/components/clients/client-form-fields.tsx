@@ -33,8 +33,8 @@ import { CLIENT_TYPE_LABEL, ClientType, REGIME_TRIBUTARIO_LABEL } from '@/api/cl
 import type { CnpjLookupResponse } from '@/api/clients-contract'
 import { apiErrorToMessage } from '@/lib/api-errors'
 import { isValidCnpj, stripDocumento } from '@/lib/documento'
-import { MultiSelect } from '@/components/worklog'
-import { FormField, IconInput, SectionTitle, selectCls } from './client-form-shell'
+import { FilterSelect, MultiSelect } from '@/components/worklog'
+import { FormField, IconInput, SectionTitle } from './client-form-shell'
 import { SLOT_EMAIL, SLOT_TELEFONE } from './client-contatos'
 import { emptyBranch, type ClientFormValues } from './client-schema'
 
@@ -89,6 +89,7 @@ export function ClientFormFields({
   // a cada tecla digitada em qualquer CNPJ.
   const tipo = useWatch({ control, name: 'tipo' })
   const sistemas = useWatch({ control, name: 'systemsPublicIds' })
+  const regime = useWatch({ control, name: 'regimeTributario' })
   const isPJ = tipo === ClientType.PJ
   const matrizErrors = errors.branches?.[0]
 
@@ -296,14 +297,15 @@ export function ClientFormFields({
             <IconInput {...register('nomeFantasia')} placeholder="Como é conhecida" />
           </FormField>
           <FormField label="Regime tributário" error={errors.regimeTributario?.message}>
-            <select {...register('regimeTributario')} className={selectCls}>
-              <option value="">Não informado</option>
-              {Object.entries(REGIME_TRIBUTARIO_LABEL).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <FilterSelect
+              variant="field"
+              value={regime ?? ''}
+              onChange={(v) => setValue('regimeTributario', v as ClientFormValues['regimeTributario'])}
+              options={[
+                { value: '', label: 'Não informado' },
+                ...Object.entries(REGIME_TRIBUTARIO_LABEL).map(([value, label]) => ({ value, label })),
+              ]}
+            />
           </FormField>
         </div>
       )}

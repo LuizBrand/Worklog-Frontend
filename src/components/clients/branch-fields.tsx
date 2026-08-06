@@ -11,7 +11,8 @@ import { CONTACT_TYPE_LABEL, ClientType } from '@/api/clients-contract'
 import type { CnpjLookupResponse } from '@/api/clients-contract'
 import { apiErrorToMessage } from '@/lib/api-errors'
 import { isValidCnpj, stripDocumento } from '@/lib/documento'
-import { FormField, SectionTitle, inputCls, selectCls } from './client-form-shell'
+import { FilterSelect } from '@/components/worklog'
+import { FormField, SectionTitle, inputCls } from './client-form-shell'
 import { emptyContato, type ClientFormValues } from './client-schema'
 
 export interface BranchFieldsProps {
@@ -47,6 +48,9 @@ export function BranchFields({
 
   const tipo = useWatch({ control, name: 'tipo' })
   const documento = useWatch({ control, name: `branches.${index}.documento` })
+  // Uma assinatura para a lista inteira: hook não pode ser chamado dentro do
+  // map dos contatos.
+  const contatos = useWatch({ control, name: `branches.${index}.contatos` })
   const isPJ = tipo === ClientType.PJ
   const branchErrors = errors.branches?.[index]
 
@@ -284,17 +288,17 @@ export function BranchFields({
                   style={{ background: 'var(--wl-surface-2)' }}
                 >
                   <div className="sm:w-28 sm:shrink-0">
-                    <select
-                      {...register(`branches.${index}.contatos.${j}.tipo`)}
-                      className={selectCls}
-                     
-                    >
-                      {Object.entries(CONTACT_TYPE_LABEL).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
+                    <FilterSelect
+                      variant="field"
+                      value={contatos?.[j]?.tipo ?? 'EMAIL'}
+                      onChange={(v) =>
+                        setValue(
+                          `branches.${index}.contatos.${j}.tipo`,
+                          v as ClientFormValues['branches'][number]['contatos'][number]['tipo'],
+                        )
+                      }
+                      options={Object.entries(CONTACT_TYPE_LABEL).map(([value, label]) => ({ value, label }))}
+                    />
                   </div>
 
                   <div className="min-w-0 space-y-1 sm:flex-1">

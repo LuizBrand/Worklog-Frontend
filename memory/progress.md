@@ -416,7 +416,35 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
   - ⚠️ **Não verificado**: consulta real à Receita a partir do campo da filial e erro
     429/rede na filial (deveria liberar a reconsulta daquele índice).
 
-**TDD-check exemption:** `client-form-fields.tsx` é UI. A lógica testável do módulo
+- [x] 2026-08-06 — **`<select>` nativo trocado pelo select do app** (o usuário apontou
+      que as opções de regime tributário abriam fora do padrão):
+  - A lista de opções de um `<select>` nativo é desenhada pelo sistema operacional, não
+    pela página — **nenhum CSS alcança**. O `selectCls` controlava só a caixa fechada.
+  - Restavam **dois**: regime tributário (`client-form-fields.tsx`) e tipo de contato da
+    filial (`branch-fields.tsx`). Ambos trocados por `FilterSelect`.
+  - **`FilterSelect` ganhou `variant="field"`** em vez de nascer um terceiro dropdown no
+    projeto (já havia `FilterSelect` e `MultiSelect`). Nesse variante o gatilho herda o
+    fundo do container e marca o foco na borda, como os `input`.
+  - **Escape passou a fechar só a lista**, com `stopPropagation` — sem isso a tecla
+    chegava ao `DialogCard` e fechava o formulário inteiro. Vale para todos os usos do
+    componente, não só os novos.
+  - `selectCls` **não existe mais**: ninguém o usava depois da troca.
+  - Como o campo virou controlado, entrou `useWatch` para `regimeTributario` e para a
+    lista `contatos` (uma assinatura só — hook não pode ser chamado dentro do `map`).
+  - 🐞 **Achado pela medição:** a primeira versão usava `h-[38px]` e ficava meio pixel
+    mais alta que o input ao lado (38 vs 37,5). Trocado por `py-2`, o mesmo do
+    `inputCls`.
+  - Verificado: **zero `<select>` nativo** em `/clientes`, `/tickets`, `/sistemas`,
+    `/usuarios`, `/perfil` e no formulário de filial; fundo e borda da lista iguais a
+    `--wl-surface`/`--wl-border` nos dois temas; Escape fecha a lista e não o dialog.
+  - Evidência: `.agent/visual/select-fora-do-padrao.md` (3 PNGs).
+  - `tsc` limpo, `eslint` nos 4 warnings de baseline, 91 testes.
+  - ⚠️ **Não resolvido:** navegação por teclado dentro da lista (setas). O `<select>`
+    nativo tinha, o substituto não — e o `FilterSelect` já não tinha nas barras de
+    filtro. A troca não regrediu, mas o gap agora atinge formulário.
+
+**TDD-check exemption:** `filter-select.tsx` e `client-form-fields.tsx` são UI. A lógica
+testável do módulo
 (schema, diff de salvamento, contatos) já tem teste; o que mudou aqui é fiação de
 formulário, verificada por runtime com a rota stubada.
 

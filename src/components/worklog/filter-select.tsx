@@ -15,6 +15,12 @@ interface FilterSelectProps {
   options: FilterOption[]
   /** Extra classes on the outer wrapper — use "w-full" for form fields */
   className?: string
+  /**
+   * `filter` (padrão) é a barra de filtros: fundo próprio e largura mínima.
+   * `field` é campo de formulário — herda o fundo do container e marca o foco
+   * na borda, como os `input` do app.
+   */
+  variant?: 'filter' | 'field'
 }
 
 interface DropPos {
@@ -24,7 +30,14 @@ interface DropPos {
   minWidth: number
 }
 
-export function FilterSelect({ value, onChange, options, className = '' }: FilterSelectProps) {
+export function FilterSelect({
+  value,
+  onChange,
+  options,
+  className = '',
+  variant = 'filter',
+}: FilterSelectProps) {
+  const campo = variant === 'field'
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<DropPos | null>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -43,6 +56,19 @@ export function FilterSelect({ value, onChange, options, className = '' }: Filte
     }
     setOpen(true)
   }
+
+  // Escape fecha só a lista, e a tecla para aqui: dentro de um dialog ela
+  // fecharia o formulário inteiro junto.
+  useEffect(() => {
+    if (!open) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      e.stopPropagation()
+      setOpen(false)
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -70,13 +96,28 @@ export function FilterSelect({ value, onChange, options, className = '' }: Filte
         ref={triggerRef}
         type="button"
         onClick={() => (open ? setOpen(false) : openDrop())}
-        className="flex h-[34px] w-full cursor-pointer items-center gap-2 rounded-lg pl-3 pr-2.5 text-[13px] transition-colors"
-        style={{
-          background: 'var(--wl-surface-2)',
-          border: '1px solid var(--wl-border)',
-          color: value ? 'var(--wl-text)' : 'var(--wl-text-muted)',
-          minWidth: 140,
-        }}
+        className={
+          campo
+            ? // Escrito por extenso, e não concatenando com a classe do input:
+              // duas classes de fundo com a mesma especificidade deixam a ordem
+              // do CSS decidir, armadilha que já deixou um select transparente.
+              // `py-2` e não altura fixa: é o que iguala a caixa à do `input`,
+              // que também é `py-2` — com `h-[38px]` sobrava meio pixel.
+              'flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent ' +
+              'border-[var(--wl-border)] py-2 pl-3 pr-2.5 text-[13px] outline-none transition-colors ' +
+              (open ? 'border-[var(--primary)] ' : 'focus:border-[var(--primary)] ')
+            : 'flex h-[34px] w-full cursor-pointer items-center gap-2 rounded-lg pl-3 pr-2.5 text-[13px] transition-colors'
+        }
+        style={
+          campo
+            ? { color: value ? 'var(--wl-text)' : 'var(--wl-text-muted)' }
+            : {
+                background: 'var(--wl-surface-2)',
+                border: '1px solid var(--wl-border)',
+                color: value ? 'var(--wl-text)' : 'var(--wl-text-muted)',
+                minWidth: 140,
+              }
+        }
       >
         <span className="flex-1 truncate text-left">{current?.label}</span>
         <ChevronDown

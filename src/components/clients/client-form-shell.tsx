@@ -156,20 +156,6 @@ export const inputCls =
   'placeholder:text-[var(--wl-text-dim)] focus:border-[var(--primary)]'
 
 /**
- * `<select>` precisa de fundo explícito: com `transparent`, a lista de opções
- * nativa fica ilegível em parte dos navegadores, que a pinta com o fundo do
- * próprio elemento.
- *
- * Escrito por extenso, e não como `${inputCls} bg-…`: as duas classes de fundo
- * teriam a mesma especificidade e quem venceria seria a ordem do CSS gerado —
- * a mesma armadilha que já colapsou um campo para 26px neste módulo.
- */
-export const selectCls =
-  'w-full cursor-pointer rounded-lg border px-3 py-2 text-[13px] outline-none transition-colors ' +
-  'bg-[var(--wl-surface)] border-[var(--wl-border)] text-[var(--wl-text)] ' +
-  'focus:border-[var(--primary)]'
-
-/**
  * Input com ícone dentro, à esquerda — o padrão visual do mockup.
  *
  * O ícone é decorativo (`aria-hidden`): quem nomeia o campo é o `label` do
