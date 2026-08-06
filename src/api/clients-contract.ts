@@ -236,9 +236,10 @@ export interface Page<T> {
 
 /**
  * Itens por página da listagem. **Escolha da UI**, não o padrão do backend
- * (que é 12): 11 é o que cabe sem apertar a tela.
+ * (que é 12): com 11 linhas a barra de paginação caía abaixo da dobra em
+ * viewport de 900px, e a lista parecia completa sem o controle à vista.
  */
-export const CLIENT_PAGE_SIZE = 11
+export const CLIENT_PAGE_SIZE = 10
 
 /** Padrão do backend quando a resposta é paginada. */
 export const CLIENT_SORT_PADRAO = 'name,asc'

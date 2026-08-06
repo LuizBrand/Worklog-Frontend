@@ -375,6 +375,18 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     script de verificação teve que usar seletores de nível de página. Lacuna de
     acessibilidade pré-existente, fora do escopo do ajuste.
 
+- [x] 2026-08-06 — **`CLIENT_PAGE_SIZE` de 11 para 10** — fecha o item que estava
+      aguardando decisão desde 2026-08-04. O usuário escolheu tirar uma linha em vez de
+      encolher a linha para `py-2.5`; a altura de 68,5px fica como está.
+  - Medido **sem rolar** (`scrollY=0` asseverado): a seta "Próxima página" termina em
+    **857** e a contagem "1–10 de 20" em **881**, ambas dentro dos 900px da dobra. Com
+    11 linhas a seta ficava em 926 e o texto por volta de 950.
+  - Rede: `/clients?page=0&size=10&sort=name%2Casc`; nenhuma chave `pageable` na URL.
+  - Evidência: `.agent/visual/paginacao-10-por-pagina.md` (2 PNGs, dark e light).
+  - Mudança de constante, sem comportamento novo a testar — os 9 testes de
+    `paginasVisiveis` não dependem do tamanho de página. O `tdd-check.sh` avisou por ser
+    export em arquivo sem teste vizinho; registrado aqui como refactor-only.
+
 **Deferidos** (do plano §5): ~~paginação client-side da listagem~~ (feita, server-side); documento no
 `ClientCombobox`; gap do backend de nome duplicado no PATCH.
 
