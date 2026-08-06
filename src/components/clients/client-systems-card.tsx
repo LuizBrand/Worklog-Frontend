@@ -60,7 +60,13 @@ export function ClientSystemsCard({ client, onEdit }: ClientSystemsCardProps) {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        /*
+          A partir de 4 sistemas as linhas se dividem em duas colunas: crescer
+          para o lado usa a largura ociosa do card, enquanto crescer para baixo
+          esticava a coluna inteira e abria um buraco no card de dados, ao lado.
+          Abaixo de `sm` a tela não comporta duas colunas.
+        */
+        <div className={`grid gap-2 ${systems.length >= 4 ? 'sm:grid-cols-2' : 'grid-cols-1'}`}>
           {systems.map((s) => (
             <SystemRow key={s.publicId} system={s} />
           ))}
@@ -116,6 +122,8 @@ function SystemRow({ system }: { system: ClientSystemResponse }) {
         <p
           className="truncate text-[13px] font-semibold leading-tight"
           style={{ color: ativo ? 'var(--primary)' : 'var(--wl-text-muted)' }}
+          // Em duas colunas a linha é estreita: o nome inteiro fica no hover.
+          title={system.name}
         >
           Sistema · {system.name}
         </p>

@@ -73,7 +73,10 @@ export function ClientDataCard({ client, onEdit, onVerFiliais }: ClientDataCardP
 
       {/* Filiais só existem para PJ (§9 do contrato). */}
       {isPJ && (
-        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--wl-border)' }}>
+        /* `mt-auto`: quando a coluna da direita é mais alta, este card estica —
+           e o rodapé fica na base, como no card de sistemas, em vez de deixar o
+           botão boiando no meio com um vazio embaixo. */
+        <div className="mt-auto pt-4" style={{ borderTop: '1px solid var(--wl-border)' }}>
           <button
             onClick={onVerFiliais}
             disabled={!onVerFiliais}

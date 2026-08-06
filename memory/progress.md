@@ -470,8 +470,31 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     dev não tem o caso. O caminho do inativo (tom neutro, contador `n/total`) só passou
     por inspeção.
 
-**TDD-check exemption:** `filter-select.tsx`, `client-form-fields.tsx` e
-`client-systems-card.tsx` são UI. A lógica
+- [x] 2026-08-06 — **Muitos sistemas: linhas em duas colunas** (o usuário viu um cliente
+      com 6 sistemas e o layout esticou):
+  - **O `flex-1` do ajuste anterior resolveu 1 sistema e inverteu o defeito com 6:** a
+    coluna da direita passou a mandar na altura, o card de dados esticou junto e
+    "+ Filiais" ficou boiando no meio, com ~200px de vazio embaixo.
+  - **A partir de 4 sistemas as linhas se dividem em duas colunas** (`sm:grid-cols-2`).
+    Crescer para o lado usa a largura ociosa do card; crescer para baixo esticava a
+    página. O card caiu de ~660px para **288px** com 6 sistemas. Abaixo de `sm` volta a
+    empilhar.
+  - **Rodapé preso na base nos dois cards:** `client-data-card.tsx` trocou `mt-4` por
+    `mt-auto` no bloco de filiais, espelhando o card de sistemas. Quando um lado estica,
+    o rodapé vai para a base em vez de ficar no meio.
+  - `title` no nome do sistema — em duas colunas a linha é estreita e o nome trunca.
+  - Medido: bases em **629/629** com 6 sistemas e **577/577** com 1; 6 linhas em 2
+    colunas (x=882 e 1148) e 3 fileiras; rodapés dos dois cards terminando em 608 de 629;
+    mobile 390px empilhando em uma coluna, sem scroll horizontal.
+  - Evidência: `.agent/visual/sistemas-muitos.md` (3 PNGs).
+  - `tsc` limpo, `eslint` nos 4 warnings de baseline, 91 testes.
+  - ⚠️ **Limite conhecido:** duas colunas adiam o problema, não o eliminam — com ~20
+    sistemas a coluna volta a crescer (10 fileiras). O próximo passo seria travar a lista
+    numa altura máxima com rolagem interna; descartado agora porque esconderia parte da
+    lista sem necessidade.
+
+**TDD-check exemption:** `filter-select.tsx`, `client-form-fields.tsx`,
+`client-systems-card.tsx` e `client-data-card.tsx` são UI. A lógica
 testável do módulo
 (schema, diff de salvamento, contatos) já tem teste; o que mudou aqui é fiação de
 formulário, verificada por runtime com a rota stubada.
