@@ -443,7 +443,35 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     nativo tinha, o substituto não — e o `FilterSelect` já não tinha nas barras de
     filtro. A troca não regrediu, mas o gap agora atinge formulário.
 
-**TDD-check exemption:** `filter-select.tsx` e `client-form-fields.tsx` são UI. A lógica
+- [x] 2026-08-06 — **Detalhe do cliente: coluna da direita alinhada e sistemas no
+      formato do mockup** (o usuário apontou que o bloco não fechava embaixo e que o
+      card de sistemas estava "simples demais"):
+  - Referência: `mockups/Client-expansion/Tela Detalhes cliente - Dark Mode.png`, onde
+    "Serviços contratados" são **linhas** de largura cheia com marcador e fundo tintado.
+  - `client-systems-card.tsx` ganhou `flex-1` e absorve a altura que sobra na coluna: a
+    base da direita passou a encontrar a base do card de dados (**593 nos dois temas**).
+  - Chips viraram linhas: marcador, `Sistema · <nome>` em `--primary`, estado na segunda
+    linha. Sistema inativo em tom neutro. Contador no cabeçalho (`1`, ou `2/3` com
+    inativo).
+  - Rodapé **"Editar sistemas"** preso com `mt-auto`, no mesmo lugar onde o card de dados
+    põe "Ver filiais" — é o que fecha a altura ganha ao esticar. Abre o dialog de edição
+    que já existia; não é botão morto.
+  - Linha reduzida de 50px para **44px** a pedido.
+  - 🐞 **Achado pela medição:** cortar só o padding (`py-2.5` → `py-1.5`) tirou **2px**,
+    não 8 — a altura vinha do `line-height` padrão (1,5) dos dois parágrafos, não do
+    respiro da caixa. Resolvido com `leading-tight`.
+  - **Decisão registrada:** o mockup mostra "Ativo desde 14 Mar 2024" nos serviços, mas
+    `ClientSystemResponse` só traz `publicId`, `name` e `enabled`. A segunda linha diz
+    só o estado — data de vigência seria dado inventado.
+  - Evidência: `.agent/visual/detalhe-sistemas.md` (3 PNGs; mobile 390px sem scroll
+    horizontal).
+  - `tsc` limpo, `eslint` nos 4 warnings de baseline, 91 testes.
+  - ⚠️ **Não verificado**: card com vários sistemas e com sistema inativo — o banco de
+    dev não tem o caso. O caminho do inativo (tom neutro, contador `n/total`) só passou
+    por inspeção.
+
+**TDD-check exemption:** `filter-select.tsx`, `client-form-fields.tsx` e
+`client-systems-card.tsx` são UI. A lógica
 testável do módulo
 (schema, diff de salvamento, contatos) já tem teste; o que mudou aqui é fiação de
 formulário, verificada por runtime com a rota stubada.

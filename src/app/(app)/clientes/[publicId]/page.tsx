@@ -142,7 +142,7 @@ export default function ClienteDetalhePage({
 
         <div className="flex flex-col gap-5">
           <ClientContractPlaceholder />
-          <ClientSystemsCard client={client} />
+          <ClientSystemsCard client={client} onEdit={() => setShowEdit(true)} />
         </div>
       </div>
 
