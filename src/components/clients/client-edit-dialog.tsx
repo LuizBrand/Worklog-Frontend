@@ -57,7 +57,7 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
   const qc = useQueryClient()
   const matriz = matrizDoCliente(client)
 
-  const { control, register, setValue, handleSubmit, setError, formState: { errors } } =
+  const { control, register, setValue, getValues, handleSubmit, setError, formState: { errors } } =
     useForm<ClientFormValues>({
       resolver: zodResolver(clientFormSchema),
       defaultValues: clientToFormValues(client),
@@ -175,6 +175,7 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
             control={control}
             register={register}
             setValue={setValue}
+            getValues={getValues}
             errors={errors}
             autoFocusName
           />

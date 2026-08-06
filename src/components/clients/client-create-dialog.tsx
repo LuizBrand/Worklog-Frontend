@@ -31,7 +31,7 @@ export interface ClientCreateDialogProps {
 export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
   const qc = useQueryClient()
 
-  const { control, register, setValue, handleSubmit, setError, formState: { errors } } =
+  const { control, register, setValue, getValues, handleSubmit, setError, formState: { errors } } =
     useForm<ClientFormValues>({
       resolver: zodResolver(clientFormSchema),
       defaultValues: emptyClientForm(ClientType.PJ),
@@ -96,6 +96,7 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
             control={control}
             register={register}
             setValue={setValue}
+            getValues={getValues}
             errors={errors}
             autoFocusName
           />

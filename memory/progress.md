@@ -387,6 +387,39 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     `paginasVisiveis` não dependem do tamanho de página. O `tdd-check.sh` avisou por ser
     export em arquivo sem teste vizinho; registrado aqui como refactor-only.
 
+- [x] 2026-08-06 — **Lupa da Receita no CNPJ da filial** — sai das perguntas em aberto
+      do handoff (o print do usuário mostrava, e a sessão anterior não implementou por
+      causa da quota compartilhada). Pedido explicitamente agora.
+  - O lookup do `client-form-fields.tsx` era exclusivo da matriz. Generalizado por
+    índice: a dedupe virou `Map<index, documento>`, a mutation carrega o índice e o
+    spinner gira só no campo clicado (`alvo`). **Não é uma terceira cópia da lógica** —
+    `branch-fields.tsx` (dialogs de filial) já tinha a sua com `preencheCliente`.
+  - **A filial não escreve campos do cliente.** Razão social, nome fantasia e regime são
+    do cliente; consultar uma filial reescreveria o cabeçalho do cadastro. Da filial vêm
+    endereço e contatos.
+  - **Apelido não é preenchido de propósito:** o contrato diz que `nomeFantasia` só vem
+    quando o CNPJ consultado é matriz, então usá-lo como apelido de filial seria
+    enganoso. Cheguei a escrever e removi.
+  - `getValues` entrou como prop (e nos dois dialogs) em vez de `useWatch` por filial:
+    assinar cada documento re-renderizaria o formulário a cada tecla digitada em
+    qualquer CNPJ.
+  - 🐞 `react-hooks/static-components` barrou `LupaReceita`/`AvisoSituacao` declarados
+    dentro do render — componente criado em render perde estado a cada ciclo. Viraram
+    funções que devolvem markup (`lupaReceita(i)`, `avisoSituacao(i)`).
+  - O aviso de situação cadastral deixou de ser global e ficou preso à filial
+    consultada (`{ index, texto }`).
+  - Verificado com a rota **stubada** (quota de 5/min compartilhada): uma única chamada
+    apesar de blur + clique, filial preenchida, campos do cliente intactos, matriz não
+    sobrescreve a filial, reconsulta do mesmo CNPJ não gasta chamada.
+  - Evidência: `.agent/visual/lupa-cnpj-filial.md` (2 PNGs).
+  - `tsc` limpo, `eslint` nos 4 warnings de baseline, 91 testes.
+  - ⚠️ **Não verificado**: consulta real à Receita a partir do campo da filial e erro
+    429/rede na filial (deveria liberar a reconsulta daquele índice).
+
+**TDD-check exemption:** `client-form-fields.tsx` é UI. A lógica testável do módulo
+(schema, diff de salvamento, contatos) já tem teste; o que mudou aqui é fiação de
+formulário, verificada por runtime com a rota stubada.
+
 **Deferidos** (do plano §5): ~~paginação client-side da listagem~~ (feita, server-side); documento no
 `ClientCombobox`; gap do backend de nome duplicado no PATCH.
 

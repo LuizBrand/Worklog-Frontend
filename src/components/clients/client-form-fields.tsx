@@ -2,7 +2,15 @@
 
 import { useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { useFieldArray, useWatch, type Control, type FieldErrors, type UseFormRegister, type UseFormSetValue } from 'react-hook-form'
+import {
+  useFieldArray,
+  useWatch,
+  type Control,
+  type FieldErrors,
+  type UseFormGetValues,
+  type UseFormRegister,
+  type UseFormSetValue,
+} from 'react-hook-form'
 import {
   AlertTriangle,
   Building2,
@@ -34,6 +42,7 @@ export interface ClientFormFieldsProps {
   control: Control<ClientFormValues>
   register: UseFormRegister<ClientFormValues>
   setValue: UseFormSetValue<ClientFormValues>
+  getValues: UseFormGetValues<ClientFormValues>
   errors: FieldErrors<ClientFormValues>
   /** Na edição o tipo já existe e trocá-lo tem efeito colateral em filiais. */
   podeTrocarTipo?: boolean
@@ -55,25 +64,30 @@ export function ClientFormFields({
   control,
   register,
   setValue,
+  getValues,
   errors,
   podeTrocarTipo = true,
   autoFocusName,
 }: ClientFormFieldsProps) {
   const [detalhes, setDetalhes] = useState(false)
-  const [aviso, setAviso] = useState<string | null>(null)
+  /** Aviso de situação cadastral, preso à filial que foi consultada. */
+  const [aviso, setAviso] = useState<{ index: number; texto: string } | null>(null)
+  /** Índice em consulta, para a lupa girar só no campo clicado. */
+  const [alvo, setAlvo] = useState<number | null>(null)
   /**
-   * Último CNPJ consultado. O clique na lupa dispara o `blur` do input antes do
-   * próprio clique; sem isto a mesma consulta ia duas vezes para um endpoint de
-   * 5 chamadas/min compartilhadas pela equipe.
+   * Último CNPJ consultado por filial. O clique na lupa dispara o `blur` do
+   * input antes do próprio clique; sem isto a mesma consulta ia duas vezes para
+   * um endpoint de 5 chamadas/min compartilhadas pela equipe.
    */
-  const consultado = useRef<string | null>(null)
+  const consultado = useRef(new Map<number, string>())
 
   const systemsQ = useFindAllSystems()
 
   // useWatch em vez de watch(): watch() não é memoizável e o React Compiler
-  // desiste de otimizar o componente inteiro.
+  // desiste de otimizar o componente inteiro. O documento sai por `getValues`
+  // no momento da consulta — assinar cada filial re-renderizaria o formulário
+  // a cada tecla digitada em qualquer CNPJ.
   const tipo = useWatch({ control, name: 'tipo' })
-  const documento = useWatch({ control, name: 'branches.0.documento' })
   const sistemas = useWatch({ control, name: 'systemsPublicIds' })
   const isPJ = tipo === ClientType.PJ
   const matrizErrors = errors.branches?.[0]
@@ -82,25 +96,36 @@ export function ClientFormFields({
   const filiais = fields.map((f, i) => ({ ...f, i })).filter((f) => f.i > 0)
 
   const lookupMut = useMutation({
-    mutationFn: (doc: string) => lookupByCnpj({ documento: doc }),
-    onSuccess: (data) => aplicarLookup(data as unknown as CnpjLookupResponse),
-    onError: (err) => {
+    mutationFn: ({ doc }: { doc: string; index: number }) => lookupByCnpj({ documento: doc }),
+    onSuccess: (data, { index }) => aplicarLookup(data as unknown as CnpjLookupResponse, index),
+    onError: (err, { index }) => {
       setAviso(null)
-      consultado.current = null // libera o retry
+      consultado.current.delete(index) // libera o retry
       toast.error(apiErrorToMessage(err, 'Não foi possível consultar o CNPJ'))
     },
+    onSettled: () => setAlvo(null),
   })
 
-  function aplicarLookup(data: CnpjLookupResponse) {
-    if (data.name) setValue('name', data.name, { shouldValidate: true })
-    if (data.nomeFantasia) setValue('nomeFantasia', data.nomeFantasia)
-    // O provedor só afirma regime para MEI e Simples Nacional.
-    if (data.regimeTributario) setValue('regimeTributario', data.regimeTributario)
+  /**
+   * Escreve o retorno da Receita na filial `index`.
+   *
+   * Razão social, nome fantasia e regime são do **cliente**, não da filial: só
+   * a matriz os preenche, senão consultar uma filial reescreveria o cabeçalho
+   * do cadastro. Da filial vêm endereço e contatos, que é o que o CNPJ dela
+   * tem de próprio — o apelido continua sendo escolha de quem cadastra.
+   */
+  function aplicarLookup(data: CnpjLookupResponse, index: number) {
+    if (index === 0) {
+      if (data.name) setValue('name', data.name, { shouldValidate: true })
+      if (data.nomeFantasia) setValue('nomeFantasia', data.nomeFantasia)
+      // O provedor só afirma regime para MEI e Simples Nacional.
+      if (data.regimeTributario) setValue('regimeTributario', data.regimeTributario)
+    }
 
     const filial = data.branches[0]
     if (filial?.address) {
       const a = filial.address
-      setValue('branches.0.address', {
+      setValue(`branches.${index}.address`, {
         cep: a.cep ?? '',
         logradouro: a.logradouro ?? '',
         numero: a.numero ?? '',
@@ -113,10 +138,10 @@ export function ClientFormFields({
     if (filial?.contatos?.length) {
       const email = filial.contatos.find((c) => c.tipo === 'EMAIL')
       const tel = filial.contatos.find((c) => c.tipo !== 'EMAIL')
-      if (email) setValue(`branches.0.contatos.${SLOT_EMAIL}.valor`, email.valor)
+      if (email) setValue(`branches.${index}.contatos.${SLOT_EMAIL}.valor`, email.valor)
       if (tel) {
-        setValue(`branches.0.contatos.${SLOT_TELEFONE}.valor`, tel.valor)
-        setValue(`branches.0.contatos.${SLOT_TELEFONE}.tipo`, tel.tipo)
+        setValue(`branches.${index}.contatos.${SLOT_TELEFONE}.valor`, tel.valor)
+        setValue(`branches.${index}.contatos.${SLOT_TELEFONE}.tipo`, tel.tipo)
       }
     }
 
@@ -124,17 +149,62 @@ export function ClientFormFields({
     setAviso(
       data.situacaoAtiva
         ? null
-        : `Situação na Receita: ${data.situacaoCadastral ?? 'não ativa'}. O cadastro pode seguir.`,
+        : {
+            index,
+            texto: `Situação na Receita: ${data.situacaoCadastral ?? 'não ativa'}. O cadastro pode seguir.`,
+          },
     )
     toast.success('Dados da Receita preenchidos. Confira IE e o contato principal.')
   }
 
-  function consultar() {
-    const doc = stripDocumento(documento ?? '')
+  function consultar(index: number) {
+    const doc = stripDocumento(getValues(`branches.${index}.documento`) ?? '')
     if (!isPJ || !doc || !isValidCnpj(doc)) return
-    if (lookupMut.isPending || consultado.current === doc) return
-    consultado.current = doc
-    lookupMut.mutate(doc)
+    if (lookupMut.isPending || consultado.current.get(index) === doc) return
+    consultado.current.set(index, doc)
+    setAlvo(index)
+    lookupMut.mutate({ doc, index })
+  }
+
+  /**
+   * A lupa dentro do campo de CNPJ. Uma por filial, matriz inclusa.
+   *
+   * Função que devolve markup, não componente: declarado como componente aqui
+   * dentro ele seria recriado a cada render e perderia estado.
+   */
+  function lupaReceita(index: number) {
+    const rodando = alvo === index
+    return (
+      <button
+        type="button"
+        onClick={() => consultar(index)}
+        disabled={lookupMut.isPending}
+        className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)] disabled:cursor-not-allowed disabled:opacity-50"
+        style={{ color: 'var(--wl-text-muted)' }}
+        aria-label={index === 0 ? 'Consultar CNPJ na Receita' : 'Consultar CNPJ da filial na Receita'}
+        title="Consultar na Receita"
+      >
+        {rodando ? <Loader2 size={ICON} className="animate-spin" /> : <Search size={ICON} />}
+      </button>
+    )
+  }
+
+  /** Faixa de situação cadastral da filial consultada. */
+  function avisoSituacao(index: number) {
+    if (aviso?.index !== index) return null
+    return (
+      <div
+        className="flex items-start gap-2 rounded-lg px-3 py-2 text-[12px]"
+        style={{
+          background: 'color-mix(in oklab, var(--status-awaiting) 12%, transparent)',
+          border: '1px solid color-mix(in oklab, var(--status-awaiting) 40%, transparent)',
+          color: 'var(--wl-text)',
+        }}
+      >
+        <AlertTriangle size={ICON} style={{ color: 'var(--status-awaiting)', flexShrink: 0, marginTop: 1 }} />
+        {aviso.texto}
+      </div>
+    )
   }
 
   return (
@@ -172,7 +242,7 @@ export function ClientFormFields({
                 // O documento muda de formato (CPF x CNPJ) e o que estava
                 // digitado não vale mais.
                 setValue('branches.0.documento', '', { shouldValidate: false })
-                consultado.current = null
+                consultado.current.clear()
               }}
               className="relative z-10 flex-1 cursor-pointer rounded-md px-3 py-1.5 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               style={{ color: ativo ? '#fff' : 'var(--wl-text-muted)', background: 'transparent' }}
@@ -200,26 +270,8 @@ export function ClientFormFields({
             icon={<FileText size={ICON} />}
             placeholder={isPJ ? '00.000.000/0000-00' : '000.000.000-00'}
             inputMode={isPJ ? 'text' : 'numeric'}
-            onBlur={isPJ ? consultar : undefined}
-            acao={
-              isPJ ? (
-                <button
-                  type="button"
-                  onClick={consultar}
-                  disabled={lookupMut.isPending}
-                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface)] disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{ color: 'var(--wl-text-muted)' }}
-                  aria-label="Consultar CNPJ na Receita"
-                  title="Consultar na Receita"
-                >
-                  {lookupMut.isPending ? (
-                    <Loader2 size={ICON} className="animate-spin" />
-                  ) : (
-                    <Search size={ICON} />
-                  )}
-                </button>
-              ) : undefined
-            }
+            onBlur={isPJ ? () => consultar(0) : undefined}
+            acao={isPJ ? lupaReceita(0) : undefined}
           />
         </FormField>
 
@@ -256,19 +308,7 @@ export function ClientFormFields({
         </div>
       )}
 
-      {aviso && (
-        <div
-          className="flex items-start gap-2 rounded-lg px-3 py-2 text-[12px]"
-          style={{
-            background: 'color-mix(in oklab, var(--status-awaiting) 12%, transparent)',
-            border: '1px solid color-mix(in oklab, var(--status-awaiting) 40%, transparent)',
-            color: 'var(--wl-text)',
-          }}
-        >
-          <AlertTriangle size={ICON} style={{ color: 'var(--status-awaiting)', flexShrink: 0, marginTop: 1 }} />
-          {aviso}
-        </div>
-      )}
+      {avisoSituacao(0)}
 
       {/* ── Contato ── */}
       <div className="grid grid-cols-2 gap-3">
@@ -432,6 +472,8 @@ export function ClientFormFields({
                           icon={<FileText size={ICON} />}
                           placeholder="CNPJ da filial"
                           aria-label="CNPJ da filial"
+                          onBlur={() => consultar(f.i)}
+                          acao={lupaReceita(f.i)}
                         />
                         {err?.documento?.message && (
                           <p className="mt-1 text-[11px]" style={{ color: 'var(--status-open)' }}>
@@ -490,6 +532,8 @@ export function ClientFormFields({
                         className="uppercase"
                       />
                     </div>
+
+                    {avisoSituacao(f.i)}
                   </div>
 
                   {/* Fora da borda do card: a lixeira age sobre a filial inteira,
