@@ -2,13 +2,14 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Pencil } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import { updateBranch } from '@/api/generated/filiais/filiais'
 import { invalidateBranches, invalidateClient, invalidateClients } from '@/api/invalidate'
 import type { BranchResponse, ClientResponse } from '@/api/clients-contract'
+import { formatDocumento } from '@/lib/documento'
 import type { BranchUpdateRequest as GeneratedBranchUpdateRequest } from '@/api/generated/schemas'
 import { apiErrorToMessage } from '@/lib/api-errors'
 import { applyApiFieldErrors } from '@/lib/field-errors'
@@ -72,8 +73,9 @@ export function BranchEditDialog({ client, branch, onClose }: BranchEditDialogPr
       <Backdrop onClose={onClose} />
       <DialogCard
         title={branch.isMatriz ? 'Editar matriz' : 'Editar filial'}
+        subtitle={branch.apelido || formatDocumento(branch.documento)}
+        icon={<Pencil size={16} />}
         onClose={onClose}
-        wide
         footer={
           <>
             <button

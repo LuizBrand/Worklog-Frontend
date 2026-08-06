@@ -2,18 +2,18 @@
 
 import { useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { useFieldArray, useWatch, type Control, type FieldErrors, type UseFormRegister, type UseFormSetValue } from 'react-hook-form'
-import { AlertTriangle, ChevronDown, ChevronRight, Loader2, Plus, Search, Trash2 } from 'lucide-react'
+import { useWatch, type Control, type FieldErrors, type UseFormRegister, type UseFormSetValue } from 'react-hook-form'
+import { AlertTriangle, Building2, FileText, Loader2, Mail, MapPin, Phone, Search } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { lookupByCnpj } from '@/api/generated/clientes/clientes'
-import { CONTACT_TYPE_LABEL, ClientType } from '@/api/clients-contract'
+import { ClientType } from '@/api/clients-contract'
 import type { CnpjLookupResponse } from '@/api/clients-contract'
 import { apiErrorToMessage } from '@/lib/api-errors'
 import { isValidCnpj, stripDocumento } from '@/lib/documento'
-import { FilterSelect } from '@/components/worklog'
-import { FormField, SectionTitle, inputCls } from './client-form-shell'
-import { emptyContato, type ClientFormValues } from './client-schema'
+import { FormField, IconInput } from './client-form-shell'
+import { SLOT_EMAIL, SLOT_TELEFONE } from './client-contatos'
+import type { ClientFormValues } from './client-schema'
 
 export interface BranchFieldsProps {
   control: Control<ClientFormValues>
@@ -26,6 +26,21 @@ export interface BranchFieldsProps {
   preencheCliente?: boolean
 }
 
+const ICON = 14
+
+/**
+ * Campos de uma filial, na ordem do mockup de "Editar filial": nome, documento
+ * e inscrição, contato, endereço. Mesma linguagem do formulário de cliente —
+ * dois campos por linha, ícone dentro do campo, o resto atrás de "Mais
+ * detalhes".
+ *
+ * Contato e telefone são os dois slots fixos de `client-contatos.ts`, não a
+ * lista livre: `contatos` no PATCH substitui a lista inteira, e é
+ * `emOrdemCompacta` que mantém os contatos extras vivos no array.
+ *
+ * "Regime tributário" não aparece: o mockup o põe na filial, mas regime é campo
+ * do cliente (assunção 6 do plano).
+ */
 export function BranchFields({
   control,
   register,
@@ -34,31 +49,22 @@ export function BranchFields({
   index,
   preencheCliente,
 }: BranchFieldsProps) {
-  const [aberto, setAberto] = useState(false)
+  const [detalhes, setDetalhes] = useState(false)
   const [aviso, setAviso] = useState<string | null>(null)
   /**
    * Último documento consultado.
    *
    * O clique na lupa dispara o `blur` do input antes do próprio clique, então
    * sem isso o mesmo CNPJ ia duas vezes para um endpoint de 5 consultas/min
-   * compartilhadas pela equipe. Também evita reconsultar ao só tabular pelo
-   * campo sem alterar nada.
+   * compartilhadas pela equipe.
    */
   const consultado = useRef<string | null>(null)
 
   const tipo = useWatch({ control, name: 'tipo' })
   const documento = useWatch({ control, name: `branches.${index}.documento` })
-  // Uma assinatura para a lista inteira: hook não pode ser chamado dentro do
-  // map dos contatos.
-  const contatos = useWatch({ control, name: `branches.${index}.contatos` })
   const isPJ = tipo === ClientType.PJ
   const branchErrors = errors.branches?.[index]
 
-  const { fields, append, remove } = useFieldArray({ control, name: `branches.${index}.contatos` })
-
-  // O provedor público limita a 5 consultas/min por IP, compartilhadas pela
-  // equipe: nunca consultar por tecla, só no blur ou no clique da lupa, e só
-  // depois do checksum passar aqui.
   const lookupMut = useMutation({
     mutationFn: (doc: string) => lookupByCnpj({ documento: doc }),
     onSuccess: (data) => aplicarLookup(data as unknown as CnpjLookupResponse),
@@ -79,31 +85,26 @@ export function BranchFields({
     }
 
     const filial = data.branches[0]
-    if (filial) {
-      if (filial.address) {
-        setValue(`branches.${index}.address`, {
-          cep: filial.address.cep ?? '',
-          logradouro: filial.address.logradouro ?? '',
-          numero: filial.address.numero ?? '',
-          complemento: filial.address.complemento ?? '',
-          bairro: filial.address.bairro ?? '',
-          cidade: filial.address.cidade ?? '',
-          uf: filial.address.uf ?? '',
-        })
+    if (filial?.address) {
+      const a = filial.address
+      setValue(`branches.${index}.address`, {
+        cep: a.cep ?? '',
+        logradouro: a.logradouro ?? '',
+        numero: a.numero ?? '',
+        complemento: a.complemento ?? '',
+        bairro: a.bairro ?? '',
+        cidade: a.cidade ?? '',
+        uf: a.uf ?? '',
+      })
+    }
+    if (filial?.contatos?.length) {
+      const email = filial.contatos.find((c) => c.tipo === 'EMAIL')
+      const tel = filial.contatos.find((c) => c.tipo !== 'EMAIL')
+      if (email) setValue(`branches.${index}.contatos.${SLOT_EMAIL}.valor`, email.valor)
+      if (tel) {
+        setValue(`branches.${index}.contatos.${SLOT_TELEFONE}.valor`, tel.valor)
+        setValue(`branches.${index}.contatos.${SLOT_TELEFONE}.tipo`, tel.tipo)
       }
-      if (filial.contatos?.length) {
-        setValue(
-          `branches.${index}.contatos`,
-          filial.contatos.map((c) => ({
-            tipo: c.tipo,
-            valor: c.valor,
-            descricao: c.descricao ?? '',
-            // O provedor nunca marca principal: fica a cargo do usuário.
-            principal: false,
-          })),
-        )
-      }
-      if (filial.address || filial.contatos?.length) setAberto(true)
     }
 
     // CNPJ não ativo é aviso, não bloqueio: o cadastro pode seguir.
@@ -112,13 +113,12 @@ export function BranchFields({
         ? null
         : `Situação na Receita: ${data.situacaoCadastral ?? 'não ativa'}. O cadastro pode seguir.`,
     )
-    toast.success('Dados da Receita preenchidos. Confira IE, IM e o contato principal.')
+    toast.success('Dados da Receita preenchidos. Confira IE e o contato principal.')
   }
 
   function consultar() {
     const doc = stripDocumento(documento ?? '')
-    if (!isPJ || !doc) return
-    if (!isValidCnpj(doc)) return // o schema já sinaliza o erro no campo
+    if (!isPJ || !doc || !isValidCnpj(doc)) return
     if (lookupMut.isPending || consultado.current === doc) return
     consultado.current = doc
     lookupMut.mutate(doc)
@@ -126,34 +126,67 @@ export function BranchFields({
 
   return (
     <div className="space-y-3">
-      <FormField
-        label={isPJ ? 'CNPJ *' : 'CPF *'}
-        error={branchErrors?.documento?.message}
-        hint={isPJ ? 'A consulta à Receita roda ao sair do campo ou no clique da lupa.' : undefined}
-      >
-        <div className="relative">
-          <input
+      {/* A matriz não tem nome próprio: quem a nomeia é a razão social do cliente. */}
+      {index > 0 && (
+        <FormField label="Nome da filial" error={branchErrors?.apelido?.message}>
+          <IconInput
+            {...register(`branches.${index}.apelido`)}
+            icon={<Building2 size={ICON} />}
+            placeholder="Como esta filial é chamada"
+          />
+        </FormField>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label={isPJ ? 'CNPJ' : 'CPF'} error={branchErrors?.documento?.message}>
+          <IconInput
             {...register(`branches.${index}.documento`)}
+            icon={<FileText size={ICON} />}
             placeholder={isPJ ? '00.000.000/0000-00' : '000.000.000-00'}
-            className={inputCls}
             inputMode={isPJ ? 'text' : 'numeric'}
             onBlur={isPJ ? consultar : undefined}
+            acao={
+              isPJ ? (
+                <button
+                  type="button"
+                  onClick={consultar}
+                  disabled={lookupMut.isPending}
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)] disabled:cursor-not-allowed disabled:opacity-50"
+                  style={{ color: 'var(--wl-text-muted)' }}
+                  aria-label="Consultar CNPJ na Receita"
+                  title="Consultar na Receita"
+                >
+                  {lookupMut.isPending ? (
+                    <Loader2 size={ICON} className="animate-spin" />
+                  ) : (
+                    <Search size={ICON} />
+                  )}
+                </button>
+              ) : undefined
+            }
           />
-          {isPJ && (
-            <button
-              type="button"
-              onClick={consultar}
-              disabled={lookupMut.isPending}
-              className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface)] disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ color: 'var(--wl-text-muted)' }}
-              aria-label="Consultar CNPJ na Receita"
-              title="Consultar na Receita"
-            >
-              {lookupMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-            </button>
-          )}
-        </div>
-      </FormField>
+        </FormField>
+
+        {isPJ ? (
+          <FormField label="Inscrição estadual" error={branchErrors?.inscricaoEstadual?.message}>
+            <IconInput
+              {...register(`branches.${index}.inscricaoEstadual`)}
+              placeholder="000.000.000.000"
+            />
+          </FormField>
+        ) : (
+          <FormField
+            label="Telefone"
+            error={branchErrors?.contatos?.[SLOT_TELEFONE]?.valor?.message}
+          >
+            <IconInput
+              {...register(`branches.${index}.contatos.${SLOT_TELEFONE}.valor`)}
+              icon={<Phone size={ICON} />}
+              placeholder="(00) 00000-0000"
+            />
+          </FormField>
+        )}
+      </div>
 
       {aviso && (
         <div
@@ -164,193 +197,88 @@ export function BranchFields({
             color: 'var(--wl-text)',
           }}
         >
-          <AlertTriangle size={14} style={{ color: 'var(--status-awaiting)', flexShrink: 0, marginTop: 1 }} />
+          <AlertTriangle size={ICON} style={{ color: 'var(--status-awaiting)', flexShrink: 0, marginTop: 1 }} />
           {aviso}
         </div>
       )}
 
-      {index > 0 && (
-        <FormField label="Apelido" error={branchErrors?.apelido?.message}>
-          <input
-            {...register(`branches.${index}.apelido`)}
-            placeholder="Como esta filial é chamada"
-            className={inputCls}
+      <div className="grid grid-cols-2 gap-3">
+        <FormField label="Contato" error={branchErrors?.contatos?.[SLOT_EMAIL]?.valor?.message}>
+          <IconInput
+            {...register(`branches.${index}.contatos.${SLOT_EMAIL}.valor`)}
+            icon={<Mail size={ICON} />}
+            placeholder="email@empresa.com"
+            type="email"
           />
         </FormField>
-      )}
+        {isPJ && (
+          <FormField label="Telefone" error={branchErrors?.contatos?.[SLOT_TELEFONE]?.valor?.message}>
+            <IconInput
+              {...register(`branches.${index}.contatos.${SLOT_TELEFONE}.valor`)}
+              icon={<Phone size={ICON} />}
+              placeholder="(00) 00000-0000"
+            />
+          </FormField>
+        )}
+      </div>
+
+      <div className="grid grid-cols-[1fr_110px] gap-3">
+        <FormField label="Endereço" error={branchErrors?.address?.logradouro?.message}>
+          <IconInput
+            {...register(`branches.${index}.address.logradouro`)}
+            icon={<MapPin size={ICON} />}
+            placeholder="Rua, avenida…"
+          />
+        </FormField>
+        <FormField label="Número" error={branchErrors?.address?.numero?.message}>
+          <IconInput {...register(`branches.${index}.address.numero`)} placeholder="1200" />
+        </FormField>
+      </div>
+
+      <div className="grid grid-cols-[1fr_110px] gap-3">
+        <FormField label="Cidade" error={branchErrors?.address?.cidade?.message}>
+          <IconInput {...register(`branches.${index}.address.cidade`)} placeholder="São Paulo" />
+        </FormField>
+        <FormField label="UF" error={branchErrors?.address?.uf?.message}>
+          <IconInput
+            {...register(`branches.${index}.address.uf`)}
+            maxLength={2}
+            placeholder="SP"
+            className="uppercase"
+          />
+        </FormField>
+      </div>
 
       <button
         type="button"
-        onClick={() => setAberto((v) => !v)}
-        className="flex cursor-pointer items-center gap-1 text-[12px] font-medium transition-opacity hover:opacity-70"
+        onClick={() => setDetalhes((v) => !v)}
+        className="cursor-pointer text-[12px] font-medium transition-opacity hover:opacity-70"
         style={{ color: 'var(--primary)' }}
       >
-        {aberto ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-        Mais detalhes
+        {detalhes ? 'Menos detalhes' : 'Mais detalhes'}
       </button>
 
-      {aberto && (
-        <div className="space-y-3 pt-1">
-          {isPJ && (
-            <div className="grid grid-cols-2 gap-3">
-              <FormField label="Inscrição Estadual" error={branchErrors?.inscricaoEstadual?.message}>
-                <input {...register(`branches.${index}.inscricaoEstadual`)} className={inputCls} />
-              </FormField>
-              <FormField label="Inscrição Municipal" error={branchErrors?.inscricaoMunicipal?.message}>
-                <input {...register(`branches.${index}.inscricaoMunicipal`)} className={inputCls} />
-              </FormField>
-            </div>
-          )}
-
-          <SectionTitle>Endereço</SectionTitle>
-
+      {detalhes && (
+        <div className="space-y-3 rounded-lg p-3" style={{ border: '1px solid var(--wl-border)' }}>
           <div className="grid grid-cols-3 gap-3">
             <FormField label="CEP" error={branchErrors?.address?.cep?.message}>
-              <input
+              <IconInput
                 {...register(`branches.${index}.address.cep`)}
                 placeholder="00000-000"
-                className={inputCls}
                 inputMode="numeric"
               />
             </FormField>
-            <div className="col-span-2">
-              <FormField label="Logradouro" error={branchErrors?.address?.logradouro?.message}>
-                <input {...register(`branches.${index}.address.logradouro`)} className={inputCls} />
-              </FormField>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <FormField label="Número" error={branchErrors?.address?.numero?.message}>
-              <input {...register(`branches.${index}.address.numero`)} className={inputCls} />
-            </FormField>
-            <div className="col-span-2">
-              <FormField label="Complemento" error={branchErrors?.address?.complemento?.message}>
-                <input {...register(`branches.${index}.address.complemento`)} className={inputCls} />
-              </FormField>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
             <FormField label="Bairro" error={branchErrors?.address?.bairro?.message}>
-              <input {...register(`branches.${index}.address.bairro`)} className={inputCls} />
+              <IconInput {...register(`branches.${index}.address.bairro`)} />
             </FormField>
-            <FormField label="Cidade" error={branchErrors?.address?.cidade?.message}>
-              <input {...register(`branches.${index}.address.cidade`)} className={inputCls} />
-            </FormField>
-            <FormField label="UF" error={branchErrors?.address?.uf?.message}>
-              <input
-                {...register(`branches.${index}.address.uf`)}
-                maxLength={2}
-                placeholder="SP"
-                className={`${inputCls} uppercase`}
-              />
+            <FormField label="Complemento" error={branchErrors?.address?.complemento?.message}>
+              <IconInput {...register(`branches.${index}.address.complemento`)} />
             </FormField>
           </div>
-
-          <SectionTitle
-            action={
-              <button
-                type="button"
-                onClick={() => append(emptyContato())}
-                className="flex cursor-pointer items-center gap-1 text-[12px] font-medium transition-opacity hover:opacity-70"
-                style={{ color: 'var(--primary)' }}
-              >
-                <Plus size={12} /> Contato
-              </button>
-            }
-          >
-            Contatos
-          </SectionTitle>
-
-          {typeof branchErrors?.contatos?.message === 'string' && (
-            <p className="text-[11px]" style={{ color: 'var(--status-open)' }}>
-              {branchErrors.contatos.message}
-            </p>
-          )}
-
-          {fields.length === 0 ? (
-            <p className="text-[12px]" style={{ color: 'var(--wl-text-dim)' }}>
-              Nenhum contato. O contato principal aparece na listagem e no detalhe.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {/*
-                Cada controle vai dentro de um wrapper com largura própria: o
-                `w-full` do `inputCls` não pode ser sobrescrito por um `w-28`
-                na mesma string (mesma especificidade, ordem do CSS decide) —
-                o campo do valor colapsava para 26px por causa disso.
-              */}
-              {fields.map((field, j) => (
-                <div
-                  key={field.id}
-                  className="flex flex-col gap-2 rounded-lg p-2 sm:flex-row sm:items-start sm:bg-transparent sm:p-0"
-                  style={{ background: 'var(--wl-surface-2)' }}
-                >
-                  <div className="sm:w-28 sm:shrink-0">
-                    <FilterSelect
-                      variant="field"
-                      value={contatos?.[j]?.tipo ?? 'EMAIL'}
-                      onChange={(v) =>
-                        setValue(
-                          `branches.${index}.contatos.${j}.tipo`,
-                          v as ClientFormValues['branches'][number]['contatos'][number]['tipo'],
-                        )
-                      }
-                      options={Object.entries(CONTACT_TYPE_LABEL).map(([value, label]) => ({ value, label }))}
-                    />
-                  </div>
-
-                  <div className="min-w-0 space-y-1 sm:flex-1">
-                    <input
-                      {...register(`branches.${index}.contatos.${j}.valor`)}
-                      placeholder="E-mail ou telefone"
-                      className={inputCls}
-                     
-                    />
-                    {branchErrors?.contatos?.[j]?.valor?.message && (
-                      <p className="text-[11px]" style={{ color: 'var(--status-open)' }}>
-                        {branchErrors.contatos[j]?.valor?.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="min-w-0 sm:w-32 sm:shrink-0">
-                    <input
-                      {...register(`branches.${index}.contatos.${j}.descricao`)}
-                      placeholder="Descrição"
-                      className={inputCls}
-                     
-                    />
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-2">
-                    <label
-                      className="flex h-[34px] cursor-pointer items-center gap-1.5 text-[12px]"
-                      style={{ color: 'var(--wl-text-muted)' }}
-                      title="Contato principal"
-                    >
-                      <input
-                        type="checkbox"
-                        {...register(`branches.${index}.contatos.${j}.principal`)}
-                        className="cursor-pointer accent-[var(--primary)]"
-                      />
-                      Principal
-                    </label>
-
-                    <button
-                      type="button"
-                      onClick={() => remove(j)}
-                      className="flex h-[34px] w-8 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface)]"
-                      style={{ color: 'var(--wl-text-muted)' }}
-                      aria-label="Remover contato"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {isPJ && (
+            <FormField label="Inscrição municipal" error={branchErrors?.inscricaoMunicipal?.message}>
+              <IconInput {...register(`branches.${index}.inscricaoMunicipal`)} />
+            </FormField>
           )}
         </div>
       )}

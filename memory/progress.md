@@ -493,8 +493,34 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     numa altura máxima com rolagem interna; descartado agora porque esconderia parte da
     lista sem necessidade.
 
+- [x] 2026-08-06 — **Editar filial: um dialog só e formulário no padrão do mockup** (o
+      usuário viu dois modais empilhados e o formulário cru):
+  - **Empilhamento:** a lista de filiais continuava montada atrás da edição — dois cards
+    sobrepostos, cada um com seu X, e o "Fechar" da lista aparecendo por baixo. Agora a
+    lista sai de cena enquanto a edição está aberta (`showBranches && !editBranch`) e
+    volta ao cancelar.
+  - **`branch-fields.tsx` reescrito** na linguagem do formulário de cliente: nome da
+    filial em largura total, CNPJ (com lupa) ‖ IE, contato ‖ telefone, endereço ‖ número,
+    cidade ‖ UF. CEP, bairro, complemento e inscrição municipal em "Mais detalhes".
+    Antes, abrir "Editar matriz" mostrava **um campo só** — todo o resto estava colapsado.
+  - **Contato e telefone viraram os dois slots fixos** de `client-contatos.ts`, no lugar
+    da lista livre com `<select>` de tipo. Os extras seguem preservados por
+    `emOrdemCompacta` — `contatos` no PATCH substitui a lista inteira.
+  - Header do dialog com ícone e subtítulo; largura de `wide` (max-w-2xl) para os mesmos
+    **540px** do formulário de cliente.
+  - Medido nos dois temas: 1 card e 1 backdrop na edição (eram 2); os 8 campos visíveis
+    sem abrir "Mais detalhes"; CNPJ/IE na mesma linha (dy=0); Número e UF alinhados em
+    859; cancelar devolve para a lista. Cadastro de filial nova (mesmo componente)
+    conferido dentro da lista.
+  - Evidência: `.agent/visual/editar-filial.md` (3 PNGs).
+  - `tsc` limpo, `eslint` nos 4 warnings de baseline, 91 testes.
+  - ⚠️ **Não verificado**: o PATCH depois do redesenho (o caminho não mudou, mas não
+    repeti a captura de rede) e filial com **3+ contatos**, o caso em que
+    `emOrdemCompacta` precisa manter o extra fora dos dois slots — o banco de dev não tem
+    esse dado.
+
 **TDD-check exemption:** `filter-select.tsx`, `client-form-fields.tsx`,
-`client-systems-card.tsx` e `client-data-card.tsx` são UI. A lógica
+`client-systems-card.tsx`, `client-data-card.tsx` e `branch-fields.tsx` são UI. A lógica
 testável do módulo
 (schema, diff de salvamento, contatos) já tem teste; o que mudou aqui é fiação de
 formulário, verificada por runtime com a rota stubada.

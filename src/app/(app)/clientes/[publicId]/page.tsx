@@ -153,7 +153,9 @@ export default function ClienteDetalhePage({
 
       {showEdit && <ClientEditDialog client={client} onClose={() => setShowEdit(false)} />}
 
-      {showBranches && (
+      {/* Enquanto a edição de uma filial está aberta, a lista sai de cena: os
+          dois dialogs juntos empilhavam card sobre card, cada um com seu X. */}
+      {showBranches && !editBranch && (
         <BranchesDialog
           client={client}
           isAdmin={isAdmin}
