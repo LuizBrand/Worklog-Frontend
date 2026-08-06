@@ -141,6 +141,10 @@ export type ContactFormValues = BranchFormValues['contatos'][number]
 
 // ── Valores iniciais ──────────────────────────────────────────────────────────
 
+export function emptyContato(): ContactFormValues {
+  return { tipo: 'EMAIL', valor: '', descricao: '', principal: false }
+}
+
 export function emptyBranch(): BranchFormValues {
   return {
     documento: '',
@@ -157,12 +161,10 @@ export function emptyBranch(): BranchFormValues {
       cidade: '',
       uf: '',
     },
-    contatos: [],
+    // Dois slots fixos, "Contato" e "Telefone", que o formulário compacto
+    // renderiza. Vazios somem do payload — ver `toContactRequests`.
+    contatos: [emptyContato(), { ...emptyContato(), tipo: 'CELULAR' }],
   }
-}
-
-export function emptyContato(): ContactFormValues {
-  return { tipo: 'EMAIL', valor: '', descricao: '', principal: false }
 }
 
 export function emptyClientForm(tipo: ClientType): ClientFormValues {

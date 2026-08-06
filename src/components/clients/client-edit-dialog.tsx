@@ -2,7 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Info, Loader2 } from 'lucide-react'
+import { Info, Loader2, Pencil } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -20,7 +20,6 @@ import { applyApiFieldErrors } from '@/lib/field-errors'
 import { apiErrorToMessage } from '@/lib/api-errors'
 import { Backdrop, DialogCard } from './client-form-shell'
 import { ClientFormFields } from './client-form-fields'
-import { BranchFields } from './branch-fields'
 import { clientFormSchema, type ClientFormValues } from './client-schema'
 import {
   clientToFormValues,
@@ -143,8 +142,9 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
       <Backdrop onClose={onClose} />
       <DialogCard
         title="Editar cliente"
+        subtitle={client.name}
+        icon={<Pencil size={15} />}
         onClose={onClose}
-        wide
         footer={
           <>
             <button
@@ -168,30 +168,16 @@ export function ClientEditDialog({ client, onClose }: ClientEditDialogProps) {
           </>
         }
       >
-        <form id="client-edit-form" onSubmit={handleSubmit((v) => saveMut.mutate(v))} className="space-y-4">
-          <ClientFormFields control={control} register={register} setValue={setValue} errors={errors} autoFocusName />
-
-          {matriz && (
-            <div className="space-y-3 rounded-lg p-3" style={{ border: '1px solid var(--wl-border)' }}>
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--wl-text-muted)' }}>
-                Matriz
-              </p>
-              <BranchFields
-                control={control}
-                register={register}
-                setValue={setValue}
-                errors={errors}
-                index={0}
-                preencheCliente
-              />
-            </div>
-          )}
-
-          {typeof errors.branches?.message === 'string' && (
-            <p className="text-[11px]" style={{ color: 'var(--status-open)' }}>
-              {errors.branches.message}
-            </p>
-          )}
+        <form id="client-edit-form" onSubmit={handleSubmit((v) => saveMut.mutate(v))} className="space-y-3">
+          {/* Filiais existentes se editam no dialog de filiais: aqui cada uma
+              seria um POST/PATCH próprio, e o erro parcial ficaria opaco. */}
+          <ClientFormFields
+            control={control}
+            register={register}
+            setValue={setValue}
+            errors={errors}
+            autoFocusName
+          />
 
           <p className="flex items-start gap-1.5 text-[11px]" style={{ color: 'var(--wl-text-dim)' }}>
             <Info size={12} style={{ flexShrink: 0, marginTop: 1 }} />

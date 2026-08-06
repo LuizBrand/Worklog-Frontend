@@ -11,7 +11,7 @@ import { CONTACT_TYPE_LABEL, ClientType } from '@/api/clients-contract'
 import type { CnpjLookupResponse } from '@/api/clients-contract'
 import { apiErrorToMessage } from '@/lib/api-errors'
 import { isValidCnpj, stripDocumento } from '@/lib/documento'
-import { FormField, SectionTitle, inputCls, inputStyle } from './client-form-shell'
+import { FormField, SectionTitle, inputCls, selectCls } from './client-form-shell'
 import { emptyContato, type ClientFormValues } from './client-schema'
 
 export interface BranchFieldsProps {
@@ -132,7 +132,6 @@ export function BranchFields({
             {...register(`branches.${index}.documento`)}
             placeholder={isPJ ? '00.000.000/0000-00' : '000.000.000-00'}
             className={inputCls}
-            style={inputStyle}
             inputMode={isPJ ? 'text' : 'numeric'}
             onBlur={isPJ ? consultar : undefined}
           />
@@ -172,7 +171,6 @@ export function BranchFields({
             {...register(`branches.${index}.apelido`)}
             placeholder="Como esta filial é chamada"
             className={inputCls}
-            style={inputStyle}
           />
         </FormField>
       )}
@@ -192,10 +190,10 @@ export function BranchFields({
           {isPJ && (
             <div className="grid grid-cols-2 gap-3">
               <FormField label="Inscrição Estadual" error={branchErrors?.inscricaoEstadual?.message}>
-                <input {...register(`branches.${index}.inscricaoEstadual`)} className={inputCls} style={inputStyle} />
+                <input {...register(`branches.${index}.inscricaoEstadual`)} className={inputCls} />
               </FormField>
               <FormField label="Inscrição Municipal" error={branchErrors?.inscricaoMunicipal?.message}>
-                <input {...register(`branches.${index}.inscricaoMunicipal`)} className={inputCls} style={inputStyle} />
+                <input {...register(`branches.${index}.inscricaoMunicipal`)} className={inputCls} />
               </FormField>
             </div>
           )}
@@ -208,34 +206,33 @@ export function BranchFields({
                 {...register(`branches.${index}.address.cep`)}
                 placeholder="00000-000"
                 className={inputCls}
-                style={inputStyle}
                 inputMode="numeric"
               />
             </FormField>
             <div className="col-span-2">
               <FormField label="Logradouro" error={branchErrors?.address?.logradouro?.message}>
-                <input {...register(`branches.${index}.address.logradouro`)} className={inputCls} style={inputStyle} />
+                <input {...register(`branches.${index}.address.logradouro`)} className={inputCls} />
               </FormField>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <FormField label="Número" error={branchErrors?.address?.numero?.message}>
-              <input {...register(`branches.${index}.address.numero`)} className={inputCls} style={inputStyle} />
+              <input {...register(`branches.${index}.address.numero`)} className={inputCls} />
             </FormField>
             <div className="col-span-2">
               <FormField label="Complemento" error={branchErrors?.address?.complemento?.message}>
-                <input {...register(`branches.${index}.address.complemento`)} className={inputCls} style={inputStyle} />
+                <input {...register(`branches.${index}.address.complemento`)} className={inputCls} />
               </FormField>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <FormField label="Bairro" error={branchErrors?.address?.bairro?.message}>
-              <input {...register(`branches.${index}.address.bairro`)} className={inputCls} style={inputStyle} />
+              <input {...register(`branches.${index}.address.bairro`)} className={inputCls} />
             </FormField>
             <FormField label="Cidade" error={branchErrors?.address?.cidade?.message}>
-              <input {...register(`branches.${index}.address.cidade`)} className={inputCls} style={inputStyle} />
+              <input {...register(`branches.${index}.address.cidade`)} className={inputCls} />
             </FormField>
             <FormField label="UF" error={branchErrors?.address?.uf?.message}>
               <input
@@ -243,7 +240,6 @@ export function BranchFields({
                 maxLength={2}
                 placeholder="SP"
                 className={`${inputCls} uppercase`}
-                style={inputStyle}
               />
             </FormField>
           </div>
@@ -290,8 +286,8 @@ export function BranchFields({
                   <div className="sm:w-28 sm:shrink-0">
                     <select
                       {...register(`branches.${index}.contatos.${j}.tipo`)}
-                      className={`${inputCls} cursor-pointer`}
-                      style={inputStyle}
+                      className={selectCls}
+                     
                     >
                       {Object.entries(CONTACT_TYPE_LABEL).map(([value, label]) => (
                         <option key={value} value={value}>
@@ -306,7 +302,7 @@ export function BranchFields({
                       {...register(`branches.${index}.contatos.${j}.valor`)}
                       placeholder="E-mail ou telefone"
                       className={inputCls}
-                      style={inputStyle}
+                     
                     />
                     {branchErrors?.contatos?.[j]?.valor?.message && (
                       <p className="text-[11px]" style={{ color: 'var(--status-open)' }}>
@@ -320,7 +316,7 @@ export function BranchFields({
                       {...register(`branches.${index}.contatos.${j}.descricao`)}
                       placeholder="Descrição"
                       className={inputCls}
-                      style={inputStyle}
+                     
                     />
                   </div>
 

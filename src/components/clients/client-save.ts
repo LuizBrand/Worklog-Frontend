@@ -19,6 +19,7 @@ import {
   type RegimeTributario,
 } from '@/api/clients-contract'
 import { formatDocumento, stripDocumento } from '@/lib/documento'
+import { emOrdemCompacta } from './client-contatos'
 import {
   emptyBranch,
   toAddressRequest,
@@ -51,12 +52,17 @@ export function branchToFormValues(branch: BranchResponse): BranchFormValues {
           uf: branch.address.uf ?? '',
         }
       : vazio.address,
-    contatos: branch.contatos.map((c) => ({
-      tipo: c.tipo,
-      valor: c.valor,
-      descricao: c.descricao ?? '',
-      principal: c.principal,
-    })),
+    // Reordenado para os dois slots do formulário compacto. Os extras vêm
+    // depois e continuam no array — `contatos` no PATCH substitui a lista
+    // inteira, e um contato que sumisse daqui seria apagado no servidor.
+    contatos: emOrdemCompacta(
+      branch.contatos.map((c) => ({
+        tipo: c.tipo,
+        valor: c.valor,
+        descricao: c.descricao ?? '',
+        principal: c.principal,
+      })),
+    ),
   }
 }
 

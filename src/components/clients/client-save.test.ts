@@ -74,7 +74,9 @@ describe('clientToFormValues', () => {
     expect(values.branches[0].apelido).toBe('')
     expect(values.branches[0].inscricaoEstadual).toBe('')
     expect(values.branches[0].address).toEqual(emptyBranch().address)
-    expect(values.branches[0].contatos).toEqual([])
+    // Dois slots vazios ("Contato" e "Telefone") em vez de lista vazia: é o que
+    // o formulário compacto renderiza. Vazios não vão para o payload.
+    expect(values.branches[0].contatos).toEqual(emptyBranch().contatos)
   })
 
   it('põe a matriz primeiro', () => {

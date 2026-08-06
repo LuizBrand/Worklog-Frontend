@@ -295,6 +295,48 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
     - Evidência: `.agent/visual/header-listagem-mockup.md` (3 PNGs; posição do
       contador e alinhamento da busca verificados por `boundingBox`).
 
+- [x] 2026-08-04 — **Formulário de cliente redesenhado para o mockup** (criar e editar):
+  - `client-form-fields.tsx` reescrito: passou a ser o formulário inteiro, na ordem do
+    mockup (tipo → identificação → contato → endereço → sistemas → filiais), **dois
+    campos por linha**. A caixa "MATRIZ" separada sumiu — os campos da matriz *são* os
+    campos do formulário. `BranchFields` continua existindo, mas só para os dialogs de
+    filial.
+  - `components/worklog/multi-select.tsx` (novo) — campo que abre a lista de opções,
+    no lugar da grade de checkboxes. Portal, como o `ClientCombobox`, para a lista não
+    ser cortada pelo `overflow` do dialog; e `Escape` fecha só a lista, não o dialog.
+  - `client-form-shell.tsx` — header com ícone, título e subtítulo; **sem as linhas
+    divisórias** que eu tinha posto (o mockup separa por espaço); `IconInput` com ícone
+    dentro do campo; label em caixa normal; dialog de `max-w-2xl` para **540px**.
+  - **Filiais entram no create** (como no mockup): lá tudo vai num `POST` atômico. Na
+    edição continuam no dialog de filiais, onde cada uma é uma chamada própria.
+  - 🐞 **Risco de perda de dado, coberto por teste ANTES da UI:** "Contato" e "Telefone"
+    são dois slots fixos sobre uma lista livre, e `contatos` no PATCH **substitui a
+    lista inteira**. `client-contatos.ts` + **7 testes** garantem que os contatos extras
+    continuam no array depois dos dois slots — sem isso, o terceiro contato de uma
+    filial seria apagado no primeiro salvamento.
+  - **Desvio registrado:** o campo compacto "Endereço" grava em `logradouro`. O mockup
+    tem uma linha só; a API tem endereço estruturado. Quem quiser os campos separados
+    abre "Mais detalhes". Preenchendo só a linha, cidade e UF ficam dentro de
+    `logradouro`.
+  - Evidência: `.agent/visual/form-cliente-mockup.md` (7 PNGs; cada item pedido
+    verificado por medição — 0 checkboxes, dialog de 540px, campos na mesma linha por
+    diferença de topo < 4px, `padding-left: 36px` dos ícones, bordas 0px no card).
+  - `tsc` limpo, `eslint` nos 5 warnings pré-existentes, **91 testes**.
+  - **Ajustes seguintes, no mesmo dia:**
+    - Toggle PJ/PF virou um `radiogroup` de bloco único com pastilha que desliza
+      (`transform` + `0.2s`, desligada por `motion-reduce`).
+    - **Endereço saiu de "Mais detalhes"**: rua, número, cidade e UF são campos
+      próprios no corpo do formulário. Isso **corrige o desvio anterior** de gravar o
+      endereço inteiro dentro de `logradouro`. Em "Mais detalhes" sobraram CEP,
+      bairro, complemento e inscrição municipal.
+    - Card de filial completo (nome, CNPJ, IE, e-mail, telefone, rua, número, cidade,
+      UF), como o print do usuário.
+    - **Não implementados, de propósito:** lupa de Receita no CNPJ da filial (mexe em
+      quota e não foi pedido) e "Regime tributário" por filial (não existe na API —
+      seria campo que não salva).
+    - Evidência: `.agent/visual/form-filial-toggle-endereco.md` (5 PNGs; deslize da
+      pastilha medido por `transform`, campos por `aria-label`, payload conferido).
+
 **Deferidos** (do plano §5): ~~paginação client-side da listagem~~ (feita, server-side); documento no
 `ClientCombobox`; gap do backend de nome duplicado no PATCH.
 

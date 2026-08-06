@@ -1,8 +1,8 @@
 'use client'
 
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Users } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -14,7 +14,6 @@ import { apiErrorToMessage } from '@/lib/api-errors'
 import type { ClientRequest as GeneratedClientRequest } from '@/api/generated/schemas'
 import { Backdrop, DialogCard } from './client-form-shell'
 import { ClientFormFields } from './client-form-fields'
-import { BranchFields } from './branch-fields'
 import { clientFormSchema, emptyClientForm, toClientRequest, type ClientFormValues } from './client-schema'
 
 export interface ClientCreateDialogProps {
@@ -22,10 +21,12 @@ export interface ClientCreateDialogProps {
 }
 
 /**
- * Criação: um `POST /clients/` só, com a matriz aninhada.
+ * Criação: um `POST /clients/` só, com a matriz e as filiais aninhadas.
  *
- * Filiais além da matriz não entram aqui — o mockup as trata na tela de filiais,
- * e criar tudo de uma vez tornaria o erro parcial impossível de explicar.
+ * Filiais entram aqui (como no mockup) porque no create tudo vai num POST
+ * atômico — ou grava inteiro, ou não grava nada. Na **edição** é diferente: lá
+ * cada filial nova é um POST próprio, e por isso ela mora no dialog de filiais,
+ * onde o erro parcial tem como ser explicado.
  */
 export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
   const qc = useQueryClient()
@@ -35,8 +36,6 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
       resolver: zodResolver(clientFormSchema),
       defaultValues: emptyClientForm(ClientType.PJ),
     })
-
-  const tipo = useWatch({ control, name: 'tipo' })
 
   const createMut = useSaveClient({
     mutation: {
@@ -66,8 +65,9 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
       <Backdrop onClose={onClose} />
       <DialogCard
         title="Novo cliente"
+        subtitle="Cadastre um cliente PJ ou PF"
+        icon={<Users size={16} />}
         onClose={onClose}
-        wide
         footer={
           <>
             <button
@@ -86,12 +86,12 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
               style={{ background: 'var(--primary)', color: '#fff' }}
             >
               {createMut.isPending && <Loader2 size={13} className="animate-spin" />}
-              Criar cliente
+              Salvar
             </button>
           </>
         }
       >
-        <form id="client-create-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form id="client-create-form" onSubmit={handleSubmit(onSubmit)}>
           <ClientFormFields
             control={control}
             register={register}
@@ -99,26 +99,6 @@ export function ClientCreateDialog({ onClose }: ClientCreateDialogProps) {
             errors={errors}
             autoFocusName
           />
-
-          <div className="space-y-3 rounded-lg p-3" style={{ border: '1px solid var(--wl-border)' }}>
-            <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--wl-text-muted)' }}>
-              {tipo === ClientType.PJ ? 'Matriz' : 'Dados'}
-            </p>
-            <BranchFields
-              control={control}
-              register={register}
-              setValue={setValue}
-              errors={errors}
-              index={0}
-              preencheCliente
-            />
-          </div>
-
-          {typeof errors.branches?.message === 'string' && (
-            <p className="text-[11px]" style={{ color: 'var(--status-open)' }}>
-              {errors.branches.message}
-            </p>
-          )}
         </form>
       </DialogCard>
     </>
