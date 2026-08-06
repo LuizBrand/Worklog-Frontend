@@ -352,6 +352,29 @@ Contrato: `docs/api/CONTRATO-CLIENTES.md` (autoridade máxima).
       - Evidência: `.agent/visual/campos-fundo-borda.md` (3 PNGs; fundo e borda por
         `getComputedStyle`, em dark e light, nos quatro formulários).
 
+- [x] 2026-08-06 — **Três correções de alinhamento no formulário de cliente** (pedidas
+      pelo usuário na sessão anterior, especificadas no `handoff-2026-08-05.md` §5.1).
+      Só `client-form-fields.tsx`:
+  - **Número e UF da matriz alinhados.** As duas linhas usavam templates diferentes
+    (`grid-cols-[1fr_100px]` no endereço, `[1fr_80px]` na cidade), o que punha 20px de
+    diferença na borda **esquerda** — terminavam alinhadas, e era isso que enganava.
+    Agora as duas são `[1fr_110px]`: `numero.x === uf.x === 859`, ambas 110px.
+  - **UF da filial desceu para a linha da Cidade.** Era `[1fr_80px_80px]` (rua ‖ nº ‖ UF)
+    com a cidade sozinha embaixo; virou duas linhas de `[1fr_80px]`.
+  - **Lixeira da filial vermelha e fora do bloco.** Saiu de dentro do card (onde dividia
+    a linha com "Nome da filial", em `--wl-text-muted`) para fora da borda, em
+    `--wl-danger`. O card virou `flex` com o botão irmão; "Nome da filial" ficou em
+    largura total (432px). `mt-3` no botão compensa o `p-3` do card — dy final de 1px.
+  - Verificado por medição, não por olho: `numero.x === uf.x` nos dois temas, dy=0 nas
+    linhas da filial, `lixeira.x=937` contra o card terminando em `929`, e a cor do
+    botão igual a `--wl-danger` resolvido em runtime (dark `rgb(226,86,78)`, light
+    `rgb(214,69,61)`).
+  - Evidência: `.agent/visual/form-ajustes-alinhamento-lixeira.md` (5 PNGs).
+  - `tsc` limpo, `eslint` nos 4 warnings de baseline, 91 testes passando.
+  - ⚠️ Achado de passagem, **não corrigido**: `DialogCard` não tem `role="dialog"` — o
+    script de verificação teve que usar seletores de nível de página. Lacuna de
+    acessibilidade pré-existente, fora do escopo do ajuste.
+
 **Deferidos** (do plano §5): ~~paginação client-side da listagem~~ (feita, server-side); documento no
 `ClientCombobox`; gap do backend de nome duplicado no PATCH.
 

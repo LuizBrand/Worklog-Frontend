@@ -308,7 +308,7 @@ export function ClientFormFields({
         a linha única gravava o endereço inteiro dentro de `logradouro`, o que
         deixava cidade e UF sem os campos que a API tem para elas.
       */}
-      <div className="grid grid-cols-[1fr_100px] gap-3">
+      <div className="grid grid-cols-[1fr_110px] gap-3">
         <FormField label="Endereço" error={matrizErrors?.address?.logradouro?.message}>
           <IconInput
             {...register('branches.0.address.logradouro')}
@@ -321,7 +321,9 @@ export function ClientFormFields({
         </FormField>
       </div>
 
-      <div className="grid grid-cols-[1fr_80px] gap-3">
+      {/* Mesmo template da linha acima: com [1fr_100px] e [1fr_80px] a borda
+          esquerda de Número e UF ficava 20px fora de prumo. */}
+      <div className="grid grid-cols-[1fr_110px] gap-3">
         <FormField label="Cidade" error={matrizErrors?.address?.cidade?.message}>
           <IconInput {...register('branches.0.address.cidade')} placeholder="São Paulo" />
         </FormField>
@@ -405,13 +407,12 @@ export function ClientFormFields({
             filiais.map((f) => {
               const err = errors.branches?.[f.i]
               return (
-                <div
-                  key={f.id}
-                  className="space-y-2 rounded-lg p-3"
-                  style={{ border: '1px solid var(--wl-border)' }}
-                >
-                  <div className="flex items-start gap-2">
-                    <div className="min-w-0 flex-1">
+                <div key={f.id} className="flex items-start gap-2">
+                  <div
+                    className="min-w-0 flex-1 space-y-2 rounded-lg p-3"
+                    style={{ border: '1px solid var(--wl-border)' }}
+                  >
+                    <div>
                       <IconInput
                         {...register(`branches.${f.i}.apelido`)}
                         placeholder="Nome da filial"
@@ -423,80 +424,85 @@ export function ClientFormFields({
                         </p>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => remove(f.i)}
-                      className="flex h-[34px] w-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
-                      style={{ color: 'var(--wl-text-muted)' }}
-                      aria-label="Remover filial"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <IconInput
+                          {...register(`branches.${f.i}.documento`)}
+                          icon={<FileText size={ICON} />}
+                          placeholder="CNPJ da filial"
+                          aria-label="CNPJ da filial"
+                        />
+                        {err?.documento?.message && (
+                          <p className="mt-1 text-[11px]" style={{ color: 'var(--status-open)' }}>
+                            {err.documento.message}
+                          </p>
+                        )}
+                      </div>
                       <IconInput
-                        {...register(`branches.${f.i}.documento`)}
-                        icon={<FileText size={ICON} />}
-                        placeholder="CNPJ da filial"
-                        aria-label="CNPJ da filial"
+                        {...register(`branches.${f.i}.inscricaoEstadual`)}
+                        placeholder="Inscrição estadual"
+                        aria-label="Inscrição estadual da filial"
                       />
-                      {err?.documento?.message && (
-                        <p className="mt-1 text-[11px]" style={{ color: 'var(--status-open)' }}>
-                          {err.documento.message}
-                        </p>
-                      )}
                     </div>
-                    <IconInput
-                      {...register(`branches.${f.i}.inscricaoEstadual`)}
-                      placeholder="Inscrição estadual"
-                      aria-label="Inscrição estadual da filial"
-                    />
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <IconInput
+                        {...register(`branches.${f.i}.contatos.${SLOT_EMAIL}.valor`)}
+                        icon={<Mail size={ICON} />}
+                        placeholder="email@empresa.com"
+                        aria-label="E-mail da filial"
+                        type="email"
+                      />
+                      <IconInput
+                        {...register(`branches.${f.i}.contatos.${SLOT_TELEFONE}.valor`)}
+                        icon={<Phone size={ICON} />}
+                        placeholder="(00) 00000-0000"
+                        aria-label="Telefone da filial"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-[1fr_80px] gap-2">
+                      <IconInput
+                        {...register(`branches.${f.i}.address.logradouro`)}
+                        icon={<MapPin size={ICON} />}
+                        placeholder="Rua, avenida…"
+                        aria-label="Endereço da filial"
+                      />
+                      <IconInput
+                        {...register(`branches.${f.i}.address.numero`)}
+                        placeholder="Nº"
+                        aria-label="Número da filial"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-[1fr_80px] gap-2">
+                      <IconInput
+                        {...register(`branches.${f.i}.address.cidade`)}
+                        placeholder="Cidade"
+                        aria-label="Cidade da filial"
+                      />
+                      <IconInput
+                        {...register(`branches.${f.i}.address.uf`)}
+                        maxLength={2}
+                        placeholder="UF"
+                        aria-label="UF da filial"
+                        className="uppercase"
+                      />
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <IconInput
-                      {...register(`branches.${f.i}.contatos.${SLOT_EMAIL}.valor`)}
-                      icon={<Mail size={ICON} />}
-                      placeholder="email@empresa.com"
-                      aria-label="E-mail da filial"
-                      type="email"
-                    />
-                    <IconInput
-                      {...register(`branches.${f.i}.contatos.${SLOT_TELEFONE}.valor`)}
-                      icon={<Phone size={ICON} />}
-                      placeholder="(00) 00000-0000"
-                      aria-label="Telefone da filial"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-[1fr_80px_80px] gap-2">
-                    <IconInput
-                      {...register(`branches.${f.i}.address.logradouro`)}
-                      icon={<MapPin size={ICON} />}
-                      placeholder="Rua, avenida…"
-                      aria-label="Endereço da filial"
-                    />
-                    <IconInput
-                      {...register(`branches.${f.i}.address.numero`)}
-                      placeholder="Nº"
-                      aria-label="Número da filial"
-                    />
-                    <IconInput
-                      {...register(`branches.${f.i}.address.uf`)}
-                      maxLength={2}
-                      placeholder="UF"
-                      aria-label="UF da filial"
-                      className="uppercase"
-                    />
-                  </div>
-
-                  <IconInput
-                    {...register(`branches.${f.i}.address.cidade`)}
-                    placeholder="Cidade"
-                    aria-label="Cidade da filial"
-                  />
+                  {/* Fora da borda do card: a lixeira age sobre a filial inteira,
+                      não sobre o campo ao lado dela. */}
+                  <button
+                    type="button"
+                    onClick={() => remove(f.i)}
+                    className="mt-3 flex h-[34px] w-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--wl-surface-2)]"
+                    style={{ color: 'var(--wl-danger)' }}
+                    aria-label="Remover filial"
+                  >
+                    <Trash2 size={13} />
+                  </button>
                 </div>
               )
             })
